@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "../components/Navigation";
-import { Search, Filter, Star, ShoppingCart, ArrowRight } from "lucide-react";
+import Footer from "../components/Footer";
+import Cart from "../components/Cart";
+import { Search, Filter, Star, ShoppingCart, ArrowRight, Calculator, TrendingUp, Sparkles } from "lucide-react";
 
 const platforms = [
   { name: "All", icon: "🌟", filter: "all" },
@@ -124,6 +126,73 @@ const Services = () => {
   const [selectedPlatform, setSelectedPlatform] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("popular");
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  
+  // Calculator state
+  const [selectedCalcPlatform, setSelectedCalcPlatform] = useState(platforms[0]);
+  const [selectedService, setSelectedService] = useState("Followers");
+  const [quantity, setQuantity] = useState(1000);
+  const [calculatedPrice, setCalculatedPrice] = useState(0);
+
+  // Price calculation for calculator
+  useEffect(() => {
+    const baseRates: { [key: string]: { [key: string]: number } } = {
+      "Instagram": { "Followers": 0.02, "Likes": 0.005, "Views": 0.001, "Story Views": 0.001 },
+      "YouTube": { "Subscribers": 0.05, "Views": 0.001, "Likes": 0.01, "Comments": 0.15 },
+      "TikTok": { "Followers": 0.015, "Likes": 0.003, "Views": 0.0005, "Shares": 0.08 },
+      "Twitter": { "Followers": 0.03, "Likes": 0.008, "Retweets": 0.02, "Views": 0.0008 }
+    };
+
+    const rate = baseRates[selectedCalcPlatform.name]?.[selectedService] || 0.01;
+    const price = Math.max(5.99, quantity * rate);
+    setCalculatedPrice(Math.round(price * 100) / 100);
+  }, [selectedCalcPlatform, selectedService, quantity]);
+
+  const addToCart = (service: any, calcQuantity?: number) => {
+    const newItem = {
+      id: service.id || Date.now(),
+      title: calcQuantity ? `${selectedCalcPlatform.name} ${selectedService}` : service.title,
+      platform: calcQuantity ? selectedCalcPlatform.name : service.platform,
+      icon: calcQuantity ? selectedCalcPlatform.icon : service.icon,
+      price: calcQuantity ? calculatedPrice : service.price,
+      quantity: 1,
+      maxQuantity: 10
+    };
+
+    setCartItems(prev => {
+      const existing = prev.find(item => item.id === newItem.id);
+      if (existing) {
+        return prev.map(item =>
+          item.id === newItem.id
+            ? { ...item, quantity: Math.min(item.maxQuantity, item.quantity + 1) }
+            : item
+        );
+      }
+      return [...prev, newItem];
+    });
+    setIsCartOpen(true);
+  };
+
+  const updateQuantity = (id: number, newQuantity: number) => {
+    setCartItems(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  };
+
+  const removeItem = (id: number) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const handleQuantityChange = (value: number) => {
+    setQuantity(Math.max(100, Math.min(100000, value)));
+  };
 
   const filteredServices = services
     .filter(service => 
@@ -145,10 +214,136 @@ const Services = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <Navigation />
+      <Navigation cartItemCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
+      
+      {/* Calculator Section */}
+      <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-accent-peach/20 rounded-full px-4 py-2 mb-6">
+              <Calculator className="w-4 h-4 text-accent-lavender" />
+              <span className="text-sm font-medium text-primary">Service Calculator</span>
+            </div>
+            
+            <h2 className="font-clash text-3xl md:text-4xl font-bold text-primary mb-4">
+              Calculate Your Growth
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Get instant pricing for your social media growth needs
+            </p>
+          </div>
+
+          <div className="glass rounded-3xl p-6 md:p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Configuration Panel */}
+              <div className="space-y-6">
+                {/* Platform Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-primary mb-3">
+                    Select Platform
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {platforms.slice(1, 5).map((platform) => (
+                      <button
+                        key={platform.name}
+                        onClick={() => {
+                          setSelectedCalcPlatform(platform);
+                          setSelectedService("Followers");
+                        }}
+                        className={`p-3 rounded-xl border-2 transition-all duration-300 ${
+                          selectedCalcPlatform.name === platform.name
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="text-xl mb-1">{platform.icon}</div>
+                        <div className="text-xs font-medium text-primary">
+                          {platform.name}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Service Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-primary mb-3">
+                    Select Service
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["Followers", "Likes", "Views", "Comments"].map((service) => (
+                      <button
+                        key={service}
+                        onClick={() => setSelectedService(service)}
+                        className={`p-2 rounded-lg border transition-all duration-300 text-sm font-medium ${
+                          selectedService === service
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border hover:border-primary/50 text-muted-foreground'
+                        }`}
+                      >
+                        {service}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quantity Slider */}
+                <div>
+                  <label className="block text-sm font-medium text-primary mb-3">
+                    Quantity: {quantity.toLocaleString()}
+                  </label>
+                  <input
+                    type="range"
+                    min="100"
+                    max="100000"
+                    step="100"
+                    value={quantity}
+                    onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
+                    className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <span>100</span>
+                    <span>25K</span>
+                    <span>50K</span>
+                    <span>100K</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing Panel */}
+              <div className="space-y-6">
+                <div className="glass rounded-2xl p-6 text-center">
+                  <div className="text-4xl mb-3">{selectedCalcPlatform.icon}</div>
+                  <h3 className="font-clash text-lg font-bold text-primary mb-2">
+                    {selectedCalcPlatform.name} {selectedService}
+                  </h3>
+                  <div className="text-3xl font-bold text-primary font-clash mb-3">
+                    ${calculatedPrice}
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-4">
+                    For {quantity.toLocaleString()} {selectedService.toLowerCase()}
+                  </div>
+                  
+                  <button 
+                    onClick={() => addToCart({}, quantity)}
+                    className="glass-button w-full mb-3 group"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                    Add to Cart
+                  </button>
+                  
+                  <div className="text-xs text-muted-foreground">
+                    ⚡ Instant delivery • 🛡️ Money-back guarantee
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       
       {/* Header */}
-      <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <section className="pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="font-clash text-5xl md:text-7xl font-bold text-primary mb-6">
@@ -290,7 +485,10 @@ const Services = () => {
                     </div>
 
                     {/* Add to Cart Button */}
-                    <button className="w-full glass-button group/btn">
+                    <button 
+                      onClick={() => addToCart(service)}
+                      className="w-full glass-button group/btn"
+                    >
                       <span className="flex items-center justify-center gap-2">
                         <ShoppingCart className="w-4 h-4" />
                         Add to Cart
@@ -304,6 +502,17 @@ const Services = () => {
           )}
         </div>
       </section>
+
+      <Footer />
+      
+      <Cart
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeItem}
+        onClearCart={clearCart}
+      />
     </div>
   );
 };

@@ -2,7 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ShoppingCart } from "lucide-react";
 
-const Navigation = () => {
+interface NavigationProps {
+  cartItemCount?: number;
+  onCartClick?: () => void;
+}
+
+const Navigation = ({ cartItemCount = 0, onCartClick }: NavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -42,11 +47,16 @@ const Navigation = () => {
             </Link>
             
             {/* Cart Icon */}
-            <button className="relative p-2 rounded-full hover:bg-glass transition-all duration-300">
+            <button 
+              onClick={onCartClick}
+              className="relative p-2 rounded-full hover:bg-glass transition-all duration-300"
+            >
               <ShoppingCart className="w-6 h-6 text-foreground" />
-              <span className="absolute -top-1 -right-1 bg-accent-peach text-xs rounded-full w-5 h-5 flex items-center justify-center text-foreground font-medium">
-                0
-              </span>
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-accent-peach text-xs rounded-full w-5 h-5 flex items-center justify-center text-foreground font-medium">
+                  {cartItemCount}
+                </span>
+              )}
             </button>
           </div>
 

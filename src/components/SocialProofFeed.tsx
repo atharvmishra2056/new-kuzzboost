@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, Clock, X } from "lucide-react";
 
 interface Purchase {
   id: string;
@@ -24,20 +24,25 @@ const mockPurchases: Purchase[] = [
 const SocialProofFeed = () => {
   const [currentPurchase, setCurrentPurchase] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
+    if (isDismissed) return;
+    
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
         setCurrentPurchase((prev) => (prev + 1) % mockPurchases.length);
         setIsVisible(true);
       }, 300);
-    }, 4000);
+    }, 120000); // Changed to 2 minutes
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isDismissed]);
 
   const purchase = mockPurchases[currentPurchase];
+
+  if (isDismissed) return null;
 
   return (
     <div className="fixed bottom-6 left-6 z-50 max-w-sm">
@@ -46,6 +51,13 @@ const SocialProofFeed = () => {
           isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
         }`}
       >
+        {/* Close button */}
+        <button
+          onClick={() => setIsDismissed(true)}
+          className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-vibrant rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform duration-200 z-10"
+        >
+          <X className="w-3 h-3" />
+        </button>
         <div className="flex items-center gap-3">
           {/* Platform icon */}
           <div className="text-2xl">{purchase.icon}</div>

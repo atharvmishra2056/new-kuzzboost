@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Navigation from "../components/Navigation";
+import Footer from "../components/Footer";
+import ParticleField from "../components/ParticleField";
 import { Code, Lightbulb, Users, Target, Star, Award } from "lucide-react";
 
 const About = () => {
@@ -48,7 +50,8 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      <ParticleField />
       <Navigation />
       
       {/* Hero Section */}
@@ -219,6 +222,8 @@ const About = () => {
           </div>
         </div>
       </section>
+      
+      <Footer />
     </div>
   );
 };
