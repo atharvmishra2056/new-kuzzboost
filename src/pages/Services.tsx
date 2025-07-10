@@ -1,0 +1,311 @@
+import { useState } from "react";
+import Navigation from "../components/Navigation";
+import { Search, Filter, Star, ShoppingCart, ArrowRight } from "lucide-react";
+
+const platforms = [
+  { name: "All", icon: "🌟", filter: "all" },
+  { name: "Instagram", icon: "📷", filter: "instagram" },
+  { name: "YouTube", icon: "📺", filter: "youtube" },
+  { name: "TikTok", icon: "🎵", filter: "tiktok" },
+  { name: "Twitter", icon: "🐦", filter: "twitter" },
+  { name: "Discord", icon: "🎮", filter: "discord" },
+  { name: "Twitch", icon: "🎬", filter: "twitch" },
+  { name: "Spotify", icon: "🎶", filter: "spotify" }
+];
+
+const services = [
+  {
+    id: 1,
+    title: "Instagram Followers Premium",
+    platform: "instagram",
+    icon: "📷",
+    price: 24.99,
+    originalPrice: 34.99,
+    rating: 4.9,
+    reviews: 1284,
+    features: ["Real Active Users", "Gradual Delivery", "30-Day Guarantee", "24/7 Support"],
+    description: "High-quality, active followers from real accounts",
+    badge: "Best Seller"
+  },
+  {
+    id: 2,
+    title: "YouTube Views Boost",
+    platform: "youtube",
+    icon: "📺",
+    price: 19.99,
+    originalPrice: 29.99,
+    rating: 4.8,
+    reviews: 892,
+    features: ["High Retention", "Global Sources", "Fast Delivery", "Analytics Safe"],
+    description: "Organic-looking views from diverse locations",
+    badge: "Fast Delivery"
+  },
+  {
+    id: 3,
+    title: "TikTok Viral Package",
+    platform: "tiktok",
+    icon: "🎵",
+    price: 39.99,
+    originalPrice: 59.99,
+    rating: 4.9,
+    reviews: 756,
+    features: ["Complete Package", "Viral Algorithm", "Engagement Boost", "Trending Support"],
+    description: "Complete viral growth package for maximum impact",
+    badge: "Premium"
+  },
+  {
+    id: 4,
+    title: "Twitter Engagement Boost",
+    platform: "twitter",
+    icon: "🐦",
+    price: 18.99,
+    originalPrice: 25.99,
+    rating: 4.7,
+    reviews: 634,
+    features: ["Real Engagement", "Tweet Optimization", "Follower Growth", "Analytics"],
+    description: "Boost your Twitter presence with real engagement",
+    badge: "Popular"
+  },
+  {
+    id: 5,
+    title: "Discord Server Growth",
+    platform: "discord",
+    icon: "🎮",
+    price: 29.99,
+    originalPrice: 44.99,
+    rating: 4.8,
+    reviews: 445,
+    features: ["Active Members", "Server Optimization", "Community Building", "Moderation"],
+    description: "Grow your Discord community with active members",
+    badge: "Community"
+  },
+  {
+    id: 6,
+    title: "Twitch Channel Boost",
+    platform: "twitch",
+    icon: "🎬",
+    price: 35.99,
+    originalPrice: 49.99,
+    rating: 4.9,
+    reviews: 323,
+    features: ["Live Viewers", "Follower Growth", "Chat Engagement", "Stream Optimization"],
+    description: "Boost your Twitch channel with real viewers",
+    badge: "Streamer Choice"
+  },
+  {
+    id: 7,
+    title: "Spotify Plays & Followers",
+    platform: "spotify",
+    icon: "🎶",
+    price: 22.99,
+    originalPrice: 32.99,
+    rating: 4.8,
+    reviews: 567,
+    features: ["Real Plays", "Playlist Placement", "Artist Growth", "Royalty Safe"],
+    description: "Grow your Spotify presence with real plays",
+    badge: "Artist Approved"
+  },
+  {
+    id: 8,
+    title: "Instagram Stories Views",
+    platform: "instagram",
+    icon: "📷",
+    price: 15.99,
+    originalPrice: 22.99,
+    rating: 4.7,
+    reviews: 789,
+    features: ["Story Engagement", "Real Views", "Quick Delivery", "Safe Method"],
+    description: "Boost your Instagram stories visibility",
+    badge: "Quick Start"
+  }
+];
+
+const Services = () => {
+  const [selectedPlatform, setSelectedPlatform] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("popular");
+
+  const filteredServices = services
+    .filter(service => 
+      (selectedPlatform === "all" || service.platform === selectedPlatform) &&
+      service.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "price-low":
+          return a.price - b.price;
+        case "price-high":
+          return b.price - a.price;
+        case "rating":
+          return b.rating - a.rating;
+        default:
+          return b.reviews - a.reviews;
+      }
+    });
+
+  return (
+    <div className="min-h-screen bg-gradient-hero">
+      <Navigation />
+      
+      {/* Header */}
+      <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="font-clash text-5xl md:text-7xl font-bold text-primary mb-6">
+              Our Services
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Premium social media growth services designed to elevate your online presence. 
+              Choose from our comprehensive selection of professional solutions.
+            </p>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="glass rounded-2xl p-6 mb-12">
+            <div className="flex flex-col lg:flex-row gap-6 items-center">
+              {/* Search */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search services..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-background/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300"
+                />
+              </div>
+
+              {/* Sort */}
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="pl-10 pr-8 py-3 bg-background/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 appearance-none"
+                >
+                  <option value="popular">Most Popular</option>
+                  <option value="rating">Highest Rated</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Platform Filters */}
+          <div className="flex flex-wrap gap-3 justify-center mb-12">
+            {platforms.map((platform) => (
+              <button
+                key={platform.filter}
+                onClick={() => setSelectedPlatform(platform.filter)}
+                className={`platform-logo flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-300 ${
+                  selectedPlatform === platform.filter
+                    ? 'border-primary bg-primary/10 scale-105'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <span className="text-xl">{platform.icon}</span>
+                <span className="font-medium text-primary">{platform.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Grid */}
+      <section className="pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {filteredServices.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="font-clash text-2xl font-bold text-primary mb-2">
+                No services found
+              </h3>
+              <p className="text-muted-foreground">
+                Try adjusting your search or filter criteria
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredServices.map((service, index) => (
+                <div
+                  key={service.id}
+                  className="stagger-item service-card group relative"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  {/* Badge */}
+                  {service.badge && (
+                    <div className="absolute -top-3 -right-3 z-10">
+                      <div className="glass rounded-full px-3 py-1 text-xs font-bold text-primary border border-accent-peach/50">
+                        {service.badge}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Service Icon */}
+                  <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    {service.icon}
+                  </div>
+
+                  {/* Service Title */}
+                  <h3 className="font-clash text-lg font-semibold text-primary mb-2">
+                    {service.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {service.description}
+                  </p>
+
+                  {/* Rating */}
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-accent-peach text-accent-peach" />
+                      <span className="text-sm font-medium">{service.rating}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      ({service.reviews} reviews)
+                    </span>
+                  </div>
+
+                  {/* Features */}
+                  <div className="space-y-1 mb-6">
+                    {service.features.slice(0, 3).map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-xs">
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent-peach" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="mt-auto">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-2xl font-bold text-primary font-clash">
+                        ${service.price}
+                      </span>
+                      <span className="text-sm text-muted-foreground line-through">
+                        ${service.originalPrice}
+                      </span>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <button className="w-full glass-button group/btn">
+                      <span className="flex items-center justify-center gap-2">
+                        <ShoppingCart className="w-4 h-4" />
+                        Add to Cart
+                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Services;
