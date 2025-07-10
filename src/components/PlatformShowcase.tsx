@@ -1,14 +1,15 @@
 import { useState } from "react";
+import { Instagram, Youtube, Twitter, MessageCircle, Twitch, Spotify, ShoppingCart, Smartphone } from "lucide-react";
 
 const platforms = [
-  { name: "Instagram", icon: "📷", color: "#E4405F", description: "Followers, Likes, Views" },
-  { name: "YouTube", icon: "📺", color: "#FF0000", description: "Subscribers, Views, Likes" },
-  { name: "TikTok", icon: "🎵", color: "#000000", description: "Followers, Likes, Views" },
-  { name: "Twitter", icon: "🐦", color: "#1DA1F2", description: "Followers, Retweets, Likes" },
-  { name: "Discord", icon: "🎮", color: "#7289DA", description: "Server Members, Boosts" },
-  { name: "Twitch", icon: "🎬", color: "#9146FF", description: "Followers, Views, Chat" },
-  { name: "Spotify", icon: "🎶", color: "#1DB954", description: "Plays, Followers, Saves" },
-  { name: "WhatsApp", icon: "💬", color: "#25D366", description: "Group Members, Views" }
+  { name: "Instagram", icon: <Instagram />, color: "#E4405F", description: "Followers, Likes, Views" },
+  { name: "YouTube", icon: <Youtube />, color: "#FF0000", description: "Subscribers, Views, Likes" },
+  { name: "Snapchat", icon: <ShoppingCart />, color: "#FFFC00", description: "Followers, Likes, Views" },
+  { name: "Twitter", icon: <Twitter />, color: "#1DA1F2", description: "Followers, Retweets, Likes" },
+  { name: "Discord", icon: <MessageCircle />, color: "#7289DA", description: "Server Members, Boosts" },
+  { name: "Twitch", icon: <Twitch />, color: "#9146FF", description: "Followers, Views, Chat" },
+  { name: "Spotify", icon: <Spotify />, color: "#1DB954", description: "Plays, Followers, Saves" },
+  { name: "Whatsapp", icon: <Smartphone />, color: "#25D366", description: "Group Members, Views" }
 ];
 
 const PlatformShowcase = () => {
