@@ -262,10 +262,7 @@ const OrderHistory = () => {
                           variant="ghost"
                           size="sm"
                           className="flex items-center gap-2"
-                          onClick={() => {
-                            // You can implement order details view here
-                            alert(`Order details for ${order.orderId}`);
-                          }}
+                          onClick={() => navigate(`/order-details/${order.orderId}`)}
                         >
                           <Eye className="w-4 h-4" />
                           View Details

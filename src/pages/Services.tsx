@@ -3,7 +3,8 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import Cart from "../components/Cart";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Filter, Star, Calculator, Sparkles } from "lucide-react";
+import { Search, Filter, Star, Calculator, Sparkles, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { motion, Variants } from "framer-motion";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from "react-icons/si";
 import { useCurrency } from "../context/CurrencyContext";
@@ -122,6 +123,7 @@ export const ServiceCalculatorModal = ({ service, onAddToCart }: { service: Serv
 
 // --- MAIN SERVICES PAGE COMPONENT ---
 const Services = () => {
+  const navigate = useNavigate();
   const { getSymbol, convert } = useCurrency();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -242,21 +244,90 @@ const Services = () => {
           <div className="max-w-7xl mx-auto">
             {loading ? (<div className="text-center py-20 text-lg font-semibold">Loading Services...</div>) : (
                 <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedServiceForCalc(null)}>
-                  <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" initial="hidden" animate="visible" variants={listVariants}>
+                  <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" initial="hidden" animate="visible" variants={listVariants}>
                     {filteredServices.map((service) => (
-                        <DialogTrigger asChild key={service.id}>
-                          <motion.div onClick={() => setSelectedServiceForCalc(service)} className="stagger-item service-card group relative cursor-pointer" variants={itemVariants}>
-                            <Badge className="absolute top-4 right-4">{service.badge}</Badge>
-                            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{service.icon}</div>
-                            <h3 className="font-clash text-lg font-semibold text-primary mb-2">{service.title}</h3>
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{service.description}</p>
-                            <div className="flex justify-between items-center mb-4"><div className="flex items-center gap-1"><Star className="w-4 h-4 fill-accent-peach text-accent-peach" /><span className="text-sm font-medium">{service.rating}</span><span className="text-xs text-muted-foreground">({service.reviews})</span></div></div>
-                            <div className="mt-auto">
-                              {service.tiers?.length > 0 ? (<div className="flex items-baseline gap-2 mb-4"><span className="text-2xl font-bold text-primary font-clash">{getSymbol()}{convert(service.tiers[0].price)}</span><span className="text-sm text-muted-foreground">/ {service.tiers[0].quantity.toLocaleString()}</span></div>) : <div className="h-[36px] flex items-center text-muted-foreground">Not Available</div>}
-                              <Button className="w-full glass-button group/btn" disabled={!service.tiers || service.tiers.length === 0}><Calculator className="w-4 h-4 mr-2" />Customize</Button>
+                        <motion.div 
+                          key={service.id} 
+                          className="service-card group relative cursor-pointer h-full" 
+                          variants={itemVariants}
+                          whileHover={{ y: -8, scale: 1.02 }}
+                          transition={{ duration: 0.2 }}
+                          onClick={() => navigate(`/service/${service.id}`)}
+                        >
+                          <Badge className="absolute top-4 right-4 z-10 bg-primary/90 text-primary-foreground">{service.badge}</Badge>
+                          
+                          {/* Service Icon with Platform Color */}
+                          <div className="relative mb-6">
+                            <div className="text-5xl mb-2 group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                              {service.icon}
                             </div>
-                          </motion.div>
-                        </DialogTrigger>
+                            <div className="text-center">
+                              <span className="text-xs px-2 py-1 bg-secondary/50 rounded-full text-secondary-foreground font-medium">
+                                {service.platform.charAt(0).toUpperCase() + service.platform.slice(1)}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Service Content */}
+                          <div className="space-y-4 flex-1 flex flex-col">
+                            <div>
+                              <h3 className="font-clash text-xl font-semibold text-primary mb-2 line-clamp-2 min-h-[3.5rem]">
+                                {service.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground line-clamp-3 min-h-[4rem]">
+                                {service.description}
+                              </p>
+                            </div>
+                            
+                            {/* Rating and Reviews */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 fill-accent-peach text-accent-peach" />
+                                <span className="text-sm font-medium">{service.rating}</span>
+                                <span className="text-xs text-muted-foreground">({service.reviews})</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Users className="w-3 h-3" />
+                                <span>{service.reviews}</span>
+                              </div>
+                            </div>
+                            
+                            {/* Pricing */}
+                            <div className="mt-auto space-y-4">
+                              {service.tiers?.length > 0 ? (
+                                <div className="text-center">
+                                  <div className="flex items-baseline justify-center gap-2 mb-2">
+                                    <span className="text-2xl font-bold text-primary font-clash">
+                                      {getSymbol()}{convert(service.tiers[0].price)}
+                                    </span>
+                                    <span className="text-sm text-muted-foreground">
+                                      / {service.tiers[0].quantity.toLocaleString()}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-accent-peach">
+                                    Starting from ₹{(service.tiers[0].price / service.tiers[0].quantity).toFixed(4)} per unit
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="h-[60px] flex items-center justify-center text-muted-foreground">
+                                  <span className="text-sm">Contact for pricing</span>
+                                </div>
+                              )}
+                              
+                              <Button 
+                                className="w-full glass-button group/btn" 
+                                disabled={!service.tiers || service.tiers.length === 0}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/service/${service.id}`);
+                                }}
+                              >
+                                <Sparkles className="w-4 h-4 mr-2 group-hover/btn:rotate-12 transition-transform duration-300" />
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
                     ))}
                   </motion.div>
                   {selectedServiceForCalc && (<ServiceCalculatorModal service={selectedServiceForCalc} onAddToCart={addToCart} />)}

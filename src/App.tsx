@@ -13,6 +13,8 @@ import AuthPage from "./pages/AuthPage";
 import OrderHistory from "./pages/OrderHistory";
 import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
+import ServiceDetail from "./pages/ServiceDetail";
+import OrderDetails from "./pages/OrderDetails";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/Orders";
@@ -47,8 +49,10 @@ const App = () => (
                 />
 
                 <Route path="/order-history" element={<OrderHistory />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/service/:id" element={<ServiceDetail />} />
+                <Route path="/order-details/:orderId" element={<OrderDetails />} />
 
                 <Route element={<ProtectedRoute />}>
                   <Route path="/admin" element={<AdminLayout />}>

@@ -120,8 +120,41 @@ const Checkout = () => {
       return;
     }
 
+    // Simple validation for transaction ID format
+    if (transactionId.length < 8) {
+      alert("Transaction ID must be at least 8 characters long");
+      return;
+    }
+
     setLoading(true);
     try {
+      // Mock transaction verification with more realistic validation
+      const isValidTransaction = await new Promise((resolve) => {
+        setTimeout(() => {
+          // Simulate different validation outcomes
+          const validFormats = ['UPI', 'TXN', 'REF'];
+          const hasValidPrefix = validFormats.some(prefix => 
+            transactionId.toUpperCase().startsWith(prefix)
+          );
+          
+          // More nuanced validation
+          if (transactionId.length < 8) {
+            resolve(false);
+          } else if (transactionId.toUpperCase().includes('TEST')) {
+            resolve(false); // Test transactions are invalid
+          } else if (hasValidPrefix && transactionId.length >= 10) {
+            resolve(true); // Valid format
+          } else {
+            resolve(Math.random() > 0.3); // 70% success rate for other formats
+          }
+        }, 2000); // 2 second delay to simulate API call
+      });
+
+      if (!isValidTransaction) {
+        alert("Invalid transaction ID. Please check your payment app and try again.");
+        return;
+      }
+
       // Generate order ID
       const orderId = `KZB-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
       
@@ -153,7 +186,8 @@ const Checkout = () => {
       localStorage.removeItem('cartItems');
     } catch (error) {
       console.error('Error creating order:', error);
-      alert('Error processing order. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Error processing order: ${errorMessage}. Please try again or contact support.`);
     } finally {
       setLoading(false);
     }
