@@ -88,7 +88,7 @@ const Footer = () => {
               {services.map((service) => (
                 <li key={service}>
                   <a 
-                    href="#" 
+                    href="/services" 
                     className="text-muted-foreground hover:text-accent-peach transition-colors duration-200 text-sm"
                   >
                     {service}
@@ -105,7 +105,7 @@ const Footer = () => {
               {company.map((item) => (
                 <li key={item}>
                   <a 
-                    href="#" 
+                    href={item === "About Us" ? "/about" : item === "Our Team" ? "/about" : "#"} 
                     className="text-muted-foreground hover:text-accent-peach transition-colors duration-200 text-sm"
                   >
                     {item}

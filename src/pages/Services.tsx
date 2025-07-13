@@ -151,7 +151,17 @@ const Services = () => {
   }, []);
 
   const addToCart = (service: Service, quantity: number, price: number) => {
-    setCartItems(prev => [...prev, { ...service, quantity, price }]);
+    const cartItem = {
+      id: service.id,
+      title: service.title,
+      platform: service.platform,
+      icon: service.icon,
+      price: price,
+      quantity: 1, // Always 1 item, regardless of service quantity
+      maxQuantity: 10,
+      serviceQuantity: quantity // Store the actual service quantity separately
+    };
+    setCartItems(prev => [...prev, cartItem]);
     setSelectedServiceForCalc(null);
     setIsCartOpen(true);
   };
@@ -179,11 +189,51 @@ const Services = () => {
         <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12"><h1 className="font-clash text-5xl md:text-7xl font-bold text-primary mb-6">Our Services</h1><p className="text-xl text-muted-foreground max-w-3xl mx-auto">Premium social media growth services to elevate your online presence.</p></div>
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-8">
-              <div className="flex gap-2 overflow-x-auto pb-2">{platforms.map(p => (<button key={p.filter} onClick={() => setSelectedPlatform(p.filter)} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 ${selectedPlatform === p.filter ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-primary/80'}`}>{p.icon}<span>{p.name}</span></button>))}</div>
-              <div className="flex gap-4">
-                <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><input type="text" placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 pr-4 py-2 rounded-full border border-border bg-background w-full md:w-auto" /></div>
-                <div className="relative"><Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><select value={sortBy} onChange={e => setSortBy(e.target.value)} className="pl-10 pr-4 py-2 rounded-full border border-border bg-background appearance-none w-full md:w-auto"><option value="popular">Popular</option><option value="price-low">Price: Low to High</option><option value="price-high">Price: High to Low</option><option value="rating">Rating</option></select></div>
+            {/* Mobile-friendly filters */}
+            <div className="space-y-4 mb-8">
+              {/* Platform filters - horizontal scroll on mobile */}
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {platforms.map(p => (
+                  <button
+                    key={p.filter}
+                    onClick={() => setSelectedPlatform(p.filter)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
+                      selectedPlatform === p.filter 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-secondary text-secondary-foreground hover:bg-primary/80'
+                    }`}
+                  >
+                    {p.icon}
+                    <span className="hidden sm:inline">{p.name}</span>
+                  </button>
+                ))}
+              </div>
+              
+              {/* Search and sort - stacked on mobile */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input 
+                    type="text" 
+                    placeholder="Search services..." 
+                    value={searchTerm} 
+                    onChange={e => setSearchTerm(e.target.value)} 
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background/80 backdrop-blur-sm focus:ring-2 focus:ring-accent-peach/50 focus:border-accent-peach" 
+                  />
+                </div>
+                <div className="relative min-w-[180px]">
+                  <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <select 
+                    value={sortBy} 
+                    onChange={e => setSortBy(e.target.value)} 
+                    className="w-full pl-10 pr-8 py-3 rounded-xl border border-border bg-background/80 backdrop-blur-sm appearance-none focus:ring-2 focus:ring-accent-peach/50 focus:border-accent-peach"
+                  >
+                    <option value="popular">Most Popular</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Highest Rated</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -192,7 +242,7 @@ const Services = () => {
           <div className="max-w-7xl mx-auto">
             {loading ? (<div className="text-center py-20 text-lg font-semibold">Loading Services...</div>) : (
                 <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedServiceForCalc(null)}>
-                  <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" initial="hidden" animate="visible" variants={listVariants}>
+                  <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" initial="hidden" animate="visible" variants={listVariants}>
                     {filteredServices.map((service) => (
                         <DialogTrigger asChild key={service.id}>
                           <motion.div onClick={() => setSelectedServiceForCalc(service)} className="stagger-item service-card group relative cursor-pointer" variants={itemVariants}>
@@ -215,7 +265,20 @@ const Services = () => {
           </div>
         </section>
         <Footer />
-        <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} items={cartItems} onUpdateQuantity={()=>{}} onRemoveItem={() => {}} onClearCart={() => setCartItems([])} />
+        <Cart 
+          isOpen={isCartOpen} 
+          onClose={() => setIsCartOpen(false)} 
+          items={cartItems} 
+          onUpdateQuantity={(id, newQuantity) => {
+            setCartItems(prev => prev.map(item => 
+              item.id === id ? { ...item, quantity: newQuantity } : item
+            ));
+          }}
+          onRemoveItem={(id) => {
+            setCartItems(prev => prev.filter(item => item.id !== id));
+          }}
+          onClearCart={() => setCartItems([])} 
+        />
       </div>
   );
 };

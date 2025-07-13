@@ -94,8 +94,22 @@ const Navigation = ({ cartItemCount = 0, onCartClick }: NavigationProps) => {
 
             </div>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden">
+            {/* Mobile Controls */}
+            <div className="md:hidden flex items-center gap-2">
+              {/* Mobile Cart Icon */}
+              <button
+                  onClick={onCartClick}
+                  className="relative p-2 rounded-full hover:bg-glass transition-all duration-300"
+              >
+                <ShoppingCart className="w-5 h-5 text-foreground" />
+                {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-accent-peach text-xs rounded-full w-4 h-4 flex items-center justify-center text-foreground font-medium text-[10px]">
+                  {cartItemCount}
+                </span>
+                )}
+              </button>
+              
+              {/* Mobile menu button */}
               <button
                   onClick={() => setIsOpen(!isOpen)}
                   className="text-foreground hover:text-primary transition-colors duration-300"
@@ -107,12 +121,46 @@ const Navigation = ({ cartItemCount = 0, onCartClick }: NavigationProps) => {
 
           {/* Mobile Navigation */}
           {isOpen && (
-              // ... (mobile nav remains the same)
-              <div className="md:hidden mt-4 pb-4 space-y-4">
-                <Link to="/" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium" onClick={() => setIsOpen(false)}>Home</Link>
-                <Link to="/services" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium" onClick={() => setIsOpen(false)}>Services</Link>
-                <Link to="/about" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium" onClick={() => setIsOpen(false)}>About</Link>
-                <Link to="/contact" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium" onClick={() => setIsOpen(false)}>Contact</Link>
+              <div className="md:hidden mt-4 pb-4">
+                <div className="glass rounded-2xl p-4 space-y-4">
+                  <Link to="/" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium py-2" onClick={() => setIsOpen(false)}>Home</Link>
+                  <Link to="/services" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium py-2" onClick={() => setIsOpen(false)}>Services</Link>
+                  <Link to="/about" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium py-2" onClick={() => setIsOpen(false)}>About</Link>
+                  
+                  {/* Currency Switcher for Mobile */}
+                  <div className="border-t border-border/50 pt-4">
+                    <p className="text-sm text-muted-foreground mb-2">Currency</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={() => {setCurrency('INR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'INR' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>INR (₹)</button>
+                      <button onClick={() => {setCurrency('USD'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'USD' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>USD ($)</button>
+                      <button onClick={() => {setCurrency('EUR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'EUR' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>EUR (€)</button>
+                      <button onClick={() => {setCurrency('GBP'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'GBP' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>GBP (£)</button>
+                    </div>
+                  </div>
+                  
+                  {/* Cart and Auth for Mobile */}
+                  <div className="border-t border-border/50 pt-4 space-y-3">
+                    <button
+                      onClick={() => {onCartClick?.(); setIsOpen(false);}}
+                      className="w-full flex items-center gap-3 p-3 glass rounded-lg hover:scale-105 transition-transform"
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      <span>Cart ({cartItemCount})</span>
+                    </button>
+                    
+                    {currentUser ? (
+                      <div className="space-y-2">
+                        <div className="text-sm text-muted-foreground px-3">{currentUser.email}</div>
+                        <button onClick={() => {navigate('/order-history'); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg">Order History</button>
+                        <button onClick={() => {handleLogout(); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg text-destructive">Logout</button>
+                      </div>
+                    ) : (
+                      <Link to="/auth" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full glass-button">Login</Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </div>
           )}
         </div>

@@ -40,31 +40,17 @@ const Cart = ({
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = async () => {
-    if (!currentUser) {
-      alert("Please log in to place an order.");
-      navigate('/auth');
-      return;
-    }
-
     setIsCheckingOut(true);
     try {
-      // Create a new 'orders' collection in Firestore
-      await addDoc(collection(db, "orders"), {
-        userId: currentUser.uid,
-        userEmail: currentUser.email,
-        items: items.map(({ icon, ...rest }) => rest), // Remove icon component before saving
-        totalAmount: total,
-        status: "Processing", // You can manage this status from admin panel later
-        createdAt: serverTimestamp()
-      });
-
-      alert('Checkout successful! Your order has been placed.');
-      onClearCart();
+      // Save cart items to localStorage for checkout page
+      localStorage.setItem('cartItems', JSON.stringify(items));
+      
+      // Navigate to checkout page
+      navigate('/checkout', { state: { items } });
       onClose();
-
     } catch (error) {
-      console.error("Error placing order: ", error);
-      alert("There was an error placing your order. Please try again.");
+      console.error("Error navigating to checkout: ", error);
+      alert("There was an error. Please try again.");
     } finally {
       setIsCheckingOut(false);
     }

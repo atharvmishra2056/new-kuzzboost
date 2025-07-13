@@ -235,9 +235,31 @@
 
   /* Enhanced service card glass effect */
   .service-card {
-    @apply glass rounded-3xl p-6 transition-all duration-500 relative overflow-hidden;
-    background: var(--gradient-glass);
-    border: 1px solid hsla(35, 50%, 85%, 0.6);
+    @apply glass rounded-2xl p-4 sm:p-6 h-full transition-all duration-300 hover:scale-105 hover:shadow-glow border border-border/50;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile-first responsive improvements */
+  @media (max-width: 640px) {
+    .service-card {
+      @apply p-4 rounded-xl;
+    }
+    
+    .glass-button {
+      @apply px-6 py-3 text-sm;
+    }
+    
+    .hero-title {
+      @apply text-4xl md:text-6xl;
+    }
   }
 
   .service-card::after {
