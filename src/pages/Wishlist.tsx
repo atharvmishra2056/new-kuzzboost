@@ -7,7 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SiInstagram, SiYoutube, SiX, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat } from 'react-icons/si';
 import { motion } from "framer-motion";
+
+// Icon mapping to recreate icons from iconName
+const iconMap: { [key: string]: React.ReactElement } = {
+  SiInstagram: <SiInstagram className="text-4xl text-[#E4405F]" />,
+  SiYoutube: <SiYoutube className="text-4xl text-[#FF0000]" />,
+  SiX: <SiX className="text-4xl text-[#000000]" />,
+  SiDiscord: <SiDiscord className="text-4xl text-[#7289DA]" />,
+  SiTwitch: <SiTwitch className="text-4xl text-[#9146FF]" />,
+  SiSpotify: <SiSpotify className="text-4xl text-[#1DB954]" />,
+  SiWhatsapp: <SiWhatsapp className="text-4xl text-[#25D366]" />,
+  SiSnapchat: <SiSnapchat className="text-4xl text-[#FFFC00]" />,
+};
 
 const Wishlist = () => {
   const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
@@ -100,7 +113,7 @@ const Wishlist = () => {
                 </div>
 
                 <div className="mb-4 text-center">
-                  {item.icon}
+                  {iconMap[item.iconName] || <div className="w-16 h-16 bg-accent-peach/20 rounded-full flex items-center justify-center text-accent-peach font-bold">{item.platform.charAt(0)}</div>}
                 </div>
 
                 <h3 className="font-clash text-lg font-semibold text-primary mb-2">
