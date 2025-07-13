@@ -10,6 +10,9 @@ import ParticleField from "../components/ParticleField";
 import Cart from "../components/Cart";
 import { ServiceCalculatorModal, Service } from "./Services"; // Import modal and Service type
 import { Dialog } from "@/components/ui/dialog";
+import RecentlyViewed from "../components/RecentlyViewed";
+import PersonalizedRecommendations from "../components/PersonalizedRecommendations";
+import SocialProofFeed from "../components/SocialProofFeed";
 
 const Index = () => {
     const [selectedServiceForCalc, setSelectedServiceForCalc] = useState<Service | null>(null);
@@ -37,9 +40,12 @@ const Index = () => {
             <HeroSection />
             <PlatformShowcase />
             <FeaturedServices onCustomizeClick={handleCustomizeClick} />
+            <RecentlyViewed />
+            <PersonalizedRecommendations />
             <HowItWorks />
             <Testimonials />
             <Footer />
+            <SocialProofFeed />
 
             <Dialog open={!!selectedServiceForCalc} onOpenChange={(isOpen) => { if (!isOpen) handleCloseModal(); }}>
                 {selectedServiceForCalc && (

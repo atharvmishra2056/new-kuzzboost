@@ -15,6 +15,7 @@ import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import ServiceDetail from "./pages/ServiceDetail";
 import OrderDetails from "./pages/OrderDetails";
+import Wishlist from "./pages/Wishlist";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/Orders";
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/service/:id" element={<ServiceDetail />} />
                 <Route path="/order-details/:orderId" element={<OrderDetails />} />
+                <Route path="/wishlist" element={<Wishlist />} />
 
                 <Route element={<ProtectedRoute />}>
                   <Route path="/admin" element={<AdminLayout />}>

@@ -73,10 +73,19 @@ const Checkout = () => {
   // Check authentication on component mount
   useEffect(() => {
     if (!currentUser) {
-      alert('Please log in to continue with checkout');
-      navigate('/auth');
+      // Show a better UX for login requirement
+      setLoading(true);
+      setTimeout(() => {
+        navigate('/auth', { 
+          state: { 
+            returnTo: '/checkout',
+            message: 'Please log in to continue with your order'
+          }
+        });
+      }, 1000);
       return;
     }
+    setLoading(false);
   }, [currentUser, navigate]);
 
   useEffect(() => {

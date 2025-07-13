@@ -8,8 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { orderService, OrderData } from "../services/orderService";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import jsPDF from 'jspdf';
@@ -28,7 +27,6 @@ const iconMap: { [key: string]: React.ReactElement } = {
 };
 
 interface Order {
-  id: string;
   orderId: string;
   items: any[];
   total: number;
@@ -52,18 +50,7 @@ const OrderHistory = () => {
 
     const fetchOrders = async () => {
       try {
-        const q = query(
-          collection(db, "orders"),
-          where("userId", "==", currentUser.uid),
-          orderBy("createdAt", "desc")
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const ordersData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Order[];
-        
+        const ordersData = orderService.getUserOrders(currentUser.uid);
         setOrders(ordersData);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -168,8 +155,8 @@ const OrderHistory = () => {
           ) : (
             <div className="space-y-6">
               {orders.map((order, index) => (
-                <motion.div
-                  key={order.id}
+                 <motion.div
+                   key={order.orderId}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}

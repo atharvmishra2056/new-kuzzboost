@@ -9,6 +9,7 @@ import { motion, Variants } from "framer-motion";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from "react-icons/si";
 import { useCurrency } from "../context/CurrencyContext";
 import { Badge } from "@/components/ui/badge";
+import SaveForLater from "@/components/SaveForLater";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { Button } from "@/components/ui/button";
@@ -254,7 +255,10 @@ const Services = () => {
                           transition={{ duration: 0.2 }}
                           onClick={() => navigate(`/service/${service.id}`)}
                         >
-                          <Badge className="absolute top-4 right-4 z-10 bg-accent-peach/90 text-white">{service.badge}</Badge>
+                          <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+                            <SaveForLater service={service} />
+                            <Badge className="bg-accent-peach/90 text-white">{service.badge}</Badge>
+                          </div>
                           
                           {/* Service Icon with Platform Color */}
                           <div className="relative mb-6">

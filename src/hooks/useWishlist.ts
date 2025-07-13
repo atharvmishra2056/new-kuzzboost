@@ -6,6 +6,7 @@ interface WishlistItem {
   title: string;
   platform: string;
   iconName: string;
+  icon?: any;
   description: string;
   rating: number;
   reviews: number;

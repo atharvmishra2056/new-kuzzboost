@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import SaveForLater from "@/components/SaveForLater";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { usePersonalization } from "@/hooks/usePersonalization";
 import { motion } from "framer-motion";
 import { useCurrency } from "../context/CurrencyContext";
 import { useAuth } from "../context/AuthContext";
@@ -49,6 +52,8 @@ const ServiceDetail = () => {
   const navigate = useNavigate();
   const { getSymbol, convert } = useCurrency();
   const { currentUser } = useAuth();
+  const { addToRecentlyViewed } = useRecentlyViewed();
+  const { trackServiceView } = usePersonalization();
   
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,6 +79,10 @@ const ServiceDetail = () => {
         if (!snapshot.empty) {
           const serviceData = snapshot.docs[0].data() as Service;
           setService(serviceData);
+          
+          // Track for personalization and recently viewed
+          addToRecentlyViewed(serviceData);
+          trackServiceView(serviceData);
           
           if (serviceData.tiers && serviceData.tiers.length > 0) {
             setQuantity(serviceData.tiers[0].quantity);
@@ -242,7 +251,10 @@ const ServiceDetail = () => {
                       {service.platform.charAt(0).toUpperCase() + service.platform.slice(1)}
                     </p>
                   </div>
-                  <Badge className="ml-auto">{service.badge}</Badge>
+                  <div className="ml-auto flex items-center gap-2">
+                    <SaveForLater service={service} />
+                    <Badge className="bg-accent-peach/20 text-accent-peach border-accent-peach/30">{service.badge}</Badge>
+                  </div>
                 </div>
 
                 <p className="text-muted-foreground mb-6 text-lg leading-relaxed">

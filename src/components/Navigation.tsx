@@ -80,6 +80,7 @@ const Navigation = ({ cartItemCount = 0, onCartClick }: NavigationProps) => {
                       <DropdownMenuItem disabled>{currentUser.email}</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate('/order-history')}>Order History</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/wishlist')}>Wishlist</DropdownMenuItem>
                       <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                         <LogOut className="w-4 h-4 mr-2"/>
                         Logout
@@ -131,10 +132,10 @@ const Navigation = ({ cartItemCount = 0, onCartClick }: NavigationProps) => {
                   <div className="border-t border-border/50 pt-4">
                     <p className="text-sm text-muted-foreground mb-2">Currency</p>
                     <div className="grid grid-cols-2 gap-2">
-                      <button onClick={() => {setCurrency('INR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'INR' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>INR (₹)</button>
-                      <button onClick={() => {setCurrency('USD'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'USD' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>USD ($)</button>
-                      <button onClick={() => {setCurrency('EUR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'EUR' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>EUR (€)</button>
-                      <button onClick={() => {setCurrency('GBP'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'GBP' ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>GBP (£)</button>
+                      <button onClick={() => {setCurrency('INR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'INR' ? 'bg-accent-peach text-white' : 'glass'}`}>INR (₹)</button>
+                      <button onClick={() => {setCurrency('USD'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'USD' ? 'bg-accent-peach text-white' : 'glass'}`}>USD ($)</button>
+                      <button onClick={() => {setCurrency('EUR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'EUR' ? 'bg-accent-peach text-white' : 'glass'}`}>EUR (€)</button>
+                      <button onClick={() => {setCurrency('GBP'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'GBP' ? 'bg-accent-peach text-white' : 'glass'}`}>GBP (£)</button>
                     </div>
                   </div>
                   
@@ -152,6 +153,7 @@ const Navigation = ({ cartItemCount = 0, onCartClick }: NavigationProps) => {
                       <div className="space-y-2">
                         <div className="text-sm text-muted-foreground px-3">{currentUser.email}</div>
                         <button onClick={() => {navigate('/order-history'); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg">Order History</button>
+                        <button onClick={() => {navigate('/wishlist'); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg">Wishlist</button>
                         <button onClick={() => {handleLogout(); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg text-destructive">Logout</button>
                       </div>
                     ) : (
