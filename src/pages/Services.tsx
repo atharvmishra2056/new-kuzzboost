@@ -201,8 +201,8 @@ const Services = () => {
                     onClick={() => setSelectedPlatform(p.filter)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
                       selectedPlatform === p.filter 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-secondary text-secondary-foreground hover:bg-primary/80'
+                        ? 'bg-accent-peach text-white' 
+                        : 'glass text-primary hover:bg-accent-peach/20'
                     }`}
                   >
                     {p.icon}
@@ -220,7 +220,7 @@ const Services = () => {
                     placeholder="Search services..." 
                     value={searchTerm} 
                     onChange={e => setSearchTerm(e.target.value)} 
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background/80 backdrop-blur-sm focus:ring-2 focus:ring-accent-peach/50 focus:border-accent-peach" 
+                    className="w-full pl-10 pr-4 py-3 rounded-xl glass focus:ring-2 focus:ring-accent-peach/50 focus:border-accent-peach" 
                   />
                 </div>
                 <div className="relative min-w-[180px]">
@@ -228,7 +228,7 @@ const Services = () => {
                   <select 
                     value={sortBy} 
                     onChange={e => setSortBy(e.target.value)} 
-                    className="w-full pl-10 pr-8 py-3 rounded-xl border border-border bg-background/80 backdrop-blur-sm appearance-none focus:ring-2 focus:ring-accent-peach/50 focus:border-accent-peach"
+                    className="w-full pl-10 pr-8 py-3 rounded-xl glass appearance-none focus:ring-2 focus:ring-accent-peach/50 focus:border-accent-peach"
                   >
                     <option value="popular">Most Popular</option>
                     <option value="price-low">Price: Low to High</option>
@@ -254,7 +254,7 @@ const Services = () => {
                           transition={{ duration: 0.2 }}
                           onClick={() => navigate(`/service/${service.id}`)}
                         >
-                          <Badge className="absolute top-4 right-4 z-10 bg-primary/90 text-primary-foreground">{service.badge}</Badge>
+                          <Badge className="absolute top-4 right-4 z-10 bg-accent-peach/90 text-white">{service.badge}</Badge>
                           
                           {/* Service Icon with Platform Color */}
                           <div className="relative mb-6">
@@ -262,7 +262,7 @@ const Services = () => {
                               {service.icon}
                             </div>
                             <div className="text-center">
-                              <span className="text-xs px-2 py-1 bg-secondary/50 rounded-full text-secondary-foreground font-medium">
+                              <span className="text-xs px-2 py-1 bg-accent-peach/20 rounded-full text-primary font-medium">
                                 {service.platform.charAt(0).toUpperCase() + service.platform.slice(1)}
                               </span>
                             </div>
