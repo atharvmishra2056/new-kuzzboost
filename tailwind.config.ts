@@ -19,8 +19,9 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				clash: ['Clash Display', 'sans-serif'],
+				clash: ['"Clash Display"', 'sans-serif'],
 				sans: ['Inter', 'sans-serif'],
+				mono: ['"Roboto Mono"', 'monospace'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
