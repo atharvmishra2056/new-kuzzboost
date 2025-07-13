@@ -13,6 +13,7 @@ interface CartItem {
   price: number;
   quantity: number;
   maxQuantity: number;
+  serviceQuantity?: number;
 }
 
 interface CartProps {
@@ -40,6 +41,14 @@ const Cart = ({
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = async () => {
+    // Check if user is authenticated
+    if (!currentUser) {
+      alert("Please login to place an order.");
+      navigate('/auth');
+      onClose();
+      return;
+    }
+
     setIsCheckingOut(true);
     try {
       // Remove React elements before saving to localStorage and navigation
@@ -117,7 +126,9 @@ const Cart = ({
                             </div>
                             <div className="text-right">
                               <div className="font-semibold text-primary">₹{(item.price * item.quantity).toFixed(2)}</div>
-                              <div className="text-xs text-muted-foreground">₹{item.price.toFixed(2)} each</div>
+                              <div className="text-xs text-muted-foreground">
+                                ₹{((item.price * item.quantity) / (item.serviceQuantity || 1000)).toFixed(4)} per unit
+                              </div>
                             </div>
                           </div>
                         </div>

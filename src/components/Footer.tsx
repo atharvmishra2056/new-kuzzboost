@@ -1,6 +1,8 @@
 import { Instagram, Youtube, Twitter, MessageCircle, Mail, Phone } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const Footer = () => {
+  const { currentUser } = useAuth();
   const currentYear = new Date().getFullYear();
 
   const platforms = [
@@ -29,9 +31,8 @@ const Footer = () => {
 
   const support = [
     "Help Center",
-    "Contact Support",
-    "API Documentation",
-    "Status Page",
+    "Contact Support", 
+    ...(currentUser ? ["Order History"] : []),
     "Terms of Service",
     "Privacy Policy"
   ];
@@ -122,7 +123,7 @@ const Footer = () => {
               {support.map((item) => (
                 <li key={item}>
                   <a 
-                    href="#" 
+                    href={item === "Order History" ? "/order-history" : item === "Contact Support" ? "mailto:support@kuzzboost.com" : "#"} 
                     className="text-muted-foreground hover:text-accent-peach transition-colors duration-200 text-sm"
                   >
                     {item}
