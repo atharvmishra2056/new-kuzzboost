@@ -235,7 +235,12 @@
 
   /* Enhanced service card glass effect */
   .service-card {
-    @apply glass rounded-2xl p-4 sm:p-6 h-full transition-all duration-300 hover:scale-105 hover:shadow-glow border border-border/50;
+    @apply glass rounded-2xl p-4 sm:p-6 h-full transition-all duration-300 hover:scale-105 border border-border/50;
+    box-shadow: 0 8px 32px hsla(var(--primary), 0.1);
+  }
+  
+  .service-card:hover {
+    box-shadow: 0 12px 40px hsla(var(--primary), 0.2);
   }
   
   .scrollbar-hide {

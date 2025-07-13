@@ -42,11 +42,17 @@ const Cart = ({
   const handleCheckout = async () => {
     setIsCheckingOut(true);
     try {
-      // Save cart items to localStorage for checkout page
-      localStorage.setItem('cartItems', JSON.stringify(items));
+      // Remove React elements before saving to localStorage and navigation
+      const serializableItems = items.map(({ icon, ...rest }) => ({
+        ...rest,
+        iconName: 'placeholder' // We'll handle icons in checkout page
+      }));
       
-      // Navigate to checkout page
-      navigate('/checkout', { state: { items } });
+      // Save cart items to localStorage for checkout page
+      localStorage.setItem('cartItems', JSON.stringify(serializableItems));
+      
+      // Navigate to checkout page without passing React elements in state
+      navigate('/checkout');
       onClose();
     } catch (error) {
       console.error("Error navigating to checkout: ", error);
