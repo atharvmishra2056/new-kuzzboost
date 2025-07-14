@@ -173,7 +173,7 @@ const OrderReview = () => {
                         </p>
                         {item.service_quantity && (
                           <p className="text-xs text-muted-foreground">
-                            {getSymbol()}{convert(Number(item.price) / Number(item.service_quantity)).toFixed(4)}/unit
+                            {getSymbol()}{(Number(item.price) / Number(item.service_quantity)).toFixed(4)}/unit
                           </p>
                         )}
                       </div>
