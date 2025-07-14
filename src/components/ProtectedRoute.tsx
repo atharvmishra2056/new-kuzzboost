@@ -13,7 +13,7 @@ const ProtectedRoute = () => {
 
     // If the user is logged in AND their UID matches the admin UID, show the admin pages.
     // Otherwise, redirect them to the homepage.
-    return currentUser?.uid === adminUid ? <Outlet /> : <Navigate to="/" />;
+    return currentUser?.id === adminUid ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;

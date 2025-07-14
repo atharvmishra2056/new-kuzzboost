@@ -1,172 +1,234 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingCart, Globe, User, LogOut } from "lucide-react";
-import { useCurrency } from "../context/CurrencyContext";
-import { useAuth } from "../context/AuthContext"; // Import useAuth
-import { auth } from "../firebase";
-import { signOut } from "firebase/auth";
+import { Menu, X, ShoppingCart, User, LogOut, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { Button } from "./ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "./ui/dropdown-menu";
 
 interface NavigationProps {
   cartItemCount?: number;
   onCartClick?: () => void;
 }
 
-const Navigation = ({ cartItemCount = 0, onCartClick }: NavigationProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { currency, setCurrency } = useCurrency();
-  const { currentUser } = useAuth();
+const Navigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { currentUser, signOut } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/');
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
+  const finalCartCount = cartItemCount ?? cartCount;
+
   return (
-      <nav className="fixed top-0 left-0 right-0 z-50 glass">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link to="/" className="font-clash text-2xl font-bold text-primary">
+    <motion.nav 
+      className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border/20"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          {/* Logo */}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link to="/" className="text-2xl font-clash font-bold text-primary">
               KuzzBoost
             </Link>
+          </motion.div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
-              <Link to="/" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">Home</Link>
-              <Link to="/services" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">Services</Link>
-
-              {/* Currency Switcher */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    {currency}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setCurrency('INR')}>INR (₹)</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCurrency('USD')}>USD ($)</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCurrency('EUR')}>EUR (€)</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCurrency('GBP')}>GBP (£)</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Cart Icon */}
-              <button
-                  id="cart-icon"
-                  onClick={onCartClick}
-                  className="relative p-2 rounded-full hover:bg-glass transition-all duration-300"
-              >
-                <ShoppingCart className="w-6 h-6 text-foreground" />
-                {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-accent-peach text-xs rounded-full w-5 h-5 flex items-center justify-center text-foreground font-medium">
-                  {cartItemCount}
-                </span>
-                )}
-              </button>
-
-              {/* User/Auth Section */}
-              {currentUser ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center gap-2">
-                        <User className="w-5 h-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem disabled>{currentUser.email}</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/order-history')}>Order History</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/wishlist')}>Wishlist</DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                        <LogOut className="w-4 h-4 mr-2"/>
-                        Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-              ) : (
-                  <Link to="/auth">
-                    <Button className="glass-button py-2 px-4 text-sm">Login</Button>
-                  </Link>
-              )}
-
-            </div>
-
-            {/* Mobile Controls */}
-            <div className="md:hidden flex items-center gap-2">
-              {/* Mobile Cart Icon */}
-              <button
-                  onClick={onCartClick}
-                  className="relative p-2 rounded-full hover:bg-glass transition-all duration-300"
-              >
-                <ShoppingCart className="w-5 h-5 text-foreground" />
-                {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-accent-peach text-xs rounded-full w-4 h-4 flex items-center justify-center text-foreground font-medium text-[10px]">
-                  {cartItemCount}
-                </span>
-                )}
-              </button>
-              
-              {/* Mobile menu button */}
-              <button
-                  onClick={() => setIsOpen(!isOpen)}
-                  className="text-foreground hover:text-primary transition-colors duration-300"
-              >
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
+              Home
+            </Link>
+            <Link to="/services" className="text-muted-foreground hover:text-primary transition-colors">
+              Services
+            </Link>
+            <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
+              About
+            </Link>
           </div>
 
-          {/* Mobile Navigation */}
-          {isOpen && (
-              <div className="md:hidden mt-4 pb-4">
-                <div className="glass rounded-2xl p-4 space-y-4">
-                  <Link to="/" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium py-2" onClick={() => setIsOpen(false)}>Home</Link>
-                  <Link to="/services" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium py-2" onClick={() => setIsOpen(false)}>Services</Link>
-                  <Link to="/about" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium py-2" onClick={() => setIsOpen(false)}>About</Link>
-                  
-                  {/* Currency Switcher for Mobile */}
-                  <div className="border-t border-border/50 pt-4">
-                    <p className="text-sm text-muted-foreground mb-2">Currency</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button onClick={() => {setCurrency('INR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'INR' ? 'bg-accent-peach text-white' : 'glass'}`}>INR (₹)</button>
-                      <button onClick={() => {setCurrency('USD'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'USD' ? 'bg-accent-peach text-white' : 'glass'}`}>USD ($)</button>
-                      <button onClick={() => {setCurrency('EUR'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'EUR' ? 'bg-accent-peach text-white' : 'glass'}`}>EUR (€)</button>
-                      <button onClick={() => {setCurrency('GBP'); setIsOpen(false);}} className={`p-2 rounded-lg text-sm ${currency === 'GBP' ? 'bg-accent-peach text-white' : 'glass'}`}>GBP (£)</button>
-                    </div>
-                  </div>
-                  
-                  {/* Cart and Auth for Mobile */}
-                  <div className="border-t border-border/50 pt-4 space-y-3">
-                    <button
-                      onClick={() => {onCartClick?.(); setIsOpen(false);}}
-                      className="w-full flex items-center gap-3 p-3 glass rounded-lg hover:scale-105 transition-transform"
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                      <span>Cart ({cartItemCount})</span>
-                    </button>
-                    
-                    {currentUser ? (
-                      <div className="space-y-2">
-                        <div className="text-sm text-muted-foreground px-3">{currentUser.email}</div>
-                        <button onClick={() => {navigate('/order-history'); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg">Order History</button>
-                        <button onClick={() => {navigate('/wishlist'); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg">Wishlist</button>
-                        <button onClick={() => {handleLogout(); setIsOpen(false);}} className="w-full text-left p-3 glass rounded-lg text-destructive">Logout</button>
-                      </div>
-                    ) : (
-                      <Link to="/auth" onClick={() => setIsOpen(false)}>
-                        <Button className="w-full glass-button">Login</Button>
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </div>
-          )}
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            {currentUser ? (
+              <>
+                <Link to="/wishlist" className="p-2 rounded-full hover:bg-accent transition-colors">
+                  <Heart className="w-5 h-5" />
+                </Link>
+                <button
+                  onClick={onCartClick}
+                  className="relative p-2 rounded-full hover:bg-accent transition-colors"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  {finalCartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-accent-peach text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {finalCartCount}
+                    </span>
+                  )}
+                </button>
+                <Link to="/order-history" className="p-2 rounded-full hover:bg-accent transition-colors">
+                  <User className="w-5 h-5" />
+                </Link>
+                <Button
+                  onClick={handleSignOut}
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button className="glass-button">
+                  Sign In
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+            >
+              <AnimatePresence mode="wait">
+                {isMenuOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90 }}
+                    animate={{ rotate: 0 }}
+                    exit={{ rotate: 90 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="w-6 h-6" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: 90 }}
+                    animate={{ rotate: 0 }}
+                    exit={{ rotate: -90 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Menu className="w-6 h-6" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
         </div>
-      </nav>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden border-t border-border/20 bg-card/95 backdrop-blur-sm"
+            >
+              <div className="py-4 space-y-4">
+                <Link
+                  to="/"
+                  className="block px-4 py-2 text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/services"
+                  className="block px-4 py-2 text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Services
+                </Link>
+                <Link
+                  to="/about"
+                  className="block px-4 py-2 text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  About
+                </Link>
+                
+                {currentUser ? (
+                  <>
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <Link
+                        to="/wishlist"
+                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Heart className="w-5 h-5" />
+                        Wishlist
+                      </Link>
+                      <button
+                        onClick={() => {
+                          onCartClick?.();
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <div className="relative">
+                          <ShoppingCart className="w-5 h-5" />
+                          {finalCartCount > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-accent-peach text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                              {finalCartCount}
+                            </span>
+                          )}
+                        </div>
+                        Cart
+                      </button>
+                    </div>
+                    <Link
+                      to="/order-history"
+                      className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-primary transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5" />
+                      Orders
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-primary transition-colors w-full text-left"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <div className="px-4 py-2">
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full glass-button">
+                        Sign In
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.nav>
   );
 };
 

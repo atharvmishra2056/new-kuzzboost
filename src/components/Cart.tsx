@@ -1,164 +1,170 @@
-import { useState } from "react";
-import { X, Plus, Minus, ShoppingCart, CreditCard, Trash2 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { X, Plus, Minus, ShoppingBag, Trash2, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase";
-
-interface CartItem {
-  id: number;
-  title: string;
-  platform: string;
-  icon: React.ReactElement;
-  price: number;
-  quantity: number;
-  maxQuantity: number;
-  serviceQuantity?: number;
-}
+import { useCart, CartItem } from "../context/CartContext";
+import { useCurrency } from "../context/CurrencyContext";
 
 interface CartProps {
   isOpen: boolean;
   onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (id: number, quantity: number) => void;
-  onRemoveItem: (id: number) => void;
-  onClearCart: () => void;
 }
 
-const Cart = ({
-                isOpen,
-                onClose,
-                items,
-                onUpdateQuantity,
-                onRemoveItem,
-                onClearCart
-              }: CartProps) => {
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const { currentUser } = useAuth();
+const Cart = ({ isOpen, onClose }: CartProps) => {
   const navigate = useNavigate();
+  const { cartItems, updateCartItemQuantity, removeFromCart, clearCart } = useCart();
+  const { getSymbol, convert } = useCurrency();
 
-  const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  const handleCheckout = async () => {
-    // Check if user is authenticated
-    if (!currentUser) {
-      alert("Please login to place an order.");
-      navigate('/auth');
-      onClose();
-      return;
-    }
-
-    setIsCheckingOut(true);
-    try {
-      // Remove React elements before saving to localStorage and navigation
-      const serializableItems = items.map(({ icon, ...rest }) => ({
-        ...rest,
-        iconName: 'placeholder' // We'll handle icons in checkout page
-      }));
-      
-      // Save cart items to localStorage for checkout page
-      localStorage.setItem('cartItems', JSON.stringify(serializableItems));
-      
-      // Navigate to checkout page without passing React elements in state
-      navigate('/checkout');
-      onClose();
-    } catch (error) {
-      console.error("Error navigating to checkout: ", error);
-      alert("There was an error. Please try again.");
-    } finally {
-      setIsCheckingOut(false);
-    }
+  const handleCheckout = () => {
+    onClose();
+    navigate('/checkout/review');
   };
 
-  if (!isOpen) return null;
-
   return (
-      <div className="fixed inset-0 z-50 overflow-hidden">
-        <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
             onClick={onClose}
-        />
-
-        <div className="absolute right-0 top-0 h-full w-full max-w-md bg-gradient-glass border-l border-border backdrop-blur-xl">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between p-6 border-b border-border/50">
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="w-6 h-6 text-primary" />
-                <h2 className="font-clash text-xl font-semibold text-primary">Cart ({itemCount})</h2>
+          />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-card border-l border-border shadow-xl z-50 flex flex-col"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-5 h-5 text-primary" />
+                <h2 className="text-xl font-clash font-semibold text-primary">Your Cart</h2>
+                <Badge variant="secondary">{cartItems.length}</Badge>
               </div>
-              <button
-                  onClick={onClose}
-                  className="w-8 h-8 glass rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-200"
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="text-muted-foreground hover:text-primary"
               >
-                <X className="w-4 h-4" />
-              </button>
+                <X className="w-5 h-5" />
+              </Button>
             </div>
 
+            {/* Cart Items */}
             <div className="flex-1 overflow-y-auto p-6">
-              {items.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🛒</div>
-                    <h3 className="font-clash text-lg font-semibold text-primary mb-2">Your cart is empty</h3>
-                    <p className="text-muted-foreground text-sm">Add some services to get started!</p>
-                  </div>
-              ) : (
+              <AnimatePresence>
+                {cartItems.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center py-12"
+                  >
+                    <ShoppingBag className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-lg font-medium text-muted-foreground mb-2">Your cart is empty</p>
+                    <p className="text-sm text-muted-foreground mb-6">Add some services to get started</p>
+                    <Button onClick={() => { onClose(); navigate('/services'); }} className="glass-button">
+                      Browse Services
+                    </Button>
+                  </motion.div>
+                ) : (
                   <div className="space-y-4">
-                    {items.map((item) => (
-                        <div key={item.id} className="glass rounded-xl p-4 space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="text-2xl">{item.icon}</div>
-                              <div>
-                                <h4 className="font-semibold text-primary text-sm">{item.title}</h4>
-                                <p className="text-xs text-muted-foreground">{item.platform}</p>
-                              </div>
-                            </div>
-                            <button onClick={() => onRemoveItem(item.id)} className="w-6 h-6 text-muted-foreground hover:text-destructive transition-colors duration-200">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                    {cartItems.map((item) => (
+                      <motion.div
+                        key={item.id}
+                        layout
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="glass rounded-lg p-4 space-y-3"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-medium text-primary line-clamp-2">{item.title}</h3>
+                            <Badge variant="outline" className="mt-1 text-xs">
+                              {item.platform}
+                            </Badge>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))} className="w-7 h-7 glass rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-200"><Minus className="w-3 h-3" /></button>
-                              <span className="font-medium text-primary min-w-[40px] text-center">{item.quantity}</span>
-                              <button onClick={() => onUpdateQuantity(item.id, Math.min(item.maxQuantity, item.quantity + 1))} className="w-7 h-7 glass rounded-lg flex items-center justify-center hover:scale-110 transition-transform duration-200"><Plus className="w-3 h-3" /></button>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-semibold text-primary">₹{(item.price * item.quantity).toFixed(2)}</div>
-                              <div className="text-xs text-muted-foreground">
-                                ₹{((item.price * item.quantity) / (item.serviceQuantity || 1000)).toFixed(4)} per unit
-                              </div>
-                            </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateCartItemQuantity(item.id, Math.max(1, item.quantity - 1))}
+                              disabled={item.quantity <= 1}
+                              className="w-8 h-8 p-0"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </Button>
+                            <span className="w-8 text-center font-medium">{item.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                              className="w-8 h-8 p-0"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium text-primary">
+                              {getSymbol()}{convert(item.price * item.quantity)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.service_quantity.toLocaleString()} units
+                            </p>
                           </div>
                         </div>
+                      </motion.div>
                     ))}
                   </div>
-              )}
+                )}
+              </AnimatePresence>
             </div>
-            {items.length > 0 && (
-                <div className="border-t border-border/50 p-6 space-y-4">
-                  <button onClick={onClearCart} className="w-full text-sm text-muted-foreground hover:text-destructive transition-colors duration-200">Clear Cart</button>
-                  <div className="glass rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2"><span className="text-muted-foreground">Subtotal:</span><span className="font-semibold">₹{total.toFixed(2)}</span></div>
-                    <div className="flex items-center justify-between mb-2"><span className="text-muted-foreground">Processing Fee:</span><span className="font-semibold">Free</span></div>
-                    <div className="border-t border-border/30 pt-2">
-                      <div className="flex items-center justify-between"><span className="font-semibold text-primary">Total:</span><span className="font-clash text-xl font-bold text-primary">₹{total.toFixed(2)}</span></div>
-                    </div>
-                  </div>
-                  <button onClick={handleCheckout} disabled={isCheckingOut} className="w-full glass-button flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    {isCheckingOut ? (
-                        <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
-                    ) : (
-                        <><CreditCard className="w-4 h-4" />Checkout Now</>
-                    )}
-                  </button>
-                  <p className="text-xs text-muted-foreground text-center">🔒 Secure checkout with SSL encryption</p>
+
+            {/* Footer */}
+            {cartItems.length > 0 && (
+              <div className="border-t border-border p-6 space-y-4">
+                <div className="flex items-center justify-between text-lg font-semibold">
+                  <span>Total:</span>
+                  <span className="text-primary">{getSymbol()}{convert(total)}</span>
                 </div>
+                <div className="space-y-2">
+                  <Button onClick={handleCheckout} className="w-full glass-button group">
+                    <span>Proceed to Checkout</span>
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={clearCart}
+                    className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    Clear Cart
+                  </Button>
+                </div>
+              </div>
             )}
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

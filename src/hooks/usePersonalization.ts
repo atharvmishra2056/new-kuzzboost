@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Service } from '@/pages/Services';
+import { Service } from '@/types/service';
 
 interface UserPreferences {
   favoriteCategories: string[];

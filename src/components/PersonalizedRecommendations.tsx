@@ -1,133 +1,89 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Sparkles, TrendingUp } from "lucide-react";
+import { Star, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePersonalization } from "@/hooks/usePersonalization";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Badge } from "./ui/badge";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/firebase";
-import { Service } from "@/pages/Services";
+import { useServices } from "@/components/Services";
+import { Service } from "@/types/service";
 
 const PersonalizedRecommendations = () => {
   const { getRecommendations } = usePersonalization();
+  const { services } = useServices();
   const { getSymbol, convert } = useCurrency();
   const navigate = useNavigate();
   const [recommendations, setRecommendations] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        const servicesCollection = collection(db, "services");
-        const querySnapshot = await getDocs(servicesCollection);
-        const allServices = querySnapshot.docs.map(doc => ({
-          ...doc.data(),
-          id: doc.data().id
-        })) as Service[];
-        
-        const recommended = getRecommendations(allServices);
-        setRecommendations(recommended);
-      } catch (error) {
-        console.error('Error fetching recommendations:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecommendations();
-  }, [getRecommendations]);
-
-  if (loading) {
-    return (
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <Sparkles className="w-6 h-6 text-accent-peach animate-pulse" />
-            <h2 className="font-clash text-2xl md:text-3xl font-bold text-primary">
-              Recommended for You
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="glass-subtle rounded-xl p-6 animate-pulse">
-                <div className="h-4 bg-accent-peach/20 rounded mb-4"></div>
-                <div className="h-8 bg-accent-peach/20 rounded mb-3"></div>
-                <div className="h-16 bg-accent-peach/20 rounded"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
+    if (services.length > 0) {
+      const personalizedServices = getRecommendations(services);
+      setRecommendations(personalizedServices.slice(0, 3));
+    }
+  }, [services, getRecommendations]);
 
   if (recommendations.length === 0) return null;
 
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-hero">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-6 h-6 text-accent-peach" />
-            <h2 className="font-clash text-2xl md:text-3xl font-bold text-primary">
-              Recommended for You
-            </h2>
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-accent-lavender/20 rounded-full px-4 py-2 mb-6">
+            <TrendingUp className="w-4 h-4 text-accent-peach" />
+            <span className="text-sm font-medium text-primary">Recommended for You</span>
           </div>
-          <button 
-            onClick={() => navigate('/services')}
-            className="text-accent-peach hover:text-accent-peach/80 transition-colors font-medium"
-          >
-            View All Services
-          </button>
+          <h2 className="font-clash text-4xl md:text-6xl font-bold text-primary mb-6">
+            Tailored Selections
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Based on your activity and preferences, here are services we think you'll love.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {recommendations.slice(0, 3).map((service) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {recommendations.map((service, index) => (
             <div
               key={service.id}
+              className="service-card group cursor-pointer h-full"
               onClick={() => navigate(`/service/${service.id}`)}
-              className="glass-subtle rounded-xl p-6 cursor-pointer hover:scale-105 transition-all duration-300 group relative overflow-hidden"
+              style={{ animationDelay: `${index * 0.2}s` }}
             >
-              <div className="absolute top-0 right-0 p-4">
-                <Badge className="bg-accent-peach/90 text-white">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  {service.badge}
-                </Badge>
-              </div>
-              
-              <div className="mb-4 text-center pt-4">
-                {service.icon}
-              </div>
-              
-              <h3 className="font-clash text-lg font-semibold text-primary mb-2">
-                {service.title}
-              </h3>
-              
-              <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                {service.description}
-              </p>
-              
-              {service.tiers?.length > 0 && (
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-xl font-bold text-primary font-clash">
-                    {getSymbol()}{convert(service.tiers[0].price)}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    / {service.tiers[0].quantity.toLocaleString()}
-                  </span>
+              <div className="relative mb-6">
+                <div className="text-5xl mb-2 group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                  {service.icon}
                 </div>
-              )}
-              
-              <div className="flex items-center justify-between">
+                <div className="text-center">
+                  <Badge className="bg-accent-peach/20 text-primary">{service.badge}</Badge>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-clash text-xl font-semibold text-primary mb-2 line-clamp-2">
+                    {service.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {service.description}
+                  </p>
+                </div>
+
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-medium text-accent-peach">
-                    ⭐ {service.rating}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({service.reviews})
-                  </span>
+                  <Star className="w-4 h-4 fill-accent-peach text-accent-peach" />
+                  <span className="text-sm font-medium">{service.rating}</span>
+                  <span className="text-xs text-muted-foreground">({service.reviews})</span>
                 </div>
-                <ArrowRight className="w-4 h-4 text-accent-peach group-hover:translate-x-1 transition-transform" />
+
+                {service.tiers && service.tiers.length > 0 && (
+                  <div className="pt-4 border-t border-border/20">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-lg font-bold text-primary font-clash">
+                        {getSymbol()}{convert(service.tiers[0].price)}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        / {service.tiers[0].quantity.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
