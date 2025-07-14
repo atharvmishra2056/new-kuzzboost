@@ -12,6 +12,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import AuthPage from "./pages/AuthPage";
 import OrderHistory from "./pages/OrderHistory";
+import OrderReview from "./pages/OrderReview";
 import Checkout from "./pages/Checkout";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
 import ServiceDetail from "./pages/ServiceDetail";
@@ -20,9 +21,9 @@ import Wishlist from "./pages/Wishlist";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/Orders";
-import ManageServices from './pages/admin/ManageServices'; // Import the new page
-import ProtectedRoute from "./components/ProtectedRoute"; // Import the new component
-import ErrorBoundary from "./components/ErrorBoundary"; // Naya component import karein
+import ManageServices from './pages/admin/ManageServices';
+import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 
 const queryClient = new QueryClient();
@@ -41,7 +42,7 @@ const App = () => (
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/about" element={<About />} />
 
-                {/* Services route ko ErrorBoundary se wrap karein */}
+                {/* Services route wrapped with ErrorBoundary */}
                 <Route
                     path="/services"
                     element={
@@ -52,6 +53,7 @@ const App = () => (
                 />
 
                 <Route path="/order-history" element={<OrderHistory />} />
+                <Route path="/checkout/review" element={<OrderReview />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/service/:id" element={<ServiceDetail />} />
