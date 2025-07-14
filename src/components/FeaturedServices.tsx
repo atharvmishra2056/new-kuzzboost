@@ -1,10 +1,9 @@
 import { useState, useEffect, ReactElement } from "react";
 import { Star, ArrowRight } from "lucide-react";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from 'react-icons/si';
 import { useCurrency } from "@/context/CurrencyContext";
-import { Service } from "@/pages/Services"; // Import the Service interface
+import { Service } from "@/types/service";
+import { useServices } from "@/components/Services";
 
 const iconMap: { [key: string]: ReactElement } = {
   SiInstagram: <SiInstagram className="text-5xl relative z-10 group-hover:scale-110 transition-transform duration-300" />,
@@ -14,27 +13,15 @@ const iconMap: { [key: string]: ReactElement } = {
 };
 
 const FeaturedServices = ({ onCustomizeClick }: { onCustomizeClick: (service: Service) => void }) => {
-  const [services, setServices] = useState<Service[]>([]);
+  const { services } = useServices();
   const { getSymbol, convert } = useCurrency();
+  
+  // Get top 4 services by reviews
+  const featuredServices = services
+    .sort((a, b) => b.reviews - a.reviews)
+    .slice(0, 4);
 
-  useEffect(() => {
-    const fetchFeaturedServices = async () => {
-      const servicesCollection = collection(db, "services");
-      const q = query(servicesCollection, orderBy("reviews", "desc"), limit(4));
-      const querySnapshot = await getDocs(q);
-      const servicesData = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          ...data,
-          icon: iconMap[data.iconName],
-        } as Service;
-      });
-      setServices(servicesData);
-    };
-    fetchFeaturedServices();
-  }, []);
-
-  if (services.length === 0) return null;
+  if (featuredServices.length === 0) return null;
 
   return (
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-hero">
@@ -45,7 +32,7 @@ const FeaturedServices = ({ onCustomizeClick }: { onCustomizeClick: (service: Se
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">Hand-picked services that deliver exceptional results. These are our most popular and effective growth solutions.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-            {services.map((service, index) => (
+            {featuredServices.map((service, index) => (
                 <div key={service.id} className="stagger-item service-card relative h-full flex flex-col" style={{ animationDelay: `${index * 0.15}s` }}>
                   <div className="absolute top-0 right-0 p-4"><div className="glass rounded-full px-3 py-1 text-xs font-bold text-primary border">{service.badge}</div></div>
                   <div className="relative mb-4 text-center pt-4">{service.icon}</div>

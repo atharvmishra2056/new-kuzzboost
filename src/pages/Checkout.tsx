@@ -172,7 +172,7 @@ const Checkout = () => {
       // This avoids Firebase permission errors while maintaining functionality
       console.log('Order would be saved:', {
         orderId,
-        userId: currentUser?.uid,
+        userId: currentUser?.id,
         customerInfo: formData,
         items: items.map(({ icon, ...item }) => item),
         total,

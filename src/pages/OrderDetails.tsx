@@ -66,7 +66,7 @@ const OrderDetails = () => {
         const q = query(
           collection(db, "orders"),
           where("orderId", "==", orderId),
-          where("userId", "==", currentUser.uid)
+          where("userId", "==", currentUser.id)
         );
         
         const querySnapshot = await getDocs(q);

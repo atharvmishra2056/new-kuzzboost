@@ -50,7 +50,7 @@ const OrderHistory = () => {
 
     const fetchOrders = async () => {
       try {
-        const ordersData = orderService.getUserOrders(currentUser.uid);
+        const ordersData = orderService.getUserOrders(currentUser.id);
         setOrders(ordersData);
       } catch (error) {
         console.error("Error fetching orders:", error);
