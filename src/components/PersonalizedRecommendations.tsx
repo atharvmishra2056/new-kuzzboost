@@ -36,12 +36,12 @@ const PersonalizedRecommendations = () => {
 
       // Sort by AI score and take top 3
       const topRecommendations = aiEnhancedServices
-        .sort((a, b) => b.aiScore - a.aiScore)
+        .sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0))
         .slice(0, 3);
         
       setRecommendations(topRecommendations);
     }
-  }, [services, getRecommendations]);
+  }, [services]);
 
   const getPersonalizationReason = (service: Service): string => {
     const reasons = [

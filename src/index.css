@@ -12,12 +12,12 @@
     --background: 35 100% 98%;     /* Warmer cream white */
     --foreground: 25 40% 15%;      /* Deeper charcoal */
 
-    /* Rich glassmorphic surfaces */
-    --glass: 40 60% 96%;           /* Richer glass base */
-    --glass-border: 35 50% 85%;    /* More defined borders */
+    /* Enhanced beige glassmorphic surfaces */
+    --glass: 35 65% 94%;           /* Warm beige glass base */
+    --glass-border: 30 45% 80%;    /* Softer beige borders */
     --glass-foreground: 25 50% 10%;
 
-    --card: 38 90% 97%;            /* Warmer card background */
+    --card: 35 85% 95%;            /* Warm beige card background */
     --card-foreground: 25 40% 15%;
 
     --popover: 38 90% 97%;
@@ -29,10 +29,10 @@
     --primary-glow: 30 70% 45%;    /* Warmer glow */
     --primary-light: 30 60% 70%;   /* Light variant */
 
-    /* Enhanced secondary palette */
-    --secondary: 35 70% 82%;       /* Warmer cashmere */
+    /* Enhanced beige secondary palette */
+    --secondary: 30 60% 85%;       /* Soft beige */
     --secondary-foreground: 25 40% 20%;
-    --secondary-dark: 35 50% 65%;  /* Darker variant */
+    --secondary-dark: 28 45% 72%;  /* Deeper beige variant */
 
     --muted: 38 50% 90%;
     --muted-foreground: 25 30% 40%;
@@ -62,9 +62,9 @@
     /* Enhanced gradients with more color */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)), hsl(var(--primary-light)));
     --gradient-glass: linear-gradient(135deg,
-    hsla(40, 60%, 96%, 0.4),
-    hsla(35, 50%, 85%, 0.25),
-    hsla(30, 40%, 80%, 0.15)
+    hsla(35, 65%, 94%, 0.6),
+    hsla(30, 55%, 88%, 0.4),
+    hsla(28, 45%, 82%, 0.3)
     );
     --gradient-accent: linear-gradient(135deg,
     hsl(var(--accent-lavender)),
@@ -233,19 +233,31 @@
     transform: translateY(-1px) scale(0.98);
   }
 
-  /* Enhanced service card glass effect */
+  /* Enhanced beige service card glass effect */
   .service-card {
-    @apply glass rounded-2xl p-6 h-full flex flex-col transition-all duration-300 border border-border/50;
-    background: linear-gradient(135deg, rgba(var(--card) / 0.8), rgba(var(--card) / 0.9));
-    backdrop-filter: blur(10px);
+    @apply glass rounded-2xl p-6 h-full flex flex-col transition-all duration-300 border border-accent-peach/20;
+    background: linear-gradient(135deg, 
+      hsla(35, 65%, 94%, 0.9), 
+      hsla(30, 60%, 90%, 0.95)
+    );
+    backdrop-filter: blur(15px);
     min-height: 400px;
+    box-shadow: 
+      0 8px 32px hsla(30, 45%, 72%, 0.15),
+      0 0 0 1px hsla(35, 60%, 85%, 0.3) inset;
   }
   
   .service-card:hover {
-    @apply -translate-y-2 scale-[1.02];
-    box-shadow: 0 25px 50px -12px rgba(var(--accent-peach) / 0.4), 
-                0 0 30px rgba(var(--primary) / 0.1);
-    border-color: rgba(var(--accent-peach) / 0.3);
+    @apply -translate-y-3 scale-[1.03];
+    background: linear-gradient(135deg, 
+      hsla(35, 70%, 96%, 0.95), 
+      hsla(30, 65%, 92%, 1)
+    );
+    box-shadow: 
+      0 25px 60px hsla(30, 45%, 72%, 0.25), 
+      0 0 40px hsla(15, 80%, 75%, 0.2),
+      0 0 0 1px hsla(15, 80%, 75%, 0.4) inset;
+    border-color: hsla(15, 80%, 75%, 0.5);
   }
 
   /* Modern Grid Layout */

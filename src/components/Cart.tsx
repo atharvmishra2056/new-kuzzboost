@@ -24,7 +24,7 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
 
   const handleCheckout = () => {
     onClose();
-    navigate('/checkout/review');
+    navigate('/cart');
   };
 
   return (
@@ -152,7 +152,7 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
                 </div>
                 <div className="space-y-2">
                   <Button onClick={handleCheckout} className="w-full glass-button group">
-                    <span>Proceed to Checkout</span>
+                    <span>View Cart</span>
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                   <Button

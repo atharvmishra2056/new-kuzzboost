@@ -27,6 +27,8 @@ import UserManagement from './pages/admin/UserManagement';
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AIChatbot from "./components/AIChatbot";
+import CursorFollower from "./components/CursorFollower";
+import ViewCart from "./pages/ViewCart";
 
 
 const queryClient = new QueryClient();
@@ -40,6 +42,7 @@ const App = () => (
               <Toaster />
               <Sonner />
             <BrowserRouter>
+              <CursorFollower />
               <AIChatbot />
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -57,6 +60,7 @@ const App = () => (
                 />
 
                 <Route path="/order-history" element={<OrderHistory />} />
+                <Route path="/cart" element={<ViewCart />} />
                 <Route path="/checkout/review" element={<OrderReview />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />

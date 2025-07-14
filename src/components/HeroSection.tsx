@@ -69,33 +69,70 @@ const HeroSection = () => {
   }
 
   return (
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero">
-        {/* Morphing Background Blob */}
+    <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Enhanced Interactive Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary/20 to-accent-peach/10" />
+        
+        {/* Interactive floating particles */}
+        <div className="absolute inset-0">
+          {[...Array(30)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-accent-peach/60 rounded-full"
+              initial={{
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
+                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+              }}
+              animate={{
+                x: mousePosition.x * (0.01 + i * 0.0002),
+                y: mousePosition.y * (0.01 + i * 0.0002),
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 0.8, 0.3],
+              }}
+              transition={{
+                duration: 3 + i * 0.1,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+        
+        {/* Animated morphing blobs */}
         <motion.div
-            className="absolute top-1/2 left-1/2 w-96 h-96 morphing-blob opacity-30"
-            style={{
-              background: 'linear-gradient(45deg, hsl(var(--accent-lavender)), hsl(var(--accent-peach)), hsl(var(--primary-glow)))',
-            }}
-            animate={{
-              x: -mousePosition.x,
-              y: -mousePosition.y,
-            }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 morphing-blob opacity-30"
+          style={{
+            background: 'radial-gradient(circle, hsl(var(--accent-lavender) / 0.4), hsl(var(--accent-peach) / 0.3))',
+          }}
+          animate={{
+            x: mousePosition.x * 0.03,
+            y: mousePosition.y * 0.03,
+          }}
+          transition={{
+            type: "spring", 
+            stiffness: 100, 
+            damping: 30 
+          }}
         />
-
-        {/* Secondary blob */}
+        
         <motion.div
-            className="absolute top-1/4 right-1/4 w-64 h-64 morphing-blob opacity-20"
-            style={{
-              background: 'linear-gradient(135deg, hsl(var(--accent-peach)), hsl(var(--secondary)))',
-              animationDelay: '10s'
-            }}
-            animate={{
-              x: mousePosition.x,
-              y: mousePosition.y,
-            }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 morphing-blob opacity-25"
+          style={{
+            background: 'radial-gradient(circle, hsl(var(--accent-coral) / 0.4), hsl(var(--accent-mint) / 0.3))',
+          }}
+          animate={{
+            x: mousePosition.x * -0.02,
+            y: mousePosition.y * -0.02,
+          }}
+          transition={{
+            type: "spring", 
+            stiffness: 80, 
+            damping: 25 
+          }}
         />
+      </div>
 
         <motion.div
             className="relative z-10 text-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
