@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, Shield, Clock, Users, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Star, Shield, Clock, Users, AlertCircle, ChevronDown, ChevronUp, ShoppingCart } from "lucide-react";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import SaveForLater from "@/components/SaveForLater";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { usePersonalization } from "@/hooks/usePersonalization";
+import { useCart } from "@/context/CartContext";
 import { motion } from "framer-motion";
 import { useCurrency } from "../context/CurrencyContext";
 import { useAuth } from "../context/AuthContext";
@@ -53,6 +54,7 @@ const ServiceDetail = () => {
   const { currentUser } = useAuth();
   const { addToRecentlyViewed } = useRecentlyViewed();
   const { trackServiceView } = usePersonalization();
+  const { addToCart } = useCart();
   
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
@@ -178,23 +180,10 @@ const ServiceDetail = () => {
     const packageMultiplier = service?.packageTypes?.find(p => p.name.toLowerCase() === selectedPackage)?.multiplier || 1;
     const finalPrice = basePrice * packageMultiplier;
     
-    // Create cart item
-    const cartItem = {
-      id: service?.id,
-      title: service?.title,
-      platform: service?.platform,
-      iconName: service?.iconName,
-      price: finalPrice,
-      quantity: 1,
-      serviceQuantity: quantity,
-      userInput,
-      packageType: selectedPackage
-    };
+    // Add to cart using CartContext
+    addToCart(service!, quantity, finalPrice);
     
-    // Add to cart and navigate
-    const existingCart = JSON.parse(localStorage.getItem('cartItems') || '[]');
-    localStorage.setItem('cartItems', JSON.stringify([...existingCart, cartItem]));
-    navigate('/checkout');
+    navigate('/checkout/review');
   };
 
   if (loading) {
@@ -465,13 +454,14 @@ const ServiceDetail = () => {
                   </span>
                 </label>
 
-                {/* Start Order Button */}
+                {/* Add to Cart Button */}
                 <Button
                   onClick={handleStartOrder}
                   disabled={!userInput.trim() || !termsAccepted}
                   className="w-full glass-button text-lg py-6"
                 >
-                  Start Order - {getSymbol()}{convert(finalPrice)}
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Add to Cart - {getSymbol()}{convert(finalPrice)}
                 </Button>
               </motion.div>
             </div>

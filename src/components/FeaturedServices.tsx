@@ -1,9 +1,10 @@
 import { useState, useEffect, ReactElement } from "react";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ShoppingCart } from "lucide-react";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from 'react-icons/si';
 import { useCurrency } from "@/context/CurrencyContext";
 import { Service } from "@/types/service";
 import { useServices } from "@/components/Services";
+import SaveForLater from "./SaveForLater";
 
 const iconMap: { [key: string]: ReactElement } = {
   SiInstagram: <SiInstagram className="text-5xl relative z-10 group-hover:scale-110 transition-transform duration-300" />,
@@ -34,8 +35,17 @@ const FeaturedServices = ({ onCustomizeClick }: { onCustomizeClick: (service: Se
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
             {featuredServices.map((service, index) => (
                 <div key={service.id} className="stagger-item service-card relative h-full flex flex-col" style={{ animationDelay: `${index * 0.15}s` }}>
-                  <div className="absolute top-0 right-0 p-4"><div className="glass rounded-full px-3 py-1 text-xs font-bold text-primary border">{service.badge}</div></div>
-                  <div className="relative mb-4 text-center pt-4">{service.icon}</div>
+                  {/* Badge */}
+                  <div className="absolute top-4 right-4 z-20">
+                    <div className="glass rounded-full px-3 py-1 text-xs font-bold text-primary border">{service.badge}</div>
+                  </div>
+                  
+                  {/* Save for Later Button - repositioned to top-left */}
+                  <div className="absolute top-4 left-4 z-20">
+                    <SaveForLater service={service} />
+                  </div>
+                  
+                  <div className="relative mb-4 text-center pt-16">{service.icon}</div>
                   <div className="flex-grow p-4">
                     <h3 className="font-clash text-xl font-semibold text-primary mb-2">{service.title}</h3>
                     <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{service.description}</p>
@@ -45,7 +55,10 @@ const FeaturedServices = ({ onCustomizeClick }: { onCustomizeClick: (service: Se
                         <div className="flex items-baseline gap-2 mb-4"><span className="text-2xl font-bold text-primary font-clash">{getSymbol()}{convert(service.tiers[0].price)}</span><span className="text-sm text-muted-foreground">/ {service.tiers[0].quantity.toLocaleString()}</span></div>
                     ) : <div className="h-[36px] flex items-center text-muted-foreground">Not Available</div>}
                     <button onClick={() => onCustomizeClick(service)} disabled={!service.tiers || service.tiers.length === 0} className="w-full glass-button text-center group/btn relative overflow-hidden">
-                      <span className="relative z-10 flex items-center justify-center gap-2">Get Started<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" /></span>
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        <ShoppingCart className="w-4 h-4" />
+                        Add to Cart
+                      </span>
                     </button>
                   </div>
                 </div>

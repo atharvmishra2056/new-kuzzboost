@@ -71,13 +71,16 @@ const Footer = () => {
 
             {/* Contact Info */}
             <div className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>support@kuzzboost.com</span>
+              <div className="flex items-start gap-2">
+                <Mail className="w-4 h-4 mt-0.5" />
+                <div className="space-y-1">
+                  <div>daksh.kuzzboost@gmail.com</div>
+                  <div>atharv.kuzzboost@gmail.com</div>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                <span>24/7 Live Support</span>
+                <span>+91 73895 56886</span>
               </div>
             </div>
           </div>
