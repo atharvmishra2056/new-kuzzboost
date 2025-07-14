@@ -71,22 +71,24 @@ const ParticleField = () => {
         }
 
         // Draw particle
-        const alpha = 1 - particle.life / particle.maxLife;
-        const size = alpha * 3;
+        const alpha = Math.max(0, 1 - particle.life / particle.maxLife);
+        const size = Math.max(0.1, alpha * 3);
         
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
-        
-        // Create gradient for particle
-        const gradient = ctx.createRadialGradient(
-          particle.x, particle.y, 0,
-          particle.x, particle.y, size
-        );
-        gradient.addColorStop(0, `hsla(270, 60%, 75%, ${alpha})`);
-        gradient.addColorStop(1, `hsla(15, 80%, 75%, ${alpha * 0.3})`);
-        
-        ctx.fillStyle = gradient;
-        ctx.fill();
+        if (size > 0.1) {
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+          
+          // Create gradient for particle
+          const gradient = ctx.createRadialGradient(
+            particle.x, particle.y, 0,
+            particle.x, particle.y, size
+          );
+          gradient.addColorStop(0, `hsla(270, 60%, 75%, ${alpha})`);
+          gradient.addColorStop(1, `hsla(15, 80%, 75%, ${alpha * 0.3})`);
+          
+          ctx.fillStyle = gradient;
+          ctx.fill();
+        }
 
         return particle.life < particle.maxLife;
       });

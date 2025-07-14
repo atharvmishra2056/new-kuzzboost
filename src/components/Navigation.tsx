@@ -26,6 +26,14 @@ const Navigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
     }
   };
 
+  const handleCartClick = () => {
+    if (onCartClick) {
+      onCartClick();
+    } else {
+      navigate('/cart');
+    }
+  };
+
   const finalCartCount = cartItemCount ?? cartCount;
 
   return (
@@ -68,7 +76,7 @@ const Navigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
                   <Heart className="w-5 h-5" />
                 </Link>
                 <button
-                  onClick={onCartClick}
+                  onClick={handleCartClick}
                   className="relative p-2 rounded-full hover:bg-accent transition-colors"
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -179,7 +187,7 @@ const Navigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
                       </Link>
                       <button
                         onClick={() => {
-                          onCartClick?.();
+                          handleCartClick();
                           setIsMenuOpen(false);
                         }}
                         className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
