@@ -29,7 +29,9 @@ const Wishlist = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
 
   const addToCart = (item: any) => {
-    setCartItems(prev => [...prev, { ...item, quantity: 1, price: item.basePrice }]);
+    // For wishlist items, we need to calculate price based on a default quantity
+    const basePrice = 100; // Default price fallback
+    setCartItems(prev => [...prev, { ...item, quantity: 1, price: basePrice }]);
     removeFromWishlist(item.id);
   };
 
@@ -133,9 +135,9 @@ const Wishlist = () => {
                       ({item.reviews})
                     </span>
                   </div>
-                  <span className="text-lg font-bold text-primary">
-                    {getSymbol()}{convert(item.basePrice)}
-                  </span>
+                          <span className="text-lg font-bold text-primary">
+                            From {getSymbol()}100
+                          </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">

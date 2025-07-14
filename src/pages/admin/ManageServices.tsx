@@ -1,6 +1,5 @@
 import { useState, useEffect, ReactElement } from 'react';
-import { collection, getDocs, orderBy, query, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -79,18 +78,27 @@ const ManageServices = () => {
 
     const fetchServices = async () => {
         setLoading(true);
-        const servicesCollection = collection(db, "services");
-        const q = query(servicesCollection, orderBy("id"));
-        const querySnapshot = await getDocs(q);
-        const servicesData = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
+        try {
+            const { data: servicesData, error } = await supabase
+                .from('services')
+                .select('*')
+                .order('id');
+                
+            if (error) throw error;
+            
+            const services = servicesData?.map(data => ({
                 ...data,
-                icon: iconMap[data.iconName],
-            } as Service;
-        });
-        setServices(servicesData);
-        setLoading(false);
+                icon: iconMap[data.icon_name],
+                iconName: data.icon_name,
+                tiers: [], // Will need to fetch separately if needed
+            })) || [];
+            
+            setServices(services);
+        } catch (error) {
+            console.error("Error fetching services:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -124,15 +132,23 @@ const ManageServices = () => {
                 serviceId = latestService.id + 1;
             }
 
-            const docRef = doc(db, "services", serviceId.toString());
-
-            // Convert features from array of objects back to array of strings for Firestore
             const dataToSave = {
-                ...data,
+                id: serviceId,
+                title: data.title,
+                platform: data.platform,
+                icon_name: data.iconName,
+                badge: data.badge,
+                description: data.description,
+                rating: data.rating,
+                reviews: data.reviews,
                 features: data.features.map(f => f.value),
             };
 
-            await setDoc(docRef, { id: serviceId, ...dataToSave });
+            const { error } = await supabase
+                .from('services')
+                .upsert(dataToSave);
+                
+            if (error) throw error;
 
             setIsDialogOpen(false);
             await fetchServices();
@@ -144,7 +160,12 @@ const ManageServices = () => {
     const handleDelete = async (serviceId: number) => {
         if (window.confirm("Are you sure you want to delete this service?")) {
             try {
-                await deleteDoc(doc(db, "services", serviceId.toString()));
+                const { error } = await supabase
+                    .from('services')
+                    .delete()
+                    .eq('id', serviceId);
+                    
+                if (error) throw error;
                 await fetchServices();
             } catch (error) {
                 console.error("Error deleting service: ", error);

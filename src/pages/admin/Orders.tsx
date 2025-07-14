@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
-import { db } from "../../firebase";
+import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
@@ -10,7 +9,7 @@ interface Order {
     userEmail: string;
     totalAmount: number;
     status: string;
-    createdAt: Timestamp;
+    createdAt: string;
     items: any[];
 }
 
@@ -22,14 +21,24 @@ const AdminOrders = () => {
         const fetchOrders = async () => {
             setLoading(true);
             try {
-                const ordersCollection = collection(db, "orders");
-                const q = query(ordersCollection, orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                const ordersData = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                } as Order));
-                setOrders(ordersData);
+                const { data: ordersData, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                    
+                if (error) throw error;
+                
+                const orders = ordersData?.map(order => ({
+                    id: order.id,
+                    userId: order.user_id,
+                    userEmail: order.user_email,
+                    totalAmount: order.total_amount,
+                    status: order.status,
+                    createdAt: order.created_at,
+                    items: Array.isArray(order.items) ? order.items : []
+                })) || [];
+                
+                setOrders(orders);
             } catch (error) {
                 console.error("Error fetching orders: ", error);
             }
@@ -60,7 +69,7 @@ const AdminOrders = () => {
                             <TableRow key={order.id}>
                                 <TableCell className="font-mono text-xs">{order.id}</TableCell>
                                 <TableCell>{order.userEmail}</TableCell>
-                                <TableCell>{order.createdAt.toDate().toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                                 <TableCell>₹{order.totalAmount.toFixed(2)}</TableCell>
                                 <TableCell>
                                     <Badge

@@ -14,8 +14,7 @@ import { usePersonalization } from "@/hooks/usePersonalization";
 import { motion } from "framer-motion";
 import { useCurrency } from "../context/CurrencyContext";
 import { useAuth } from "../context/AuthContext";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { supabase } from '@/integrations/supabase/client';
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -73,19 +72,29 @@ const ServiceDetail = () => {
       if (!id) return;
       
       try {
-        const q = query(collection(db, "services"), where("id", "==", parseInt(id)));
-        const snapshot = await getDocs(q);
+        const { data: serviceData, error } = await supabase
+          .from('services')
+          .select('*, service_tiers(quantity, price)')
+          .eq('id', parseInt(id))
+          .single();
+          
+        if (error) throw error;
         
-        if (!snapshot.empty) {
-          const serviceData = snapshot.docs[0].data() as Service;
-          setService(serviceData);
+        if (serviceData) {
+          const service = {
+            ...serviceData,
+            iconName: serviceData.icon_name,
+            tiers: serviceData.service_tiers || []
+          } as Service;
+          
+          setService(service);
           
           // Track for personalization and recently viewed
-          addToRecentlyViewed(serviceData);
-          trackServiceView(serviceData);
+          addToRecentlyViewed(service);
+          trackServiceView(service);
           
-          if (serviceData.tiers && serviceData.tiers.length > 0) {
-            setQuantity(serviceData.tiers[0].quantity);
+          if (service.tiers && service.tiers.length > 0) {
+            setQuantity(service.tiers[0].quantity);
           }
         }
       } catch (error) {

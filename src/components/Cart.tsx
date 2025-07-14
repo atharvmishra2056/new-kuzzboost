@@ -9,6 +9,10 @@ import { useCurrency } from "../context/CurrencyContext";
 interface CartProps {
   isOpen: boolean;
   onClose: () => void;
+  items: any[];
+  onUpdateQuantity: (id: string, quantity: number) => void;
+  onRemoveItem: (id: string) => void;
+  onClearCart: () => void;
 }
 
 const Cart = ({ isOpen, onClose }: CartProps) => {

@@ -8,7 +8,8 @@ import Testimonials from "../components/Testimonials";
 import Footer from "../components/Footer";
 import ParticleField from "../components/ParticleField";
 import Cart from "../components/Cart";
-import { ServiceCalculatorModal, Service } from "./Services"; // Import modal and Service type
+import { ServiceCalculatorModal } from "./Services";
+import { Service } from "@/types/service";
 import { Dialog } from "@/components/ui/dialog";
 import RecentlyViewed from "../components/RecentlyViewed";
 import PersonalizedRecommendations from "../components/PersonalizedRecommendations";

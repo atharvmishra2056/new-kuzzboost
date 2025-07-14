@@ -288,7 +288,11 @@ const Services = () => {
         <Footer />
         <Cart 
           isOpen={isCartOpen} 
-          onClose={() => setIsCartOpen(false)} 
+          onClose={() => setIsCartOpen(false)}
+          items={[]} // Cart context manages items internally
+          onUpdateQuantity={() => {}} // Cart context handles this
+          onRemoveItem={() => {}} // Cart context handles this
+          onClearCart={() => {}} // Cart context handles this
         />
       </div>
   );

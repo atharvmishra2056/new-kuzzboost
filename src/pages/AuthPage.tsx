@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,14 @@ const AuthPage = () => {
         e.preventDefault();
         setError('');
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/`
+                }
+            });
+            if (error) throw error;
             navigate('/'); // Redirect to home on successful signup
         } catch (err: any) {
             setError(err.message);
@@ -28,7 +34,11 @@ const AuthPage = () => {
         e.preventDefault();
         setError('');
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+            if (error) throw error;
             navigate('/'); // Redirect to home on successful signin
         } catch (err: any) {
             setError(err.message);

@@ -9,8 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { supabase } from '@/integrations/supabase/client';
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import jsPDF from 'jspdf';
@@ -63,28 +62,32 @@ const OrderDetails = () => {
       if (!orderId) return;
       
       try {
-        const q = query(
-          collection(db, "orders"),
-          where("orderId", "==", orderId),
-          where("userId", "==", currentUser.id)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          const orderData = {
-            id: querySnapshot.docs[0].id,
-            ...querySnapshot.docs[0].data()
-          } as Order;
+        const { data: orderData, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('order_id', orderId)
+          .eq('user_id', currentUser.id)
+          .single();
           
+        if (error) throw error;
+        
+        if (orderData) {
           // Add mock tracking info for demo
-          if (!orderData.trackingInfo) {
-            orderData.trackingInfo = [
+          const order = {
+            id: orderData.id,
+            orderId: orderData.order_id,
+            items: orderData.items,
+            total: orderData.total_amount,
+            customerInfo: orderData.customer_info,
+            transactionId: orderData.transaction_id,
+            status: orderData.status,
+            createdAt: { toDate: () => new Date(orderData.created_at) },
+            trackingInfo: [
               {
                 stage: "Order Confirmed",
                 progress: 25,
                 details: "Your order has been confirmed and is being processed",
-                timestamp: new Date(orderData.createdAt?.toDate?.() || Date.now())
+                timestamp: new Date(orderData.created_at)
               },
               {
                 stage: "Processing",
@@ -104,10 +107,10 @@ const OrderDetails = () => {
                 details: "Order completed successfully",
                 timestamp: new Date(Date.now() + 1000 * 60 * 60 * 48) // 2 days later
               }
-            ];
-          }
+            ]
+          } as Order;
           
-          setOrder(orderData);
+          setOrder(order);
         }
       } catch (error) {
         console.error("Error fetching order:", error);
