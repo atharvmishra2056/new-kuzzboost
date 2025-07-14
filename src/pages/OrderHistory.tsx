@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { orderService, OrderData } from "../services/orderService";
+import { supabase } from "@/integrations/supabase/client";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import jsPDF from 'jspdf';
@@ -50,8 +50,25 @@ const OrderHistory = () => {
 
     const fetchOrders = async () => {
       try {
-        const ordersData = orderService.getUserOrders(currentUser.id);
-        setOrders(ordersData);
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const formattedOrders = data?.map(order => ({
+          orderId: order.order_id,
+          items: Array.isArray(order.items) ? order.items : [],
+          total: order.total_amount,
+          customerInfo: order.customer_info,
+          transactionId: order.transaction_id || '',
+          status: order.status,
+          createdAt: { toDate: () => new Date(order.created_at) }
+        })) || [];
+
+        setOrders(formattedOrders);
       } catch (error) {
         console.error("Error fetching orders:", error);
       } finally {

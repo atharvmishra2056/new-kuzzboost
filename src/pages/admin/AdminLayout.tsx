@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, ShoppingCart, Settings, List } from 'lucide-react'; // Added List icon
+import { LayoutDashboard, ShoppingCart, Settings, List, BarChart3, Users } from 'lucide-react';
 
 const AdminLayout = () => {
     return (
@@ -32,7 +32,7 @@ const AdminLayout = () => {
                         Orders
                     </NavLink>
                     <NavLink
-                        to="/admin/services" // New link
+                        to="/admin/services"
                         className={({ isActive }) =>
                             `flex items-center gap-3 p-3 rounded-lg transition-colors ${
                                 isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'
@@ -41,6 +41,28 @@ const AdminLayout = () => {
                     >
                         <List className="w-5 h-5" />
                         Services
+                    </NavLink>
+                    <NavLink
+                        to="/admin/users"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                                isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'
+                            }`
+                        }
+                    >
+                        <Users className="w-5 h-5" />
+                        Users
+                    </NavLink>
+                    <NavLink
+                        to="/admin/analytics"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                                isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'
+                            }`
+                        }
+                    >
+                        <BarChart3 className="w-5 h-5" />
+                        Analytics
                     </NavLink>
                 </nav>
             </aside>

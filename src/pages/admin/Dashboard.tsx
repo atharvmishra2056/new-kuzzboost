@@ -1,5 +1,10 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, ShoppingCart, Activity } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { DollarSign, Users, ShoppingCart, Activity, TrendingUp, Eye, Star, Package } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { motion } from 'framer-motion';
 
 const Dashboard = () => {
     return (

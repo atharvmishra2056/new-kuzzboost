@@ -22,8 +22,11 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/Orders";
 import ManageServices from './pages/admin/ManageServices';
+import Analytics from './pages/admin/Analytics';
+import UserManagement from './pages/admin/UserManagement';
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AIChatbot from "./components/AIChatbot";
 
 
 const queryClient = new QueryClient();
@@ -37,6 +40,7 @@ const App = () => (
               <Toaster />
               <Sonner />
             <BrowserRouter>
+              <AIChatbot />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<AuthPage />} />
@@ -65,6 +69,8 @@ const App = () => (
                     <Route index element={<Dashboard />} />
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="services" element={<ManageServices />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="analytics" element={<Analytics />} />
                   </Route>
                 </Route>
 
