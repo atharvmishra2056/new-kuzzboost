@@ -8,7 +8,8 @@ import About from "./pages/About";
 import Services from "./pages/Services";
 import NotFound from "./pages/NotFound";
 import { CurrencyProvider } from "./context/CurrencyContext";
-import { AuthProvider } from "./context/AuthContext"; // Import AuthProvider
+import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import AuthPage from "./pages/AuthPage";
 import OrderHistory from "./pages/OrderHistory";
 import Checkout from "./pages/Checkout";
@@ -31,8 +32,9 @@ const App = () => (
       <TooltipProvider>
         <CurrencyProvider>
           <AuthProvider>
-            <Toaster />
-            <Sonner />
+            <CartProvider>
+              <Toaster />
+              <Sonner />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -67,6 +69,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+            </CartProvider>
           </AuthProvider>
         </CurrencyProvider>
       </TooltipProvider>

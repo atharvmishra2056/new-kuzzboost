@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Bookmark, BookmarkCheck, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWishlist } from "@/hooks/useWishlist";
-import { Service } from "@/pages/Services";
+import { Service } from "@/types/service";
 import { useToast } from "@/hooks/use-toast";
 
 interface SaveForLaterProps {

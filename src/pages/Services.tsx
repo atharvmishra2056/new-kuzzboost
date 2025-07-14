@@ -2,36 +2,18 @@ import { useState, useEffect, ReactElement } from "react";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import Cart from "../components/Cart";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Filter, Star, Calculator, Sparkles, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Filter, Star, Calculator, Sparkles, Users, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, Variants } from "framer-motion";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from "react-icons/si";
 import { useCurrency } from "../context/CurrencyContext";
+import { useCart } from "../context/CartContext";
 import { Badge } from "@/components/ui/badge";
 import SaveForLater from "@/components/SaveForLater";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../firebase";
+import { useServices } from "@/components/Services";
 import { Button } from "@/components/ui/button";
-
-// --- Interfaces (Exported for reuse in other components) ---
-export interface ServiceTier {
-  quantity: number;
-  price: number;
-}
-export interface Service {
-  id: number;
-  title: string;
-  platform: string;
-  icon?: ReactElement;
-  iconName: string;
-  tiers?: ServiceTier[]; // IMPORTANT: Made tiers optional to handle bad data
-  rating: number;
-  reviews: number;
-  features: string[];
-  description: string;
-  badge: string;
-}
+import { Service } from "@/types/service";
 
 // --- Data & Mappings ---
 const platforms = [
@@ -46,20 +28,8 @@ const platforms = [
   { name: "Snapchat", icon: <SiSnapchat className="w-5 h-5" />, filter: "snapchat" },
 ];
 
-const iconMap: { [key: string]: ReactElement } = {
-  SiInstagram: <SiInstagram className="w-8 h-8 text-[#E4405F]" />,
-  SiYoutube: <SiYoutube className="w-8 h-8 text-[#FF0000]" />,
-  SiX: <SiX className="w-8 h-8 text-[#000000]" />,
-  SiDiscord: <SiDiscord className="w-8 h-8 text-[#7289DA]" />,
-  SiTwitch: <SiTwitch className="w-8 h-8 text-[#9146FF]" />,
-  SiSpotify: <SiSpotify className="w-8 h-8 text-[#1DB954]" />,
-  SiWhatsapp: <SiWhatsapp className="w-8 h-8 text-[#25D366]" />,
-  SiSnapchat: <SiSnapchat className="w-8 h-8 text-[#FFFC00]" />,
-};
-
-// --- Reusable Modal Component (Exported and Safe) ---
+// --- Reusable Modal Component ---
 export const ServiceCalculatorModal = ({ service, onAddToCart }: { service: Service, onAddToCart: (service: Service, quantity: number, price: number) => void }) => {
-  // CRITICAL FIX: Safety check to prevent crash if tiers are missing or empty.
   if (!service?.tiers || service.tiers.length === 0) {
     return (
         <DialogContent>
@@ -116,7 +86,10 @@ export const ServiceCalculatorModal = ({ service, onAddToCart }: { service: Serv
             <p className="text-muted-foreground">Total Price</p>
             <p className="text-4xl font-bold font-clash text-primary">{getSymbol()}{convert(price)}</p>
           </div>
-          <button onClick={() => onAddToCart(service, quantity, price)} className="w-full glass-button group"><Sparkles className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />Add to Cart</button>
+          <button onClick={() => onAddToCart(service, quantity, price)} className="w-full glass-button group">
+            <ShoppingCart className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" />
+            Add to Cart
+          </button>
         </div>
       </DialogContent>
   );
@@ -126,45 +99,16 @@ export const ServiceCalculatorModal = ({ service, onAddToCart }: { service: Serv
 const Services = () => {
   const navigate = useNavigate();
   const { getSymbol, convert } = useCurrency();
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { services, loading } = useServices();
+  const { addToCart, cartCount } = useCart();
   const [selectedPlatform, setSelectedPlatform] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("popular");
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<any[]>([]);
   const [selectedServiceForCalc, setSelectedServiceForCalc] = useState<Service | null>(null);
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      setLoading(true);
-      try {
-        const q = query(collection(db, "services"), orderBy("id"));
-        const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({
-          ...(doc.data() as Omit<Service, 'icon'>),
-          icon: iconMap[doc.data().iconName],
-          tiers: doc.data().tiers || [] // CRITICAL FIX: Ensure tiers is always an array
-        }));
-        setServices(data);
-      } catch (error) { console.error("Error fetching services: ", error); }
-      setLoading(false);
-    };
-    fetchServices();
-  }, []);
-
-  const addToCart = (service: Service, quantity: number, price: number) => {
-    const cartItem = {
-      id: service.id,
-      title: service.title,
-      platform: service.platform,
-      icon: service.icon,
-      price: price,
-      quantity: 1, // Always 1 item, regardless of service quantity
-      maxQuantity: 10,
-      serviceQuantity: quantity // Store the actual service quantity separately
-    };
-    setCartItems(prev => [...prev, cartItem]);
+  const handleAddToCart = async (service: Service, quantity: number, price: number) => {
+    await addToCart(service, quantity, price);
     setSelectedServiceForCalc(null);
     setIsCartOpen(true);
   };
@@ -172,7 +116,6 @@ const Services = () => {
   const filteredServices = services
       .filter(s => (selectedPlatform === "all" || s.platform === selectedPlatform) && s.title.toLowerCase().includes(searchTerm.toLowerCase()))
       .sort((a, b) => {
-        // CRITICAL FIX: Safe access to price for sorting
         const priceA = a.tiers?.[0]?.price ?? 0;
         const priceB = b.tiers?.[0]?.price ?? 0;
         switch (sortBy) {
@@ -188,10 +131,13 @@ const Services = () => {
 
   return (
       <div className="min-h-screen bg-gradient-hero">
-        <Navigation cartItemCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
+        <Navigation cartItemCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
         <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12"><h1 className="font-clash text-5xl md:text-7xl font-bold text-primary mb-6">Our Services</h1><p className="text-xl text-muted-foreground max-w-3xl mx-auto">Premium social media growth services to elevate your online presence.</p></div>
+            <div className="text-center mb-12">
+              <h1 className="font-clash text-5xl md:text-7xl font-bold text-primary mb-6">Our Services</h1>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">Premium social media growth services to elevate your online presence.</p>
+            </div>
             {/* Mobile-friendly filters */}
             <div className="space-y-4 mb-8">
               {/* Platform filters - horizontal scroll on mobile */}
@@ -323,18 +269,18 @@ const Services = () => {
                                 disabled={!service.tiers || service.tiers.length === 0}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigate(`/service/${service.id}`);
+                                  setSelectedServiceForCalc(service);
                                 }}
                               >
-                                <Sparkles className="w-4 h-4 mr-2 group-hover/btn:rotate-12 transition-transform duration-300" />
-                                View Details
+                                <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform duration-300" />
+                                Add to Cart
                               </Button>
                             </div>
                           </div>
                         </motion.div>
                     ))}
                   </motion.div>
-                  {selectedServiceForCalc && (<ServiceCalculatorModal service={selectedServiceForCalc} onAddToCart={addToCart} />)}
+                  {selectedServiceForCalc && (<ServiceCalculatorModal service={selectedServiceForCalc} onAddToCart={handleAddToCart} />)}
                 </Dialog>
             )}
           </div>
@@ -343,16 +289,6 @@ const Services = () => {
         <Cart 
           isOpen={isCartOpen} 
           onClose={() => setIsCartOpen(false)} 
-          items={cartItems} 
-          onUpdateQuantity={(id, newQuantity) => {
-            setCartItems(prev => prev.map(item => 
-              item.id === id ? { ...item, quantity: newQuantity } : item
-            ));
-          }}
-          onRemoveItem={(id) => {
-            setCartItems(prev => prev.filter(item => item.id !== id));
-          }}
-          onClearCart={() => setCartItems([])} 
         />
       </div>
   );

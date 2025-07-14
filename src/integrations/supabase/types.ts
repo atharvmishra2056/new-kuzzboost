@@ -14,7 +14,294 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      carts: {
+        Row: {
+          created_at: string
+          id: string
+          price: number
+          quantity: number
+          service_id: number | null
+          service_quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price: number
+          quantity?: number
+          service_id?: number | null
+          service_quantity: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: number
+          quantity?: number
+          service_id?: number | null
+          service_quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_info: Json
+          estimated_delivery: string | null
+          id: string
+          items: Json
+          order_id: string
+          status: string
+          total_amount: number
+          transaction_id: string | null
+          updated_at: string
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_info: Json
+          estimated_delivery?: string | null
+          id?: string
+          items: Json
+          order_id: string
+          status?: string
+          total_amount: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_info?: Json
+          estimated_delivery?: string | null
+          id?: string
+          items?: Json
+          order_id?: string
+          status?: string
+          total_amount?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      public_purchases: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          service_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          service_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          service_name?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          order_id: string | null
+          rating: number
+          service_id: number | null
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating: number
+          service_id?: number | null
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating?: number
+          service_id?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_tiers: {
+        Row: {
+          created_at: string
+          id: string
+          price: number
+          quantity: number
+          service_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price: number
+          quantity: number
+          service_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: number
+          quantity?: number
+          service_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_tiers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          badge: string | null
+          created_at: string
+          description: string
+          features: string[] | null
+          icon_name: string
+          id: number
+          is_active: boolean | null
+          platform: string
+          rating: number | null
+          reviews: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          created_at?: string
+          description: string
+          features?: string[] | null
+          icon_name: string
+          id?: number
+          is_active?: boolean | null
+          platform: string
+          rating?: number | null
+          reviews?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          created_at?: string
+          description?: string
+          features?: string[] | null
+          icon_name?: string
+          id?: number
+          is_active?: boolean | null
+          platform?: string
+          rating?: number | null
+          reviews?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      wishlists: {
+        Row: {
+          created_at: string
+          id: string
+          service_id: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          service_id?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          service_id?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlists_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
