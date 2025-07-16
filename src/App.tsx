@@ -1,3 +1,5 @@
+// src/App.tsx
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,8 +20,9 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 import ServiceDetail from "./pages/ServiceDetail";
 import OrderDetails from "./pages/OrderDetails";
 import Wishlist from "./pages/Wishlist";
+import Account from "./pages/Account";
+import AccountSettings from "./pages/AccountSettings"; // Import the new page
 import AdminLayout from "./pages/admin/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
 import AdminOrders from "./pages/admin/Orders";
 import ManageServices from './pages/admin/ManageServices';
 import Analytics from './pages/admin/Analytics';
@@ -41,46 +44,46 @@ const App = () => (
             <CartProvider>
               <Toaster />
               <Sonner />
-            <BrowserRouter>
-              <CursorFollower />
-              <AIChatbot />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/about" element={<About />} />
+              <BrowserRouter>
+                <CursorFollower />
+                <AIChatbot />
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/about" element={<About />} />
 
-                {/* Services route wrapped with ErrorBoundary */}
-                <Route
-                    path="/services"
-                    element={
-                      <ErrorBoundary>
-                        <Services />
-                      </ErrorBoundary>
-                    }
-                />
+                  <Route
+                      path="/services"
+                      element={
+                        <ErrorBoundary>
+                          <Services />
+                        </ErrorBoundary>
+                      }
+                  />
 
-                <Route path="/order-history" element={<OrderHistory />} />
-                <Route path="/cart" element={<ViewCart />} />
-                <Route path="/checkout/review" element={<OrderReview />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/service/:id" element={<ServiceDetail />} />
-                <Route path="/order-details/:orderId" element={<OrderDetails />} />
-                <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/order-history" element={<OrderHistory />} />
+                  <Route path="/cart" element={<ViewCart />} />
+                  <Route path="/checkout/review" element={<OrderReview />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                  <Route path="/service/:id" element={<ServiceDetail />} />
+                  <Route path="/order-details/:orderId" element={<OrderDetails />} />
+                  <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/account-settings" element={<AccountSettings />} /> {/* Add this new route */}
 
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<Dashboard />} />
-                    <Route path="orders" element={<AdminOrders />} />
-                    <Route path="services" element={<ManageServices />} />
-                    <Route path="users" element={<UserManagement />} />
-                    <Route path="analytics" element={<Analytics />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<Analytics />} />
+                      <Route path="orders" element={<AdminOrders />} />
+                      <Route path="services" element={<ManageServices />} />
+                      <Route path="users" element={<UserManagement />} />
+                    </Route>
                   </Route>
-                </Route>
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
             </CartProvider>
           </AuthProvider>
         </CurrencyProvider>

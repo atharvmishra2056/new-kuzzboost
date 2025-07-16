@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "kuzzboost-project"
-  }
+    "default": "kuzzboost",
+    "kuzzboost": "kuzzboost"
+  },
+  "targets": {},
+  "etags": {}
 }

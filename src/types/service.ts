@@ -21,12 +21,19 @@ export interface Service {
   isActive?: boolean;
 }
 
+export interface TrackingInfo {
+  status: string;
+  timestamp: string;
+  description: string;
+}
+
+// This is the interface we are fixing
 export interface Order {
   id: string;
-  orderId: string;
-  userId: string;
-  userEmail: string;
-  customerInfo: {
+  order_id: string;
+  user_id: string;
+  user_email: string;
+  customer_info: {
     fullName: string;
     email: string;
     phone: string;
@@ -35,14 +42,16 @@ export interface Order {
     id: number;
     title: string;
     platform: string;
+    iconName: string; // This was the missing property
     quantity: number;
-    serviceQuantity: number;
+    service_quantity: number;
     price: number;
   }>;
-  totalAmount: number;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
-  transactionId?: string;
-  estimatedDelivery?: string;
-  createdAt: string;
-  updatedAt: string;
+  total_amount: number;
+  status: 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';
+  transaction_id?: string;
+  payment_verified: boolean;
+  tracking_info: TrackingInfo[];
+  created_at: string;
+  updated_at: string;
 }

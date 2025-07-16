@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, ShoppingCart, Settings, List, BarChart3, Users } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, List, Users } from 'lucide-react';
 
 const AdminLayout = () => {
     return (
@@ -52,17 +52,6 @@ const AdminLayout = () => {
                     >
                         <Users className="w-5 h-5" />
                         Users
-                    </NavLink>
-                    <NavLink
-                        to="/admin/analytics"
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                                isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'
-                            }`
-                        }
-                    >
-                        <BarChart3 className="w-5 h-5" />
-                        Analytics
                     </NavLink>
                 </nav>
             </aside>

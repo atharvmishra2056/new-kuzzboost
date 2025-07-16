@@ -1,26 +1,91 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, writeBatch } from "firebase/firestore";
-import {SiDiscord, SiInstagram, SiSnapchat, SiSpotify, SiTwitch, SiWhatsapp, SiX, SiYoutube} from "react-icons/si";
+import { createClient } from '@supabase/supabase-js';
 
-// IMPORTANT: Paste your actual firebaseConfig here for this script to work.
-// This is a one-time, local script, so it's okay for now.
-const firebaseConfig = {
-    apiKey: "AIzaSyD7o9wGYTpmQKJDPYj891JOC6szPapq_oQ",
-    authDomain: "kuzzboost-project.firebaseapp.com",
-    projectId: "kuzzboost-project",
-    storageBucket: "kuzzboost-project.firebasestorage.app",
-    messagingSenderId: "374053641812",
-    appId: "1:374053641812:web:a4d175b430161dc923d7c1",
-    measurementId: "G-4LP2BSRRYK"
-};
+// IMPORTANT: Replace with your actual Supabase credentials if they are different.
+const supabaseUrl = 'https://jglwfatcrmyvslluobie.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnbHdmYXRjcm15dnNsbHVvYmllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1MDA2OTcsImV4cCI6MjA2ODA3NjY5N30.txByRgVVo_vIjbyKOWCuR5f6laPc9L5pQlwfCaSwmHg';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-
-const servicesData= [
+const servicesData = [
+    // WhatsApp Services
     {
         id: 1,
+        title: "Whatsapp Channel Members [Real Users]",
+        platform: "whatsapp",
+        iconName: "SiWhatsapp",
+        tiers: [{ quantity: 1000, price: 1050 }],
+        rating: 4.8,
+        reviews: 312,
+        features: ["Real Active Users", "Targeted Audience", "Fast Growth"],
+        description: "Grow your WhatsApp channel with genuine members.",
+        badge: "Premium"
+    },
+    {
+        id: 2,
+        title: "Whatsapp Channel Members [Non Drop]",
+        platform: "whatsapp",
+        iconName: "SiWhatsapp",
+        tiers: [{ quantity: 1000, price: 1650 }],
+        rating: 4.9,
+        reviews: 543,
+        features: ["Non-Drop Guarantee", "Permanent Members", "High-Quality"],
+        description: "Get permanent, non-drop members for your channel.",
+        badge: "Lifetime"
+    },
+    {
+        id: 3,
+        title: "Whatsapp Contact Scraper",
+        platform: "whatsapp",
+        iconName: "SiWhatsapp",
+        tiers: [{ quantity: 1000, price: 1350 }],
+        rating: 4.5,
+        reviews: 123,
+        features: ["Scrape Group Links", "1k/day Speed", "24-48h Start"],
+        description: "Scrape contacts from WhatsApp groups.",
+        badge: "Utility"
+    },
+    {
+        id: 4,
+        title: "Whatsapp Channel Followers",
+        platform: "whatsapp",
+        iconName: "SiWhatsapp",
+        tiers: [{ quantity: 1000, price: 1650 }],
+        rating: 4.7,
+        reviews: 234,
+        features: ["1k-2k/day Speed", "Non-Drop", "Real Followers"],
+        description: "Increase your WhatsApp channel followers.",
+        badge: "Growth"
+    },
+    {
+        id: 5,
+        title: "WhatsApp Emoji Reactions (Random)",
+        platform: "whatsapp",
+        iconName: "SiWhatsapp",
+        tiers: [{ quantity: 1000, price: 275 }],
+        rating: 4.6,
+        reviews: 189,
+        features: ["Random Emojis", "Boost Engagement", "Instant Delivery"],
+        description: "Add random emoji reactions to your WhatsApp messages.",
+        badge: "Engagement"
+    },
+    {
+        id: 6,
+        title: "WhatsApp Emoji Reactions (Specific)",
+        platform: "whatsapp",
+        iconName: "SiWhatsapp",
+        tiers: [{ quantity: 1000, price: 250 }],
+        rating: 4.6,
+        reviews: 189,
+        features: ["Specific Emoji", "Boost Engagement", "Instant Delivery"],
+        description: "Add specific emoji reactions to your WhatsApp messages.",
+        badge: "Engagement"
+    },
+
+    // Instagram Services
+    {
+        id: 7,
         title: "Instagram Followers [With Auto Refill!]",
         platform: "instagram",
-        icon: <SiInstagram className="w-8 h-8 text-[#E4405F]" />,
+        iconName: "SiInstagram",
         tiers: [
             { quantity: 10, price: 4 },
             { quantity: 100, price: 29 },
@@ -35,10 +100,10 @@ const servicesData= [
         badge: "Auto Refill"
     },
     {
-        id: 2,
+        id: 8,
         title: "Instagram Likes",
         platform: "instagram",
-        icon: <SiInstagram className="w-8 h-8 text-[#E4405F]" />,
+        iconName: "SiInstagram",
         tiers: [
             { quantity: 500, price: 25 },
             { quantity: 1000, price: 45 },
@@ -52,10 +117,10 @@ const servicesData= [
         badge: "Best Value"
     },
     {
-        id: 3,
+        id: 9,
         title: "Instagram Views",
         platform: "instagram",
-        icon: <SiInstagram className="w-8 h-8 text-[#E4405F]" />,
+        iconName: "SiInstagram",
         tiers: [
             { quantity: 100000, price: 60 },
             { quantity: 200000, price: 110 }
@@ -67,10 +132,10 @@ const servicesData= [
         badge: "Viral Boost"
     },
     {
-        id: 4,
+        id: 10,
         title: "Instagram Channel Members",
         platform: "instagram",
-        icon: <SiInstagram className="w-8 h-8 text-[#E4405F]" />,
+        iconName: "SiInstagram",
         tiers: [{ quantity: 1000, price: 100 }],
         rating: 4.6,
         reviews: 432,
@@ -78,74 +143,13 @@ const servicesData= [
         description: "Expand your Instagram channel with real members.",
         badge: "New"
     },
+
+    // Discord Services
     {
-        id: 5,
-        title: "Whatsapp Channel Members [Real Users]",
-        platform: "whatsapp",
-        icon: <SiWhatsapp className="w-8 h-8 text-[#25D366]" />,
-        tiers: [{ quantity: 1000, price: 1050 }],
-        rating: 4.8,
-        reviews: 312,
-        features: ["Real Active Users", "Targeted Audience", "Fast Growth"],
-        description: "Grow your WhatsApp channel with genuine members.",
-        badge: "Premium"
-    },
-    {
-        id: 6,
-        title: "Whatsapp Channel Members [Non Drop]",
-        platform: "whatsapp",
-        icon: <SiWhatsapp className="w-8 h-8 text-[#25D366]" />,
-        tiers: [{ quantity: 1000, price: 1650 }],
-        rating: 4.9,
-        reviews: 543,
-        features: ["Non-Drop Guarantee", "Permanent Members", "High-Quality"],
-        description: "Get permanent, non-drop members for your channel.",
-        badge: "Lifetime"
-    },
-    {
-        id: 7,
-        title: "Whatsapp Contact Scraper",
-        platform: "whatsapp",
-        icon: <SiWhatsapp className="w-8 h-8 text-[#25D366]" />,
-        tiers: [{ quantity: 1000, price: 1350 }],
-        rating: 4.5,
-        reviews: 123,
-        features: ["Scrape Group Links", "1k/day Speed", "24-48h Start"],
-        description: "Scrape contacts from WhatsApp groups.",
-        badge: "Utility"
-    },
-    {
-        id: 8,
-        title: "Whatsapp Channel Followers",
-        platform: "whatsapp",
-        icon: <SiWhatsapp className="w-8 h-8 text-[#25D366]" />,
-        tiers: [{ quantity: 1000, price: 1650 }],
-        rating: 4.7,
-        reviews: 234,
-        features: ["1k-2k/day Speed", "Non-Drop", "Real Followers"],
-        description: "Increase your WhatsApp channel followers.",
-        badge: "Growth"
-    },
-    {
-        id: 9,
-        title: "WhatsApp Emoji Reactions",
-        platform: "whatsapp",
-        icon: <SiWhatsapp className="w-8 h-8 text-[#25D366]" />,
-        tiers: [
-            { quantity: 1000, price: 275 },
-            { quantity: 1000, price: 250 }
-        ],
-        rating: 4.6,
-        reviews: 189,
-        features: ["Random or Specific Emoji", "Boost Engagement", "Instant Delivery"],
-        description: "Add emoji reactions to your WhatsApp messages.",
-        badge: "Engagement"
-    },
-    {
-        id: 10,
+        id: 11,
         title: "Discord 30 Days Online Members",
         platform: "discord",
-        icon: <SiDiscord className="w-8 h-8 text-[#7289DA]" />,
+        iconName: "SiDiscord",
         tiers: [{ quantity: 1000, price: 300 }],
         rating: 4.8,
         reviews: 445,
@@ -154,10 +158,10 @@ const servicesData= [
         badge: "Online"
     },
     {
-        id: 11,
+        id: 12,
         title: "Discord Permanent Offline Members",
         platform: "discord",
-        icon: <SiDiscord className="w-8 h-8 text-[#7289DA]" />,
+        iconName: "SiDiscord",
         tiers: [{ quantity: 1000, price: 900 }],
         rating: 4.9,
         reviews: 632,
@@ -165,11 +169,13 @@ const servicesData= [
         description: "Get permanent offline members for your Discord server.",
         badge: "Lifetime"
     },
+
+    // YouTube Services
     {
-        id: 12,
+        id: 13,
         title: "YouTube Subscribers [1 Year Refill]",
         platform: "youtube",
-        icon: <SiYoutube className="w-8 h-8 text-[#FF0000]" />,
+        iconName: "SiYoutube",
         tiers: [
             { quantity: 1000, price: 600 },
             { quantity: 2000, price: 1150 },
@@ -184,10 +190,10 @@ const servicesData= [
         badge: "Refill"
     },
     {
-        id: 13,
+        id: 14,
         title: "YouTube Subscribers [No Refill]",
         platform: "youtube",
-        icon: <SiYoutube className="w-8 h-8 text-[#FF0000]" />,
+        iconName: "SiYoutube",
         tiers: [
             { quantity: 1000, price: 150 },
             { quantity: 2000, price: 290 },
@@ -202,10 +208,10 @@ const servicesData= [
         badge: "Budget"
     },
     {
-        id: 14,
+        id: 15,
         title: "YouTube Likes",
         platform: "youtube",
-        icon: <SiYoutube className="w-8 h-8 text-[#FF0000]" />,
+        iconName: "SiYoutube",
         tiers: [
             { quantity: 1000, price: 125 },
             { quantity: 2000, price: 240 },
@@ -219,10 +225,10 @@ const servicesData= [
         badge: "Ranking Boost"
     },
     {
-        id: 15,
+        id: 16,
         title: "YouTube Views",
         platform: "youtube",
-        icon: <SiYoutube className="w-8 h-8 text-[#FF0000]" />,
+        iconName: "SiYoutube",
         tiers: [
             { quantity: 1000, price: 111 },
             { quantity: 2000, price: 211 },
@@ -235,11 +241,13 @@ const servicesData= [
         description: "Get high-quality views for your YouTube videos.",
         badge: "High Retention"
     },
+
+    // Snapchat Services
     {
-        id: 16,
+        id: 17,
         title: "Snapchat Followers",
         platform: "snapchat",
-        icon: <SiSnapchat className="w-8 h-8 text-[#FFFC00]" />,
+        iconName: "SiSnapchat",
         tiers: [
             { quantity: 1000, price: 1800 },
             { quantity: 2000, price: 3600 },
@@ -252,11 +260,13 @@ const servicesData= [
         description: "Increase your Snapchat followers with real users.",
         badge: "Exclusive"
     },
+
+    // Twitch Services
     {
-        id: 17,
+        id: 18,
         title: "Twitch Followers",
         platform: "twitch",
-        icon: <SiTwitch className="w-8 h-8 text-[#9146FF]" />,
+        iconName: "SiTwitch",
         tiers: [
             { quantity: 1000, price: 70 },
             { quantity: 2000, price: 135 },
@@ -271,10 +281,10 @@ const servicesData= [
         badge: "Affiliate"
     },
     {
-        id: 18,
+        id: 19,
         title: "Twitch Views",
         platform: "twitch",
-        icon: <SiTwitch className="w-8 h-8 text-[#9146FF]" />,
+        iconName: "SiTwitch",
         tiers: [
             { quantity: 1000, price: 60 },
             { quantity: 2000, price: 115 },
@@ -289,11 +299,13 @@ const servicesData= [
         description: "Increase the number of views on your Twitch streams.",
         badge: "Stream Boost"
     },
+
+    // Spotify Services
     {
-        id: 19,
+        id: 20,
         title: "Spotify Playlist Followers",
         platform: "spotify",
-        icon: <SiSpotify className="w-8 h-8 text-[#1DB954]" />,
+        iconName: "SiSpotify",
         tiers: [
             { quantity: 1000, price: 160 },
             { quantity: 2000, price: 310 },
@@ -308,10 +320,10 @@ const servicesData= [
         badge: "Playlist Growth"
     },
     {
-        id: 20,
+        id: 21,
         title: "Spotify Profile Followers",
         platform: "spotify",
-        icon: <SiSpotify className="w-8 h-8 text-[#1DB954]" />,
+        iconName: "SiSpotify",
         tiers: [
             { quantity: 1000, price: 120 },
             { quantity: 2000, price: 235 },
@@ -325,11 +337,13 @@ const servicesData= [
         description: "Increase the number of followers on your Spotify artist profile.",
         badge: "Artist Special"
     },
+
+    // Twitter Services
     {
-        id: 21,
+        id: 22,
         title: "X (Twitter) Followers [No Refill]",
         platform: "twitter",
-        icon: <SiX className="w-8 h-8 text-[#000000]" />,
+        iconName: "SiX",
         tiers: [{ quantity: 1000, price: 650 }],
         rating: 4.5,
         reviews: 432,
@@ -338,10 +352,10 @@ const servicesData= [
         badge: "Budget"
     },
     {
-        id: 22,
+        id: 23,
         title: "X (Twitter) Followers [Refill]",
         platform: "twitter",
-        icon: <SiX className="w-8 h-8 text-[#000000]" />,
+        iconName: "SiX",
         tiers: [{ quantity: 1000, price: 800 }],
         rating: 4.8,
         reviews: 765,
@@ -351,26 +365,54 @@ const servicesData= [
     }
 ];
 
-// Initialize Firebase App
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
 const uploadData = async () => {
-    const servicesCollection = collection(db, "services");
-    const batch = writeBatch(db);
-
-    servicesData.forEach((service) => {
-        // We use the service `id` as the document ID
-        const docRef = doc(servicesCollection, service.id.toString());
-        batch.set(docRef, service);
-    });
-
-    try {
-        await batch.commit();
-        console.log("✅ Success! All services have been uploaded to Firestore.");
-    } catch (error) {
-        console.error("❌ Error uploading services: ", error);
+    // We need to delete existing data first to avoid conflicts
+    console.log("Deleting existing services and tiers...");
+    const { error: deleteTiersError } = await supabase.from('service_tiers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (deleteTiersError) {
+        console.error("Error deleting tiers:", deleteTiersError);
+        return;
     }
+    const { error: deleteServicesError } = await supabase.from('services').delete().neq('id', 0);
+    if (deleteServicesError) {
+        console.error("Error deleting services:", deleteServicesError);
+        return;
+    }
+    console.log("Existing data deleted.");
+
+
+    for (const service of servicesData) {
+        const { tiers, iconName, ...serviceData } = service;
+
+        const { data: insertedService, error: serviceError } = await supabase
+            .from('services')
+            .insert({ ...serviceData, icon_name: iconName })
+            .select()
+            .single();
+
+        if (serviceError) {
+            console.error('Error inserting service:', serviceData.title, serviceError);
+            continue; // Skip to the next service if this one fails
+        }
+
+        if (insertedService && tiers) {
+            const tiersToInsert = tiers.map(tier => ({
+                service_id: insertedService.id,
+                quantity: tier.quantity,
+                price: tier.price
+            }));
+
+            const { error: tiersError } = await supabase
+                .from('service_tiers')
+                .insert(tiersToInsert);
+
+            if (tiersError) {
+                console.error('Error inserting tiers for service:', serviceData.title, tiersError);
+            }
+        }
+    }
+
+    console.log("✅ Success! All services have been uploaded to Supabase.");
 };
 
 uploadData();

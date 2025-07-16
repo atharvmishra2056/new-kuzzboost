@@ -4,16 +4,22 @@ import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = () => {
     const { currentUser, loading } = useAuth();
-    const adminUid = import.meta.env.VITE_ADMIN_UID;
+
+    // Get the comma-separated string of admin UIDs from environment variables
+    const adminUidsString = import.meta.env.VITE_ADMIN_UIDS || "";
+
+    // Split the string into an array of UIDs
+    const adminUids = adminUidsString.split(',');
 
     if (loading) {
         // You can show a loading spinner here if you want
         return <div>Loading...</div>;
     }
 
-    // If the user is logged in AND their UID matches the admin UID, show the admin pages.
-    // Otherwise, redirect them to the homepage.
-    return currentUser?.id === adminUid ? <Outlet /> : <Navigate to="/" />;
+    // Check if the current user's ID is in the list of admin UIDs
+    const isAdmin = currentUser && adminUids.includes(currentUser.id);
+
+    return isAdmin ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;
