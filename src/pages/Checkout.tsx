@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Smartphone, CheckCircle, Shield, QrCode } from "lucide-react";
+import { ArrowLeft, Smartphone, CheckCircle, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Json } from "@/integrations/supabase/types";
+import { useToast } from "@/components/ui/use-toast";
 
 // --- Interfaces ---
 interface CheckoutItem {
@@ -45,11 +46,16 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { getSymbol, convert } = useCurrency();
   const { currentUser } = useAuth();
+  const { toast } = useToast();
 
   const [orderReview, setOrderReview] = useState<OrderReviewData | null>(null);
   const [currentStep, setCurrentStep] = useState<'payment' | 'verify'>('payment');
   const [loading, setLoading] = useState(false);
   const [transactionId, setTransactionId] = useState("");
+  const [isCopied, setIsCopied] = useState(false);
+
+  // --- UPDATED UPI ID ---
+  const upiId = "7389556886@fam";
 
   useEffect(() => {
     if (!currentUser) {
@@ -71,9 +77,23 @@ const Checkout = () => {
     setOrderReview(JSON.parse(savedOrderData));
   }, [currentUser, navigate]);
 
+  const handleCopyUpiId = () => {
+    navigator.clipboard.writeText(upiId);
+    setIsCopied(true);
+    toast({
+      title: "UPI ID Copied!",
+      description: "You can now paste it in your UPI app.",
+    });
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   const handleVerifyPayment = async () => {
     if (!transactionId.trim() || !orderReview) {
-      alert("Please enter a valid transaction ID.");
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid Transaction ID.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -108,14 +128,22 @@ const Checkout = () => {
     } catch (error) {
       console.error('Error creating order:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-      alert(`Error: ${errorMessage}`);
+      toast({
+        title: "Order Creation Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   if (!orderReview) {
-    return <div>Loading your order...</div>;
+    return (
+        <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
+    );
   }
 
   const { totalAmount } = orderReview;
@@ -159,12 +187,22 @@ const Checkout = () => {
                       </div>
 
                       <div className="mb-8">
-                        <div className="w-64 h-64 mx-auto bg-white rounded-2xl p-4 flex items-center justify-center mb-4">
-                          <QrCode className="w-48 h-48 text-gray-800" />
+                        {/* --- UPDATED QR CODE IMAGE --- */}
+                        <div className="w-64 h-64 mx-auto bg-white rounded-2xl p-2 flex items-center justify-center mb-4 border-4 border-primary/20 shadow-lg">
+                          <img
+                              src="/upi-qr-code.png" // Path to the image in the 'public' folder
+                              alt="UPI QR Code for KuzzBoost"
+                              className="rounded-lg w-full h-full object-contain"
+                          />
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">Scan QR code with any UPI app</p>
                         <div className="glass rounded-xl p-4">
-                          <p className="font-medium text-primary">UPI ID: kuzzboost@paytm</p>
+                          <div className="flex items-center justify-center gap-2">
+                            <p className="font-medium text-primary font-mono">UPI ID: {upiId}</p>
+                            <Button variant="ghost" size="icon" onClick={handleCopyUpiId}>
+                              {isCopied ? <CheckCircle className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5 text-muted-foreground" />}
+                            </Button>
+                          </div>
                           <p className="text-sm text-muted-foreground">Amount: {getSymbol()}{convert(totalAmount)}</p>
                         </div>
                       </div>
@@ -219,7 +257,7 @@ const Checkout = () => {
                             className="w-full glass-button"
                         >
                           {loading ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center gap-2">
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 Verifying...
                               </div>
