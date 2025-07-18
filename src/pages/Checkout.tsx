@@ -190,7 +190,7 @@ const Checkout = () => {
                         {/* --- UPDATED QR CODE IMAGE --- */}
                         <div className="w-64 h-64 mx-auto bg-white rounded-2xl p-2 flex items-center justify-center mb-4 border-4 border-primary/20 shadow-lg">
                           <img
-                              src="/upi-qr-code.png" // Path to the image in the 'public' folder
+                              src="/upi-qr.png" // Path to the image in the 'public' folder
                               alt="UPI QR Code for KuzzBoost"
                               className="rounded-lg w-full h-full object-contain"
                           />
