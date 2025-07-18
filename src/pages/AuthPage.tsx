@@ -1,6 +1,6 @@
 // src/pages/AuthPage.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -10,24 +10,36 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { useToast } from "@/hooks/use-toast";
 import { MailCheck } from 'lucide-react';
-import { Label } from '@/components/ui/label'; // This was the missing import
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
 
 const AuthPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [resetEmail, setResetEmail] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const [showVerificationMessage, setShowVerificationMessage] = useState(false);
     const { toast } = useToast();
     const navigate = useNavigate();
     const location = useLocation();
+    const { currentUser } = useAuth(); // Get currentUser from context
 
     const searchParams = new URLSearchParams(location.search);
     const defaultTab = searchParams.get('tab') || 'signin';
 
+    // This useEffect will redirect the user if they are already logged in
+    // or after they successfully log in.
+    useEffect(() => {
+        if (currentUser) {
+            navigate('/account');
+        }
+    }, [currentUser, navigate]);
+
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
         const { error } = await supabase.auth.signUp({
             email,
             password,
@@ -40,20 +52,22 @@ const AuthPage = () => {
         } else {
             setShowVerificationMessage(true);
         }
+        setLoading(false);
     };
 
     const handleSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
         const { error } = await supabase.auth.signInWithPassword({
             email,
             password
         });
         if (error) {
             setError(error.message);
-        } else {
-            navigate('/account');
         }
+        // We no longer navigate here. The useEffect will handle it when currentUser updates.
+        setLoading(false);
     };
 
     const handlePasswordReset = async () => {
@@ -129,7 +143,9 @@ const AuthPage = () => {
                                         </DialogContent>
                                     </Dialog>
                                 </div>
-                                <Button type="submit" className="w-full glass-button">Sign In</Button>
+                                <Button type="submit" className="w-full glass-button" disabled={loading}>
+                                    {loading ? 'Signing In...' : 'Sign In'}
+                                </Button>
                             </form>
                         </CardContent>
                     </Card>
@@ -143,7 +159,9 @@ const AuthPage = () => {
                             <form onSubmit={handleSignUp} className="space-y-4">
                                 <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                                 <Input type="password" placeholder="Password (min. 6 characters)" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                                <Button type="submit" className="w-full glass-button">Create Account</Button>
+                                <Button type="submit" className="w-full glass-button" disabled={loading}>
+                                    {loading ? 'Creating Account...' : 'Create Account'}
+                                </Button>
                             </form>
                         </CardContent>
                     </Card>

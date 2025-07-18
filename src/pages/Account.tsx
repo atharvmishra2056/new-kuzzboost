@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShoppingCart, Heart, Settings, LifeBuoy, LogOut, User as UserIcon } from "lucide-react";
 import { motion } from "framer-motion";
+import { useToast } from '@/hooks/use-toast'; // Import useToast
 
 const StatCard = ({ icon, title, value, label }: { icon: React.ReactNode, title: string, value: number | string, label: string }) => (
     <motion.div whileHover={{ scale: 1.05 }} className="h-full">
@@ -44,6 +45,7 @@ const Account = () => {
     const navigate = useNavigate();
     const [orderCount, setOrderCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const { toast } = useToast(); // Initialize toast
 
     useEffect(() => {
         if (!currentUser) {
@@ -69,8 +71,16 @@ const Account = () => {
     }, [currentUser, navigate]);
 
     const handleSignOut = async () => {
-        await signOut();
-        navigate('/');
+        const { error } = await signOut();
+        if (error) {
+            toast({
+                title: "Sign Out Failed",
+                description: error.message,
+                variant: "destructive",
+            });
+        } else {
+            navigate('/');
+        }
     };
 
     if (loading || !currentUser) {

@@ -13,7 +13,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<{ error: any | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,11 +42,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (error) throw error;
 
-        // Add the role to the user object
         setCurrentUser({ ...user, role: data?.role || 'user' });
       } catch (error) {
         console.error("Error fetching user role:", error);
-        setCurrentUser(user); // Fallback to user without role
+        setCurrentUser(user);
       } finally {
         setLoading(false);
       }
@@ -90,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName || email,
-          role: 'user' // Default role for new users
+          role: 'user'
         }
       }
     });
@@ -106,7 +105,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+
+    // Force clear the local state to prevent UI inconsistencies
+    setCurrentUser(null);
+    setSession(null);
+
+    // Gracefully handle the "Auth session missing" error by treating it as a success.
+    if (error && error.message !== 'Auth session missing, exiting.') {
+      console.error("Error signing out:", error);
+      return { error };
+    }
+
+    // For successful sign-outs or "session missing" errors, return no error.
+    return { error: null };
   };
 
   const value = {

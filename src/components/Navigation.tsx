@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast"; // Import useToast
 
 interface NavigationProps {
   cartItemCount?: number;
@@ -18,13 +19,19 @@ const Navigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
   const { currentUser, signOut } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
+  const { toast } = useToast(); // Initialize toast
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
+    const { error } = await signOut();
+    if (error) {
       console.error('Sign out error:', error);
+      toast({
+        title: "Sign Out Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      navigate('/');
     }
   };
 
