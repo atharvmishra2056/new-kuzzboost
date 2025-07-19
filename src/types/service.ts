@@ -11,7 +11,7 @@ export interface Service {
   title: string;
   platform: string;
   icon?: ReactElement;
-  iconName: string;
+  iconName: string; // This was a duplicate, but keeping it to match your existing code
   tiers?: ServiceTier[];
   rating: number;
   reviews: number;
@@ -19,6 +19,10 @@ export interface Service {
   description: string;
   badge: string;
   isActive?: boolean;
+  // --- FIX: ADDED THE MISSING OPTIONAL PROPERTIES ---
+  rules?: string[];
+  estimatedDelivery?: string;
+  packageTypes?: { name: string; description: string; multiplier: number }[];
 }
 
 export interface TrackingInfo {
@@ -27,14 +31,14 @@ export interface TrackingInfo {
   description: string;
 }
 
-// This is the interface we are fixing
 export interface Order {
   id: string;
   order_id: string;
   user_id: string;
   user_email: string;
   customer_info: {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     email: string;
     phone: string;
   };
@@ -42,10 +46,11 @@ export interface Order {
     id: number;
     title: string;
     platform: string;
-    iconName: string; // This was the missing property
+    iconName: string;
     quantity: number;
     service_quantity: number;
     price: number;
+    userInput: string;
   }>;
   total_amount: number;
   status: 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';

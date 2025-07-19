@@ -3,11 +3,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input"; // ADDED: For search bar
 import { useToast } from "@/hooks/use-toast";
 import { Order } from "@/types/service";
+import { Separator } from "@/components/ui/separator";
+import { Link as LinkIcon, Search } from "lucide-react"; // ADDED: Search Icon
+
+// MODIFIED: Added userInput to the interface
+interface OrderItem {
+    title: string;
+    platform: string;
+    quantity: number;
+    service_quantity: number;
+    price: number;
+    userInput: string;
+}
 
 const AdminOrders = () => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -17,6 +30,11 @@ const AdminOrders = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newStatus, setNewStatus] = useState<Order['status'] | ''>('');
     const { toast } = useToast();
+
+    // --- ADDED: State for new Search and Filter functionality ---
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    // ---
 
     const fetchOrders = async () => {
         setLoading(true);
@@ -48,30 +66,28 @@ const AdminOrders = () => {
 
     const updateOrderInDatabase = async (orderId: string, status: Order['status'], paymentVerified: boolean) => {
         setIsSubmitting(true);
+        try {
+            const { error } = await supabase
+                .from('orders')
+                .update({
+                    status: status,
+                    payment_verified: paymentVerified,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', orderId);
 
-        // --- DEBUGGING LOGS ---
-        console.log("--- DEBUGGING: Preparing to call Supabase RPC ---");
-        console.log("orderId:", orderId, "| type:", typeof orderId);
-        console.log("status:", status, "| type:", typeof status);
-        console.log("paymentVerified:", paymentVerified, "| type:", typeof paymentVerified);
-        console.log("-------------------------------------------------");
-        // --- END DEBUGGING ---
+            if (error) throw error;
 
-        const { error } = await supabase.rpc('update_order_status', {
-            order_id_param: orderId,
-            new_status: status,
-            payment_verified_param: paymentVerified
-        });
-
-        if (error) {
-            toast({ title: "Error", description: `Failed to update order: ${error.message}`, variant: "destructive" });
-            console.error("Supabase RPC Error:", error);
-        } else {
             toast({ title: "Success", description: "Order updated successfully." });
             await fetchOrders();
             setIsModalOpen(false);
+        } catch (error) {
+            const err = error as Error;
+            toast({ title: "Error", description: `Failed to update order: ${err.message}`, variant: "destructive" });
+            console.error("Supabase Error:", error);
+        } finally {
+            setIsSubmitting(false);
         }
-        setIsSubmitting(false);
     };
 
     const handleVerifyPayment = () => {
@@ -81,7 +97,7 @@ const AdminOrders = () => {
     };
 
     const handleSaveChanges = () => {
-        if (selectedOrder && newStatus) {
+        if (selectedOrder && newStatus && newStatus !== selectedOrder.status) {
             updateOrderInDatabase(selectedOrder.id, newStatus, selectedOrder.payment_verified);
         }
     };
@@ -97,11 +113,55 @@ const AdminOrders = () => {
         }
     };
 
+    // --- ADDED: Logic to filter orders based on state ---
+    const filteredOrders = orders.filter(order => {
+        const lowercasedTerm = searchTerm.toLowerCase();
+
+        const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+
+        const matchesSearch = searchTerm.trim() === '' ||
+            order.order_id.toLowerCase().includes(lowercasedTerm) ||
+            order.user_email.toLowerCase().includes(lowercasedTerm) ||
+            (order.customer_info.firstName && order.customer_info.firstName.toLowerCase().includes(lowercasedTerm)) ||
+            (order.customer_info.lastName && order.customer_info.lastName.toLowerCase().includes(lowercasedTerm));
+
+        return matchesStatus && matchesSearch;
+    });
+    // ---
+
     if (loading && orders.length === 0) return <div>Loading orders...</div>;
 
     return (
         <div>
             <h1 className="text-3xl font-bold mb-6">All Orders</h1>
+
+            {/* --- ADDED: Search and Filter UI --- */}
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
+                <div className="relative w-full sm:max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search by ID, email, name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                    />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="shipped">Shipped</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            {/* --- END OF NEW UI --- */}
+
             <div className="glass rounded-2xl p-6">
                 <Table>
                     <TableHeader>
@@ -116,7 +176,8 @@ const AdminOrders = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {orders.map((order) => (
+                        {/* MODIFIED: Mapping over filteredOrders */}
+                        {filteredOrders.map((order) => (
                             <TableRow key={order.id}>
                                 <TableCell className="font-mono text-xs">{order.order_id}</TableCell>
                                 <TableCell>{order.user_email}</TableCell>
@@ -147,11 +208,28 @@ const AdminOrders = () => {
                 <DialogContent className="max-w-2xl glass">
                     <DialogHeader>
                         <DialogTitle>Manage Order: {selectedOrder?.order_id}</DialogTitle>
+                        <DialogDescription>
+                            Update the status and view details for this order.
+                        </DialogDescription>
                     </DialogHeader>
                     {selectedOrder && (
-                        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-4">
-                            <p><strong>Customer:</strong> {selectedOrder.customer_info.fullName} ({selectedOrder.user_email})</p>
-                            <p><strong>Transaction ID:</strong> <span className="font-mono">{selectedOrder.transaction_id}</span></p>
+                        <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4 py-4">
+                            {/* Customer & Transaction Details */}
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <h4 className="font-semibold mb-1">Customer</h4>
+                                    <p>{selectedOrder.customer_info.firstName} {selectedOrder.customer_info.lastName}</p>
+                                    <p className="text-muted-foreground">{selectedOrder.user_email}</p>
+                                    <p className="text-muted-foreground">{selectedOrder.customer_info.phone}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-1">Transaction</h4>
+                                    <p className="font-mono text-xs">{selectedOrder.transaction_id}</p>
+                                    <Badge className={selectedOrder.payment_verified ? 'bg-green-500/20 text-green-700 mt-2' : 'bg-yellow-500/20 text-yellow-700 mt-2'}>
+                                        {selectedOrder.payment_verified ? "Payment Verified" : "Pending"}
+                                    </Badge>
+                                </div>
+                            </div>
 
                             {!selectedOrder.payment_verified && (
                                 <Button onClick={handleVerifyPayment} disabled={isSubmitting} className="w-full bg-green-600 hover:bg-green-700">
@@ -159,10 +237,46 @@ const AdminOrders = () => {
                                 </Button>
                             )}
 
+                            <Separator />
+
+                            {/* Order Items Section */}
                             <div>
-                                <Label>Update Order Status</Label>
+                                <h4 className="font-semibold mb-3">Order Items</h4>
+                                <div className="space-y-3">
+                                    {selectedOrder.items.map((item: OrderItem, index: number) => (
+                                        <div key={index} className="flex justify-between items-start glass rounded-lg p-3">
+                                            <div>
+                                                <p className="font-medium">{item.title}</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Quantity: {item.quantity} • Service Units: {item.service_quantity.toLocaleString()}
+                                                </p>
+                                                {item.userInput && (
+                                                    <div className="flex items-center gap-2 mt-2 text-sm text-accent-peach">
+                                                        <LinkIcon className="w-4 h-4 flex-shrink-0" />
+                                                        <a
+                                                            href={item.userInput.startsWith('http') ? item.userInput : `https://www.instagram.com/${item.userInput.replace('@','')}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="truncate font-mono text-xs font-semibold hover:underline"
+                                                        >
+                                                            {item.userInput}
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="font-semibold flex-shrink-0">₹{(item.price * item.quantity).toFixed(2)}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <Separator />
+
+                            {/* Status Update Section */}
+                            <div>
+                                <Label className="font-semibold">Update Order Status</Label>
                                 <Select value={newStatus} onValueChange={(value) => setNewStatus(value as Order['status'])}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="mt-2">
                                         <SelectValue placeholder="Select new status" />
                                     </SelectTrigger>
                                     <SelectContent>

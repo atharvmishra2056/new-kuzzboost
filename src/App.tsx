@@ -1,94 +1,87 @@
-// src/App.tsx
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Services from "./pages/Services";
-import NotFound from "./pages/NotFound";
-import { CurrencyProvider } from "./context/CurrencyContext";
-import { AuthProvider } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext";
-import AuthPage from "./pages/AuthPage";
-import OrderHistory from "./pages/OrderHistory";
-import OrderReview from "./pages/OrderReview";
-import Checkout from "./pages/Checkout";
-import CheckoutSuccess from "./pages/CheckoutSuccess";
-import ServiceDetail from "./pages/ServiceDetail";
-import OrderDetails from "./pages/OrderDetails";
-import Wishlist from "./pages/Wishlist";
-import Account from "./pages/Account";
-import AccountSettings from "./pages/AccountSettings"; // Import the new page
-import AdminLayout from "./pages/admin/AdminLayout";
-import AdminOrders from "./pages/admin/Orders";
-import ManageServices from './pages/admin/ManageServices';
-import Analytics from './pages/admin/Analytics';
-import UserManagement from './pages/admin/UserManagement';
-import ProtectedRoute from "./components/ProtectedRoute";
-import ErrorBoundary from "./components/ErrorBoundary";
-import AIChatbot from "./components/AIChatbot";
-import CursorFollower from "./components/CursorFollower";
-import ViewCart from "./pages/ViewCart";
+import Index from './pages/Index';
+import Services from './pages/Services';
+import ServiceDetail from './pages/ServiceDetail';
+import About from './pages/About';
+import AuthPage from './pages/AuthPage';
+import Account from './pages/Account';
+import AccountSettings from './pages/AccountSettings';
+import OrderHistory from './pages/OrderHistory';
+import OrderDetails from './pages/OrderDetails';
+import ViewCart from './pages/ViewCart';
+import Checkout from './pages/Checkout';
+import OrderReview from './pages/OrderReview';
+import CheckoutSuccess from './pages/CheckoutSuccess';
+import Wishlist from './pages/Wishlist';
+import NotFound from './pages/NotFound';
+import AdminLayout from './pages/admin/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import CursorFollower from './components/CursorFollower';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import ContactUs from './pages/ContactUs';
+import Analytics from "@/pages/admin/Analytics.tsx";
+import AdminOrders from "@/pages/admin/Orders.tsx";
+import ManageServices from "@/pages/admin/ManageServices.tsx";
+import UserManagement from "@/pages/admin/UserManagement.tsx";
 
+// ADDED: Import the new components
+import RefundPolicy from './pages/RefundPolicy';
+import ScrollToTop from './components/ScrollToTop';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <CurrencyProvider>
-          <AuthProvider>
+function App() {
+  return (
+      <Router>
+        {/* ADDED: This component handles scrolling */}
+        <ScrollToTop />
+        <AuthProvider>
+          <CurrencyProvider>
             <CartProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <CursorFollower />
-                <AIChatbot />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/about" element={<About />} />
+              <CursorFollower />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/service/:id" element={<ServiceDetail />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/account-settings" element={<AccountSettings />} />
+                <Route path="/order-history" element={<OrderHistory />} />
+                <Route path="/order-details/:orderId" element={<OrderDetails />} />
+                <Route path="/cart" element={<ViewCart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout/review" element={<OrderReview />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/contact" element={<ContactUs />} />
 
-                  <Route
-                      path="/services"
-                      element={
-                        <ErrorBoundary>
-                          <Services />
-                        </ErrorBoundary>
-                      }
-                  />
+                {/* ADDED: Route for the new refund policy page */}
+                <Route path="/refund-policy" element={<RefundPolicy />} />
 
-                  <Route path="/order-history" element={<OrderHistory />} />
-                  <Route path="/cart" element={<ViewCart />} />
-                  <Route path="/checkout/review" element={<OrderReview />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                  <Route path="/service/:id" element={<ServiceDetail />} />
-                  <Route path="/order-details/:orderId" element={<OrderDetails />} />
-                  <Route path="/wishlist" element={<Wishlist />} />
-                  <Route path="/account" element={<Account />} />
-                  <Route path="/account-settings" element={<AccountSettings />} /> {/* Add this new route */}
-
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<Analytics />} />
-                      <Route path="orders" element={<AdminOrders />} />
-                      <Route path="services" element={<ManageServices />} />
-                      <Route path="users" element={<UserManagement />} />
-                    </Route>
+                {/* Admin Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Analytics />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="services" element={<ManageServices />} />
+                    <Route path="users" element={<UserManagement />} />
                   </Route>
+                </Route>
 
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
             </CartProvider>
-          </AuthProvider>
-        </CurrencyProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-);
+          </CurrencyProvider>
+        </AuthProvider>
+      </Router>
+  );
+}
 
 export default App;

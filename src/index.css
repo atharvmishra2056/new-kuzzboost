@@ -526,4 +526,48 @@
     box-shadow: 0 4px 12px hsla(15, 80%, 75%, 0.4);
     transition: var(--transition-smooth);
   }
+
+  /* --- ADDED: New styles for the futuristic cursor follower --- */
+  .cursor-follower, .cursor-follower-dot {
+    @apply fixed top-0 left-0 rounded-full pointer-events-none z-[9999];
+    /* This is the magic property that inverts the color of what's behind it */
+    mix-blend-mode: difference;
+    transform: translate(-50%, -50%);
+  }
+
+  .cursor-follower {
+    @apply bg-white;
+    width: 40px;
+    height: 40px;
+    /* A soft blur to create the glowing orb effect */
+    filter: blur(10px);
+  }
+
+  .cursor-follower-dot {
+    @apply bg-white;
+    width: 8px;
+    height: 8px;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  /* Optional: Scale up the dot when hovering over links or buttons */
+  a:hover ~ .cursor-follower-dot,
+  button:hover ~ .cursor-follower-dot {
+    transform: translate(-50%, -50%) scale(2.5);
+  }
+
+  /* Optional: Add a shadow to the dot when hovering over links or buttons */
+  a:hover ~ .cursor-follower-dot, button:hover ~ .cursor-follower-dot {
+    box-shadow: 0 0 0 2px var(--gradient-primary);
+  }
+
+  /* Optional: Add a glow effect to the dot when hovering over links or buttons */
+  a:hover ~ .cursor-follower-dot, button:hover ~ .cursor-follower-dot {
+    filter: drop-shadow(0 0 10px var(--gradient-primary));
+  }
+
+  /* Optional: Add a glow effect to the orb when hovering over links or buttons */
+  a:hover ~ .cursor-follower, button:hover ~ .cursor-follower {
+    filter: drop-shadow(0 0 10px var(--gradient-primary));
+  }
 }

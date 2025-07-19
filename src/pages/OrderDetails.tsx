@@ -80,7 +80,8 @@ const OrderDetails = () => {
     pdf.text(`Status: ${order.status}`, 20, 80);
 
     pdf.text('Customer Information:', 20, 100);
-    pdf.text(`Name: ${order.customer_info.fullName}`, 20, 110);
+    // CORRECTED: Using firstName and lastName
+    pdf.text(`Name: ${order.customer_info.firstName} ${order.customer_info.lastName}`, 20, 110);
     pdf.text(`Email: ${order.customer_info.email}`, 20, 120);
     pdf.text(`Phone: ${order.customer_info.phone}`, 20, 130);
 
@@ -252,7 +253,8 @@ const OrderDetails = () => {
                   <Card className="glass border-border/50 h-full">
                     <CardHeader><CardTitle className="font-clash text-xl text-primary flex items-center gap-2"><User className="w-5 h-5" />Customer Information</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
-                      <div><p className="text-sm text-muted-foreground">Name</p><p className="font-medium">{order.customer_info.fullName}</p></div>
+                      {/* CORRECTED: Using firstName and lastName */}
+                      <div><p className="text-sm text-muted-foreground">Name</p><p className="font-medium">{order.customer_info.firstName} {order.customer_info.lastName}</p></div>
                       <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium">{order.customer_info.email}</p></div>
                       <div><p className="text-sm text-muted-foreground">Phone</p><p className="font-medium">{order.customer_info.phone}</p></div>
                     </CardContent>

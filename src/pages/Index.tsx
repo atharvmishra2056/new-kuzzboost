@@ -1,4 +1,5 @@
 import { useState, ReactElement } from "react";
+import { useNavigate } from 'react-router-dom'
 import Navigation from "../components/Navigation";
 import HeroSection from "../components/HeroSection";
 import PlatformShowcase from "../components/PlatformShowcase";

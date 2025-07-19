@@ -1,204 +1,105 @@
-import { Instagram, Youtube, Twitter, MessageCircle, Mail, Phone } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { Link } from 'react-router-dom';
+import { SiInstagram, SiYoutube, SiDiscord, SiX } from 'react-icons/si';
+import { motion } from 'framer-motion';
 
 const Footer = () => {
-  const { currentUser } = useAuth();
   const currentYear = new Date().getFullYear();
 
-  const platforms = [
-    { name: "Instagram", icon: Instagram, href: "#" },
-    { name: "YouTube", icon: Youtube, href: "#" },
-    { name: "Twitter", icon: Twitter, href: "#" },
-    { name: "Discord", icon: MessageCircle, href: "#" }
+  const socialLinks = [
+    { icon: <SiInstagram />, href: "https://instagram.com/kuzzboost", label: "Instagram" },
+    { icon: <SiYoutube />, href: "https://youtube.com/@KuzzBoost", label: "YouTube" },
+    { icon: <SiDiscord />, href: "https://discord.gg/your-server", label: "Discord" },
+    { icon: <SiX />, href: "https://x.com/kuzzboost", label: "X (Twitter)" },
   ];
 
-  const services = [
-    "Instagram Growth",
-    "YouTube Promotion", 
-    "TikTok Boost",
-    "Twitter Engagement",
-    "Discord Communities",
-    "Spotify Promotion"
-  ];
-
-  const company = [
-    "About Us",
-    "Our Team", 
-    "Careers",
-    "Blog",
-    "Press Kit"
-  ];
-
-  const support = [
-    "Help Center",
-    "Contact Support", 
-    ...(currentUser ? ["Order History"] : []),
-    "Terms of Service",
-    "Privacy Policy"
+  const footerSections = [
+    {
+      title: "Services",
+      links: [
+        { name: "Instagram", href: "/services?platform=instagram" },
+        { name: "YouTube", href: "/services?platform=youtube" },
+        { name: "Discord", href: "/services?platform=discord" },
+        { name: "More...", href: "/services" },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { name: "About Us", href: "/about" },
+        { name: "Contact Us", href: "/contact" },
+        { name: "Blog", href: "/blog" },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { name: "Terms of Service", href: "/terms" },
+        { name: "Privacy Policy", href: "/privacy" },
+        { name: "Refund Policy", href: "/refund-policy" }, // Assuming this page will be created later
+      ],
+    },
+    {
+      title: "Contact Us",
+      links: [
+        { name: "support@kuzzboost.shop", href: "mailto:support@kuzzboost.shop" }
+      ],
+    },
   ];
 
   return (
-    <footer className="bg-gradient-hero border-t border-border/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-          {/* Brand Section */}
-          <div className="lg:col-span-2">
-            <h3 className="font-clash text-2xl font-bold text-primary mb-4">
-              KuzzBoost
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              The ultimate marketplace for authentic social media growth. 
-              Elevate your online presence with our premium services and 
-              24/7 expert support.
-            </p>
-            
-            {/* Social Links */}
-            <div className="flex gap-4 mb-6">
-              {platforms.map((platform) => {
-                const Icon = platform.icon;
-                return (
-                  <a
-                    key={platform.name}
-                    href={platform.href}
-                    className="w-10 h-10 glass rounded-xl flex items-center justify-center hover:scale-110 transition-all duration-300 group"
-                  >
-                    <Icon className="w-5 h-5 text-muted-foreground group-hover:text-accent-peach" />
-                  </a>
-                );
-              })}
-            </div>
-
-            {/* Contact Info */}
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-start gap-2">
-                <Mail className="w-4 h-4 mt-0.5" />
-                <div className="space-y-1">
-                  <div>daksh.kuzzboost@gmail.com</div>
-                  <div>atharv.kuzzboost@gmail.com</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                <span>+91 73895 56886</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="font-semibold text-primary mb-4">Services</h4>
-            <ul className="space-y-3">
-              {services.map((service) => (
-                <li key={service}>
-                  <a 
-                    href="/services" 
-                    className="text-muted-foreground hover:text-accent-peach transition-colors duration-200 text-sm"
-                  >
-                    {service}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="font-semibold text-primary mb-4">Company</h4>
-            <ul className="space-y-3">
-              {company.map((item) => (
-                <li key={item}>
-                  <a 
-                    href={item === "About Us" ? "/about" : item === "Our Team" ? "/about" : "#"} 
-                    className="text-muted-foreground hover:text-accent-peach transition-colors duration-200 text-sm"
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="font-semibold text-primary mb-4">Support</h4>
-            <ul className="space-y-3">
-              {support.map((item) => (
-                <li key={item}>
-                  <a 
-                    href={item === "Order History" ? "/order-history" : item === "Contact Support" ? "mailto:support@kuzzboost.com" : "#"} 
-                    className="text-muted-foreground hover:text-accent-peach transition-colors duration-200 text-sm"
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Newsletter Section */}
-        <div className="glass rounded-2xl p-6 mb-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h4 className="font-semibold text-primary mb-2">Stay Updated</h4>
-              <p className="text-muted-foreground text-sm">
-                Get the latest social media growth tips and exclusive offers.
+      <footer className="bg-gradient-to-t from-black/20 via-transparent to-transparent text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+            {/* KuzzBoost Info Section */}
+            <div className="col-span-2 md:col-span-1">
+              <h2 className="text-2xl font-clash font-bold text-primary">KuzzBoost</h2>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Elevating your social media presence with top-tier services and unparalleled support.
               </p>
+              <div className="flex space-x-4 mt-6">
+                {socialLinks.map((social, index) => (
+                    <motion.a
+                        key={index}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
+                        aria-label={social.label}
+                    >
+                      {social.icon}
+                    </motion.a>
+                ))}
+              </div>
             </div>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="px-4 py-2 bg-background/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-peach/50 text-sm min-w-[200px]"
-              />
-              <button className="glass-button px-6 py-2 text-sm">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-border/50">
-          <p className="text-muted-foreground text-sm mb-4 md:mb-0">
-            © {currentYear} KuzzBoost. All rights reserved.
-          </p>
-          
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-accent-peach transition-colors duration-200">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-accent-peach transition-colors duration-200">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-accent-peach transition-colors duration-200">
-              Cookie Policy
-            </a>
+            {/* Footer Links Sections */}
+            {footerSections.map((section, index) => (
+                <div key={index}>
+                  <h3 className="font-semibold text-primary">{section.title}</h3>
+                  <ul className="mt-4 space-y-2">
+                    {section.links.map((link, linkIndex) => (
+                        <li key={linkIndex}>
+                          <Link
+                              to={link.href}
+                              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            {link.name}
+                          </Link>
+                        </li>
+                    ))}
+                  </ul>
+                </div>
+            ))}
           </div>
-        </div>
 
-        {/* Trust Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-8 pt-8 border-t border-border/30">
-          <div className="text-xs text-muted-foreground flex items-center gap-2">
-            <div className="w-2 h-2 bg-success rounded-full"></div>
-            SSL Secured
-          </div>
-          <div className="text-xs text-muted-foreground flex items-center gap-2">
-            <div className="w-2 h-2 bg-accent-peach rounded-full"></div>
-            99.9% Uptime
-          </div>
-          <div className="text-xs text-muted-foreground flex items-center gap-2">
-            <div className="w-2 h-2 bg-accent-mint rounded-full"></div>
-            24/7 Support
-          </div>
-          <div className="text-xs text-muted-foreground flex items-center gap-2">
-            <div className="w-2 h-2 bg-accent-lavender rounded-full"></div>
-            Money Back Guarantee
+          <div className="mt-12 border-t border-border/20 pt-8 flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
+            <p>&copy; {currentYear} KuzzBoost. All rights reserved.</p>
+            <p className="mt-4 sm:mt-0">Made with ❤️ in India</p>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
   );
 };
 
