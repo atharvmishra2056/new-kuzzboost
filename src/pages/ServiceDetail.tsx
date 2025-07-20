@@ -1,5 +1,5 @@
 import { useState, useEffect, ReactElement } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Star, Shield, Clock, AlertCircle, ChevronDown, ChevronUp, ShoppingCart } from "lucide-react";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from "react-icons/si";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,14 @@ import { motion } from "framer-motion";
 import { useCurrency } from "../context/CurrencyContext";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from '@/integrations/supabase/client';
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Service } from "@/types/service"; // Import the main Service type
+import { Service } from "@/types/service";
 
-// Interfaces for reviews and Q&A as they were in your file
+import ReviewList from "../components/ReviewList";
+import QnASection from "../components/QnASection";
+import ReviewModal from "../components/ReviewModal";
+import Cart from "@/components/Cart";
+
 interface Review {
   id: string;
   rating: number;
@@ -42,12 +44,6 @@ interface QnA {
   full_name?: string | null;
 }
 
-// These components are assumed to exist as per your original file
-import ReviewList from "../components/ReviewList";
-import QnASection from "../components/QnASection";
-import ReviewModal from "../components/ReviewModal"; // Corrected import path
-import Cart from "@/components/Cart"; // Import Cart for the sidebar
-
 const iconMap: { [key: string]: React.ReactElement } = {
   SiInstagram: <SiInstagram className="w-12 h-12 text-[#E4405F]" />,
   SiYoutube: <SiYoutube className="w-12 h-12 text-[#FF0000]" />,
@@ -62,7 +58,7 @@ const iconMap: { [key: string]: React.ReactElement } = {
 const ServiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation(); // Added to get current path for auth redirect
+  const location = useLocation();
   const { getSymbol, convert } = useCurrency();
   const { currentUser } = useAuth();
   const { addToRecentlyViewed } = useRecentlyViewed();
@@ -107,7 +103,6 @@ const ServiceDetail = () => {
             ...serviceData,
             iconName: serviceData.icon_name,
             tiers: serviceData.service_tiers || [],
-            // Assuming these are added dynamically or have defaults
             rules: (serviceData as { rules?: string[] }).rules || [
               "Keep your profile/content public during delivery",
               "Do not change username/URL after placing order",
@@ -129,7 +124,7 @@ const ServiceDetail = () => {
         }
 
         const { data: reviewsData, error: reviewsError } = await supabase
-            .from('reviews') // Assuming a 'reviews' table, not 'reviews_with_users'
+            .from('reviews')
             .select('*, profiles(full_name)')
             .eq('service_id', serviceId)
             .order('created_at', { ascending: false });
@@ -138,7 +133,7 @@ const ServiceDetail = () => {
         else setReviews((reviewsData ?? []) as Review[]);
 
         const { data: qnaData, error: qnaError } = await supabase
-            .from('qna') // Assuming a 'qna' table
+            .from('qna')
             .select('*, profiles(full_name)')
             .eq('service_id', serviceId)
             .order('created_at', { ascending: false });
@@ -154,11 +149,15 @@ const ServiceDetail = () => {
     };
 
     fetchServiceData();
-  }, [id]);  
+  }, [id]);
 
+  useEffect(() => {
+    if (currentUser && !location.pathname.startsWith('/dashboard')) {
+      navigate('/dashboard/service/' + id);
+    }
+  }, [currentUser, location, navigate, id]);
 
   const handleReviewSubmitted = () => {
-    // Refetch reviews after submission
     if(id) {
       supabase.from('reviews').select('*, profiles(full_name)').eq('service_id', parseInt(id)).then(({data}) => setReviews((data ?? []) as Review[]));
     }
@@ -204,7 +203,6 @@ const ServiceDetail = () => {
         return false;
       }
     } else if (service?.platform === "youtube") {
-      // Adjusted the validation logic slightly as the original was too strict
       if (!input.includes("youtube.com") && !input.includes("youtu.be")) {
         setValidationError("Please enter a valid YouTube URL");
         return false;
@@ -231,16 +229,14 @@ const ServiceDetail = () => {
     setShowConfirmation(true);
   };
 
-  // --- THIS IS THE KEY CHANGE ---
   const confirmOrder = () => {
     if (!service) return;
     const finalPrice = calculatePrice(quantity);
 
-    // Pass the userInput from the state to the addToCart function
     addToCart(service, quantity, finalPrice, userInput);
 
     setShowConfirmation(false);
-    setIsCartOpen(true); // Open the cart sidebar as a confirmation
+    setIsCartOpen(true);
   };
 
   if (loading) {
@@ -254,7 +250,6 @@ const ServiceDetail = () => {
   if (!service) {
     return (
         <div className="min-h-screen bg-gradient-hero">
-          <Navigation />
           <div className="pt-20 text-center">
             <h1 className="text-2xl font-bold text-primary">Service not found</h1>
             <Button onClick={() => navigate('/services')} className="mt-4">
@@ -269,16 +264,13 @@ const ServiceDetail = () => {
 
   return (
       <div className="min-h-screen bg-gradient-hero">
-        {/* Pass cartCount and onCartClick to Navigation */}
-        <Navigation cartItemCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
-
-        <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
               <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate('/services')}
+                  onClick={() => navigate(currentUser ? '/dashboard/services' : '/services')}
                   className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -557,7 +549,6 @@ const ServiceDetail = () => {
                 <Button variant="outline" onClick={() => setShowConfirmation(false)} className="flex-1">
                   Go Back
                 </Button>
-                {/* MODIFIED: This button now calls the corrected confirmOrder function */}
                 <Button onClick={confirmOrder} className="flex-1 glass-button">
                   Add to Cart & Continue
                 </Button>
@@ -566,17 +557,15 @@ const ServiceDetail = () => {
           </DialogContent>
         </Dialog>
 
-        {/* This Cart component will show as a sidebar */}
         <Cart
             isOpen={isCartOpen}
             onClose={() => setIsCartOpen(false)}
-            items={[]} // These props are managed by context, so we pass empty values
+            items={[]}
             onUpdateQuantity={() => {}}
             onRemoveItem={() => {}}
             onClearCart={() => {}}
         />
 
-        <Footer />
       </div>
   );
 };

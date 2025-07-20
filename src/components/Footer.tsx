@@ -1,9 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { SiInstagram, SiYoutube, SiDiscord, SiX } from 'react-icons/si';
 import { motion } from 'framer-motion';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith('/dashboard');
 
   const socialLinks = [
     { icon: <SiInstagram />, href: "https://instagram.com/kuzzboost", label: "Instagram" },
@@ -12,7 +14,7 @@ const Footer = () => {
     { icon: <SiX />, href: "https://x.com/kuzzboost", label: "X (Twitter)" },
   ];
 
-  const footerSections = [
+  const publicFooterSections = [
     {
       title: "Services",
       links: [
@@ -27,7 +29,6 @@ const Footer = () => {
       links: [
         { name: "About Us", href: "/about" },
         { name: "Contact Us", href: "/contact" },
-        { name: "Blog", href: "/blog" },
       ],
     },
     {
@@ -35,7 +36,7 @@ const Footer = () => {
       links: [
         { name: "Terms of Service", href: "/terms" },
         { name: "Privacy Policy", href: "/privacy" },
-        { name: "Refund Policy", href: "/refund-policy" }, // Assuming this page will be created later
+        { name: "Refund Policy", href: "/refund-policy" },
       ],
     },
     {
@@ -46,32 +47,57 @@ const Footer = () => {
     },
   ];
 
+  const dashboardFooterSections = [
+    {
+      title: "Legal",
+      links: [
+        { name: "Terms of Service", href: "/dashboard/terms" },
+        { name: "Privacy Policy", href: "/dashboard/privacy" },
+        { name: "Refund Policy", href: "/dashboard/refund-policy" },
+      ],
+    },
+    {
+      title: "Support",
+      links: [
+        { name: "Contact Support", href: "mailto:support@kuzzboost.shop" },
+        { name: "Help Center", href: "/dashboard/help" },
+      ],
+    },
+  ];
+
+  const footerSections = isDashboard ? dashboardFooterSections : publicFooterSections;
+
   return (
       <footer className="bg-gradient-to-t from-black/20 via-transparent to-transparent text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          <div className={`grid gap-8 ${isDashboard ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-5'}`}>
             {/* KuzzBoost Info Section */}
-            <div className="col-span-2 md:col-span-1">
+            <div className={isDashboard ? "col-span-1" : "col-span-2 md:col-span-1"}>
               <h2 className="text-2xl font-clash font-bold text-primary">KuzzBoost</h2>
               <p className="mt-4 text-sm text-muted-foreground">
-                Elevating your social media presence with top-tier services and unparalleled support.
+                {isDashboard 
+                  ? "Your trusted partner for social media growth."
+                  : "Elevating your social media presence with top-tier services and unparalleled support."
+                }
               </p>
-              <div className="flex space-x-4 mt-6">
-                {socialLinks.map((social, index) => (
-                    <motion.a
-                        key={index}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary transition-colors"
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.9 }}
-                        aria-label={social.label}
-                    >
-                      {social.icon}
-                    </motion.a>
-                ))}
-              </div>
+              {!isDashboard && (
+                <div className="flex space-x-4 mt-6">
+                  {socialLinks.map((social, index) => (
+                      <motion.a
+                          key={index}
+                          href={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-primary transition-colors"
+                          whileHover={{ scale: 1.2 }}
+                          whileTap={{ scale: 0.9 }}
+                          aria-label={social.label}
+                      >
+                        {social.icon}
+                      </motion.a>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Footer Links Sections */}

@@ -32,7 +32,7 @@ const AuthPage = () => {
     // or after they successfully log in.
     useEffect(() => {
         if (currentUser) {
-            navigate('/account');
+            navigate('/dashboard');
         }
     }, [currentUser, navigate]);
 

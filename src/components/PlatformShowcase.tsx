@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { SiInstagram, SiYoutube, SiX, SiDiscord, SiTwitch, SiSpotify, SiSnapchat, SiWhatsapp } from "react-icons/si";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 const platforms = [
   { name: "Instagram", icon: <SiInstagram />, color: "#E4405F", description: "Followers, Likes, Views" },
@@ -28,7 +29,6 @@ const PlatformShowcase = () => {
       }
     })
   };
-
 
   return (
       <section className="py-20 px-4 sm:px-6 lg:px-8">
@@ -98,9 +98,9 @@ const PlatformShowcase = () => {
               <p className="text-muted-foreground mb-6">
                 Select your platform and discover our premium growth services tailored just for you.
               </p>
-              <button className="glass-button">
+              <Link to="/services" className="glass-button">
                 View All Services
-              </button>
+              </Link>
             </div>
           </div>
         </div>

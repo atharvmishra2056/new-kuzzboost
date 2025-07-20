@@ -1,6 +1,7 @@
 import { motion, Variants } from "framer-motion";
 import { Award, MousePointer, TrendingUp } from "lucide-react"; // Corrected import
 import React from "react";
+import { Link } from "react-router-dom";
 
 const steps = [
     {
@@ -76,6 +77,11 @@ const HowItWorks = () => {
                         </motion.div>
                     ))}
                 </motion.div>
+                <div className="text-center mt-16">
+                    <Link to="/services" className="glass-button animate-breathing-glow">
+                        View All Services
+                    </Link>
+                </div>
             </div>
         </section>
     );

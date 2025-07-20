@@ -28,44 +28,58 @@ import Analytics from "@/pages/admin/Analytics.tsx";
 import AdminOrders from "@/pages/admin/Orders.tsx";
 import ManageServices from "@/pages/admin/ManageServices.tsx";
 import UserManagement from "@/pages/admin/UserManagement.tsx";
+import MainLayout from './layouts/MainLayout';
+import DashboardLayout from './layouts/DashboardLayout';
 
-// ADDED: Import the new components
 import RefundPolicy from './pages/RefundPolicy';
 import ScrollToTop from './components/ScrollToTop';
+import DashboardServices from "./pages/DashboardServices.tsx";
+import DashboardHome from "./pages/DashboardHome.tsx";
 
 function App() {
   return (
       <Router>
-        {/* ADDED: This component handles scrolling */}
         <ScrollToTop />
         <AuthProvider>
           <CurrencyProvider>
             <CartProvider>
               <CursorFollower />
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/service/:id" element={<ServiceDetail />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/account-settings" element={<AccountSettings />} />
-                <Route path="/order-history" element={<OrderHistory />} />
-                <Route path="/order-details/:orderId" element={<OrderDetails />} />
-                <Route path="/cart" element={<ViewCart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/checkout/review" element={<OrderReview />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/wishlist" element={<Wishlist />} />
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/contact" element={<ContactUs />} />
+                {/* Public Routes */}
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/service/:id" element={<ServiceDetail />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/contact" element={<ContactUs />} />
+                  <Route path="/refund-policy" element={<RefundPolicy />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
 
-                {/* ADDED: Route for the new refund policy page */}
-                <Route path="/refund-policy" element={<RefundPolicy />} />
+                {/* Dashboard Routes - Protected for any logged-in user */}
+                <Route element={<ProtectedRoute children={<DashboardLayout />} />}>
+                  <Route path="/dashboard" element={<DashboardHome />} />
+                  <Route path="/dashboard/account" element={<Account />} />
+                  <Route path="/dashboard/account-settings" element={<AccountSettings />} />
+                  <Route path="/dashboard/orders" element={<OrderHistory />} />
+                  <Route path="/dashboard/order-details/:orderId" element={<OrderDetails />} />
+                  <Route path="/dashboard/cart" element={<ViewCart />} />
+                  <Route path="/dashboard/checkout" element={<Checkout />} />
+                  <Route path="/dashboard/checkout/review" element={<OrderReview />} />
+                  <Route path="/dashboard/checkout/success" element={<CheckoutSuccess />} />
+                  <Route path="/dashboard/wishlist" element={<Wishlist />} />
+                  <Route path="/dashboard/services" element={<DashboardServices />} />
+                  <Route path="/dashboard/service/:id" element={<ServiceDetail />} />
+                  <Route path="/dashboard/terms" element={<TermsOfService />} />
+                  <Route path="/dashboard/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/dashboard/refund-policy" element={<RefundPolicy />} />
+                </Route>
 
-                {/* Admin Routes */}
-                <Route element={<ProtectedRoute />}>
+                {/* Admin Routes - Protected for admin users only */}
+                <Route element={<ProtectedRoute requireAdmin />}>
                   <Route path="/admin" element={<AdminLayout />}>
                     <Route index element={<Analytics />} />
                     <Route path="orders" element={<AdminOrders />} />
@@ -73,8 +87,6 @@ function App() {
                     <Route path="users" element={<UserManagement />} />
                   </Route>
                 </Route>
-
-                <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
             </CartProvider>

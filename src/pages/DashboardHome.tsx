@@ -1,4 +1,4 @@
-// src/pages/Account.tsx
+// src/pages/DashboardHome.tsx
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ShoppingCart, Heart, Settings, LifeBuoy, User as UserIcon } from "lucide-react";
+import { ShoppingCart, Heart, Settings, LifeBuoy, LogOut, User as UserIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from '@/hooks/use-toast';
 
@@ -36,8 +36,9 @@ const ActionButton = ({ icon, title, onClick }: { icon: React.ReactNode, title: 
     </motion.div>
 );
 
-const Account = () => {
-    const { currentUser } = useAuth();
+
+const DashboardHome = () => {
+    const { currentUser, signOut } = useAuth();
     const { wishlistCount } = useWishlist();
     const navigate = useNavigate();
     const [orderCount, setOrderCount] = useState(0);
@@ -67,9 +68,22 @@ const Account = () => {
         fetchOrderCount();
     }, [currentUser, navigate]);
 
+    const handleSignOut = async () => {
+        const { error } = await signOut();
+        if (error) {
+            toast({
+                title: "Sign Out Failed",
+                description: error.message,
+                variant: "destructive",
+            });
+        } else {
+            navigate('/');
+        }
+    };
+
     if (loading || !currentUser) {
         return (
-            <div className="flex items-center justify-center h-96">
+            <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
         );
@@ -78,12 +92,6 @@ const Account = () => {
     return (
         <div className="p-8">
             <div className="max-w-4xl mx-auto space-y-8">
-                {/* Page Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-primary font-clash">My Account</h1>
-                    <p className="text-muted-foreground mt-2">Manage your profile and account settings</p>
-                </div>
-
                 {/* Profile Header */}
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
                     <Card className="glass">
@@ -125,9 +133,16 @@ const Account = () => {
                         <ActionButton icon={<LifeBuoy className="mr-2"/>} title="Contact Support" onClick={() => window.location.href='mailto:support@kuzzboost.com'} />
                     </CardContent>
                 </Card>
+
+                <div className="text-center">
+                    <Button variant="ghost" onClick={handleSignOut} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                        <LogOut className="mr-2"/>
+                        Sign Out
+                    </Button>
+                </div>
             </div>
         </div>
     );
 };
 
-export default Account;
+export default DashboardHome;

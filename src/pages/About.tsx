@@ -52,7 +52,6 @@ const About = () => {
   return (
     <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
       <ParticleField />
-      <Navigation />
       
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
@@ -222,8 +221,7 @@ const About = () => {
           </div>
         </div>
       </section>
-      
-      <Footer />
+
     </div>
   );
 };
