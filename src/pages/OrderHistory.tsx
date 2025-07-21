@@ -9,8 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import jsPDF from 'jspdf';
 
 // Icon mapping
@@ -134,21 +132,18 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <Navigation />
-      
-      <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Home
+              Back to Dashboard
             </Button>
             <h1 className="font-clash text-3xl md:text-4xl font-bold text-primary">
               Order History
@@ -165,7 +160,7 @@ const OrderHistory = () => {
               <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-clash text-xl font-semibold text-primary mb-2">No orders yet</h3>
               <p className="text-muted-foreground mb-6">Start shopping to see your orders here!</p>
-              <Button onClick={() => navigate('/services')} className="glass-button">
+              <Button onClick={() => navigate('/dashboard/services')} className="glass-button">
                 Browse Services
               </Button>
             </div>
@@ -266,7 +261,7 @@ const OrderHistory = () => {
                           variant="ghost"
                           size="sm"
                           className="flex items-center gap-2"
-                          onClick={() => navigate(`/order-details/${order.orderId}`)}
+                          onClick={() => navigate(`/dashboard/order-details/${order.orderId}`)}
                         >
                           <Eye className="w-4 h-4" />
                           View Details
@@ -280,9 +275,6 @@ const OrderHistory = () => {
           )}
         </div>
       </div>
-      
-      <Footer />
-    </div>
   );
 };
 

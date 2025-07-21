@@ -1,10 +1,6 @@
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
-
 const PrivacyPolicy = () => {
     return (
         <div className="min-h-screen bg-gradient-hero">
-            <Navigation />
             <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto glass rounded-2xl p-8">
                     <h1 className="font-clash text-4xl font-bold text-primary mb-6">Privacy Policy</h1>
@@ -36,7 +32,6 @@ const PrivacyPolicy = () => {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 };

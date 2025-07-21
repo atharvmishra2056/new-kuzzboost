@@ -3,8 +3,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,12 +82,10 @@ const AccountSettings = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-hero">
-            <Navigation />
-            <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8 py-8">
                 <div className="max-w-2xl mx-auto space-y-8">
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="sm" onClick={() => navigate('/account')} className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/account')} className="flex items-center gap-2">
                             <ArrowLeft className="w-4 h-4" />
                             Back to Account
                         </Button>
@@ -177,8 +173,6 @@ const AccountSettings = () => {
                         </Card>
                     )}
                 </div>
-            </div>
-            <Footer />
         </div>
     );
 };

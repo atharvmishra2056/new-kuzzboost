@@ -5,8 +5,6 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { SiInstagram, SiYoutube, SiX, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat } from 'react-icons/si';
 import { motion } from "framer-motion";
 
@@ -38,7 +36,6 @@ const Wishlist = () => {
   if (wishlistItems.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-hero">
-        <Navigation cartItemCount={cartItems.length} />
         <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="glass rounded-2xl p-12">
@@ -58,14 +55,12 @@ const Wishlist = () => {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <Navigation cartItemCount={cartItems.length} />
       
       <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
@@ -164,8 +159,6 @@ const Wishlist = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

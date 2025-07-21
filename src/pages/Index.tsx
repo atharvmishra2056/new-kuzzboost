@@ -1,11 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
-import Navigation from "../components/Navigation";
 import HeroSection from "../components/HeroSection";
 import HowItWorks from "../components/HowItWorks";
 import Testimonials from "../components/Testimonials";
-import Footer from "../components/Footer";
 import ParticleField from "../components/ParticleField";
 import SocialProofFeed from "../components/SocialProofFeed";
 
@@ -22,11 +20,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
       <ParticleField />
-      <Navigation />
       <HeroSection />
       <HowItWorks />
       <Testimonials />
-      <Footer />
       <SocialProofFeed />
     </div>
   );

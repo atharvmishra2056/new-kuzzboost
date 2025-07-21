@@ -8,9 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
+import AddressSelector from "@/components/AddressSelector";
+import { Address } from "@/types/service";
 
 const OrderReview = () => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ const OrderReview = () => {
   const { currentUser } = useAuth();
   const { getSymbol, convert } = useCurrency();
 
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [formData, setFormData] = useState({
     email: currentUser?.email || "",
     firstName: "",
@@ -73,7 +74,7 @@ const OrderReview = () => {
       totalAmount: getTotalPrice()
     };
     localStorage.setItem('orderReviewData', JSON.stringify(orderData));
-    navigate('/checkout');
+    navigate('/dashboard/checkout');
   };
 
   const subtotal = getTotalPrice();
@@ -81,12 +82,12 @@ const OrderReview = () => {
 
   if (cartItems.length === 0) {
     return (
-        <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-[70vh]">
           <div className="text-center">
             <ShoppingCart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h2 className="font-clash text-2xl font-bold text-primary mb-2">Your cart is empty</h2>
             <p className="text-muted-foreground mb-6">Add some services to continue</p>
-            <Button onClick={() => navigate('/services')} className="glass-button">
+            <Button onClick={() => navigate('/dashboard/services')} className="glass-button">
               Browse Services
             </Button>
           </div>
@@ -95,10 +96,7 @@ const OrderReview = () => {
   }
 
   return (
-      <div className="min-h-screen bg-gradient-hero">
-        <Navigation />
-
-        <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
@@ -191,19 +189,44 @@ const OrderReview = () => {
                   </div>
                 </motion.div>
 
-                {/* Customer Information */}
+                {/* Address Selection */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                     className="glass rounded-2xl p-6"
                 >
+                  <AddressSelector
+                    selectedAddress={selectedAddress}
+                    onAddressSelect={setSelectedAddress}
+                    onAddressChange={(addressData) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        firstName: addressData.firstName || prev.firstName,
+                        lastName: addressData.lastName || prev.lastName,
+                        phone: addressData.phone || prev.phone,
+                        address: addressData.address || prev.address,
+                        city: addressData.city || prev.city,
+                        postalCode: addressData.postalCode || prev.postalCode,
+                        country: addressData.country || prev.country
+                      }));
+                    }}
+                  />
+                </motion.div>
+
+                {/* Customer Information */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="glass rounded-2xl p-6"
+                >
                   <h2 className="font-clash text-xl font-semibold text-primary mb-6">
-                    Customer Information
+                    Contact Information
                   </h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="md:col-span-2">
                       <Label htmlFor="email">Email Address *</Label>
                       <Input
                           id="email"
@@ -214,76 +237,6 @@ const OrderReview = () => {
                           onChange={handleInputChange}
                           className="mt-1"
                           placeholder="your@email.com"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
-                      <Input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          required
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="+91 9876543210"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="firstName">First Name *</Label>
-                      <Input
-                          id="firstName"
-                          name="firstName"
-                          required
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="John"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName">Last Name *</Label>
-                      <Input
-                          id="lastName"
-                          name="lastName"
-                          required
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="Doe"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="address">Address</Label>
-                      <Input
-                          id="address"
-                          name="address"
-                          value={formData.address}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="Street address"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                          id="city"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="Mumbai"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="postalCode">Postal Code</Label>
-                      <Input
-                          id="postalCode"
-                          name="postalCode"
-                          value={formData.postalCode}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="400001"
                       />
                     </div>
                   </div>
@@ -317,7 +270,7 @@ const OrderReview = () => {
                   <Button
                       onClick={handleProceedToPayment}
                       className="w-full glass-button text-lg py-6"
-                      disabled={!formData.email || !formData.firstName || !formData.lastName || !formData.phone}
+                      disabled={!formData.email || !selectedAddress}
                   >
                     Proceed to Payment
                   </Button>
@@ -330,9 +283,6 @@ const OrderReview = () => {
             </div>
           </div>
         </div>
-
-        <Footer />
-      </div>
   );
 };
 

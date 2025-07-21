@@ -260,18 +260,7 @@ const DashboardServices = () => {
                           </div>
                       )}
 
-                      <Button
-                          className="w-full glass-button group/btn"
-                          disabled={!service.tiers || service.tiers.length === 0}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedServiceForCalc(service);
-                          }}
-                      >
-                        <ShoppingCart
-                            className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform duration-300"/>
-                        Add to Cart
-                      </Button>
+=======
                     </div>
                   </div>
                 </motion.div>

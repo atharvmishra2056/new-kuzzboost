@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 
 const ViewCart = () => {
@@ -21,28 +19,21 @@ const ViewCart = () => {
 
   if (cartItems.length === 0) {
     return (
-        <div className="min-h-screen bg-gradient-hero">
-          <Navigation />
-          <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[70vh]">
-            <div className="text-center">
-              <ShoppingCart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h2 className="font-clash text-2xl font-bold text-primary mb-2">Your cart is empty</h2>
-              <p className="text-muted-foreground mb-6">Add some services to continue</p>
-              <Button onClick={() => navigate('/services')} className="glass-button">
-                Browse Services
-              </Button>
-            </div>
+        <div className="px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[70vh]">
+          <div className="text-center">
+            <ShoppingCart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="font-clash text-2xl font-bold text-primary mb-2">Your cart is empty</h2>
+            <p className="text-muted-foreground mb-6">Add some services to continue</p>
+            <Button onClick={() => navigate('/dashboard/services')} className="glass-button">
+              Browse Services
+            </Button>
           </div>
-          <Footer />
         </div>
     );
   }
 
   return (
-      <div className="min-h-screen bg-gradient-hero">
-        <Navigation />
-
-        <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
@@ -170,7 +161,7 @@ const ViewCart = () => {
 
                   <div className="space-y-3">
                     <Button
-                        onClick={() => navigate('/checkout/review')}
+                        onClick={() => navigate('/dashboard/checkout/review')}
                         className="w-full glass-button text-lg py-6"
                     >
                       Proceed to Checkout
@@ -193,9 +184,6 @@ const ViewCart = () => {
             </div>
           </div>
         </div>
-
-        <Footer />
-      </div>
   );
 };
 

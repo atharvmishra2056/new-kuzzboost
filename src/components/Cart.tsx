@@ -24,7 +24,7 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
 
   const handleCheckout = () => {
     onClose();
-    navigate('/cart');
+    navigate('dashboard/cart');
   };
 
   return (

@@ -1,6 +1,4 @@
 import { useEffect } from "react";
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import { motion, Variants } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +32,6 @@ const Services = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <Navigation />
       <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -115,7 +112,6 @@ const Services = () => {
           </div>
         </div>
       </section>
-      <Footer />
     </div>
   );
 };

@@ -3,8 +3,6 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { CheckCircle, Download, Home, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import { useCurrency } from "../context/CurrencyContext";
 
 const CheckoutSuccess = () => {
@@ -28,10 +26,7 @@ const CheckoutSuccess = () => {
   const orderId = `KZ${Date.now().toString().slice(-8)}`;
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      <Navigation />
-      
-      <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Success Animation */}
           <motion.div
@@ -188,16 +183,16 @@ const CheckoutSuccess = () => {
             transition={{ delay: 0.9 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link to="/order-history">
+            <Link to="/dashboard/orders">
               <Button className="glass-button flex items-center gap-2 w-full sm:w-auto">
                 <Package className="w-4 h-4" />
                 View Order History
               </Button>
             </Link>
-            <Link to="/">
+            <Link to="/dashboard">
               <Button variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
                 <Home className="w-4 h-4" />
-                Back to Home
+                Back to Dashboard
               </Button>
             </Link>
           </motion.div>
@@ -225,9 +220,6 @@ const CheckoutSuccess = () => {
           </motion.div>
         </div>
       </div>
-      
-      <Footer />
-    </div>
   );
 };
 

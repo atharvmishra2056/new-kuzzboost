@@ -8,8 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCurrency } from "../context/CurrencyContext";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from '@/integrations/supabase/client';
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import { Json } from "@/integrations/supabase/types";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -118,7 +116,7 @@ const Checkout = () => {
       localStorage.removeItem('cartItems');
       localStorage.removeItem('orderReviewData');
 
-      navigate('/checkout/success', {
+      navigate('/dashboard/checkout/success', {
         state: {
           orderDetails: { ...orderReview, orderId, transactionId },
           customerInfo: orderReview.customerInfo
@@ -140,7 +138,7 @@ const Checkout = () => {
 
   if (!orderReview) {
     return (
-        <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-[70vh]">
           <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
     );
@@ -149,16 +147,13 @@ const Checkout = () => {
   const { totalAmount } = orderReview;
 
   return (
-      <div className="min-h-screen bg-gradient-hero">
-        <Navigation />
-
-        <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
               <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate('/checkout/review')}
+                  onClick={() => navigate('/dashboard/checkout/review')}
                   className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -272,9 +267,6 @@ const Checkout = () => {
             </AnimatePresence>
           </div>
         </div>
-
-        <Footer />
-      </div>
   );
 };
 

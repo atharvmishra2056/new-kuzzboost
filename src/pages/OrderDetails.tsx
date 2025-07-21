@@ -8,8 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from '@/integrations/supabase/client';
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import { Order } from "@/types/service";
 import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
@@ -123,7 +121,7 @@ const OrderDetails = () => {
 
   if (loading) {
     return (
-        <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-[70vh]">
           <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
           <p className="ml-4 text-muted-foreground">Loading Order Details...</p>
         </div>
@@ -132,30 +130,23 @@ const OrderDetails = () => {
 
   if (!order) {
     return (
-        <div className="min-h-screen bg-gradient-hero">
-          <Navigation />
-          <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 text-center">
-            <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="font-clash text-2xl font-bold text-primary mb-2">Order Not Found</h2>
-            <p className="text-muted-foreground mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
-            <Button onClick={() => navigate('/order-history')} className="glass-button">
-              View Order History
-            </Button>
-          </div>
-          <Footer />
+        <div className="px-4 sm:px-6 lg:px-8 py-8 text-center">
+          <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="font-clash text-2xl font-bold text-primary mb-2">Order Not Found</h2>
+          <p className="text-muted-foreground mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
+          <Button onClick={() => navigate('/dashboard/orders')} className="glass-button">
+            View Order History
+          </Button>
         </div>
     );
   }
 
   return (
-      <div className="min-h-screen bg-gradient-hero">
-        <Navigation />
-
-        <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/order-history')} className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/orders')} className="flex items-center gap-2">
                 <ArrowLeft className="w-4 h-4" />
                 Back to Orders
               </Button>
@@ -271,9 +262,6 @@ const OrderDetails = () => {
             </div>
           </div>
         </div>
-
-        <Footer />
-      </div>
   );
 };
 

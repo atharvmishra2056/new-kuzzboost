@@ -1,12 +1,9 @@
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Mail, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ContactUs = () => {
     return (
         <div className="min-h-screen bg-gradient-hero">
-            <Navigation />
             <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-2xl mx-auto text-center">
                     <h1 className="font-clash text-4xl md:text-5xl font-bold text-primary mb-4">Get in Touch</h1>
@@ -47,7 +44,6 @@ const ContactUs = () => {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 };

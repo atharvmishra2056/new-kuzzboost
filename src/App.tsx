@@ -28,6 +28,7 @@ import Analytics from "@/pages/admin/Analytics.tsx";
 import AdminOrders from "@/pages/admin/Orders.tsx";
 import ManageServices from "@/pages/admin/ManageServices.tsx";
 import UserManagement from "@/pages/admin/UserManagement.tsx";
+import Announcements from "@/pages/admin/Announcements.tsx";
 import MainLayout from './layouts/MainLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 
@@ -76,6 +77,7 @@ function App() {
                   <Route path="/dashboard/terms" element={<TermsOfService />} />
                   <Route path="/dashboard/privacy" element={<PrivacyPolicy />} />
                   <Route path="/dashboard/refund-policy" element={<RefundPolicy />} />
+                  <Route path="/dashboard/contact" element={<ContactUs />} />
                 </Route>
 
                 {/* Admin Routes - Protected for admin users only */}
@@ -85,6 +87,7 @@ function App() {
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="services" element={<ManageServices />} />
                     <Route path="users" element={<UserManagement />} />
+                    <Route path="announcements" element={<Announcements />} />
                   </Route>
                 </Route>
               </Routes>

@@ -8,9 +8,11 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ShoppingCart, Heart, Settings, LifeBuoy, User as UserIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShoppingCart, Settings, LifeBuoy, User as UserIcon, MapPin, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from '@/hooks/use-toast';
+import AddressBook from '@/components/AddressBook';
 
 const StatCard = ({ icon, title, value, label }: { icon: React.ReactNode, title: string, value: number | string, label: string }) => (
     <motion.div whileHover={{ scale: 1.05 }} className="h-full">
@@ -77,11 +79,11 @@ const Account = () => {
 
     return (
         <div className="p-8">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="max-w-6xl mx-auto space-y-8">
                 {/* Page Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-primary font-clash">My Account</h1>
-                    <p className="text-muted-foreground mt-2">Manage your profile and account settings</p>
+                    <p className="text-muted-foreground mt-2">Manage your profile, addresses, and account settings</p>
                 </div>
 
                 {/* Profile Header */}
@@ -109,22 +111,54 @@ const Account = () => {
                 </motion.div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <StatCard icon={<ShoppingCart />} title="Total Orders" value={orderCount} label="Lifetime orders" />
-                    <StatCard icon={<Heart />} title="Wishlist Items" value={wishlistCount} label="Saved services" />
                     <StatCard icon={<UserIcon />} title="Loyalty Points" value="Coming Soon" label="Earn rewards" />
                 </div>
 
-                {/* Quick Actions */}
-                <Card className="glass">
-                    <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <ActionButton icon={<ShoppingCart className="mr-2"/>} title="View Order History" onClick={() => navigate('/dashboard/orders')} />
-                        <ActionButton icon={<Heart className="mr-2"/>} title="Manage Wishlist" onClick={() => navigate('/dashboard/wishlist')} />
-                        <ActionButton icon={<Settings className="mr-2"/>} title="Account Settings" onClick={() => navigate('/dashboard/account-settings')} />
-                        <ActionButton icon={<LifeBuoy className="mr-2"/>} title="Contact Support" onClick={() => window.location.href='mailto:support@kuzzboost.com'} />
-                    </CardContent>
-                </Card>
+                {/* Tabs for different sections */}
+                <Tabs defaultValue="overview" className="space-y-6">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="overview">Overview</TabsTrigger>
+                        <TabsTrigger value="addresses">Address Book</TabsTrigger>
+                        <TabsTrigger value="payment">Payment Methods</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="overview" className="space-y-6">
+                        {/* Quick Actions */}
+                        <Card className="glass">
+                            <CardHeader><CardTitle>Quick Actions</CardTitle></CardHeader>
+                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <ActionButton icon={<ShoppingCart className="mr-2"/>} title="View Order History" onClick={() => navigate('/dashboard/orders')} />
+                                <ActionButton icon={<Settings className="mr-2"/>} title="Account Settings" onClick={() => navigate('/dashboard/account-settings')} />
+                                <ActionButton icon={<MapPin className="mr-2"/>} title="Manage Addresses" onClick={() => {}} />
+                                <ActionButton icon={<LifeBuoy className="mr-2"/>} title="Contact Support" onClick={() => window.location.href='mailto:support@kuzzboost.com'} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="addresses">
+                        <AddressBook />
+                    </TabsContent>
+
+                    <TabsContent value="payment">
+                        <Card className="glass">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <CreditCard className="w-5 h-5" />
+                                    Payment Methods
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-12 text-center">
+                                <CreditCard className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                                <h3 className="text-lg font-semibold text-primary mb-2">Payment methods coming soon</h3>
+                                <p className="text-muted-foreground">
+                                    We're working on adding saved payment methods for faster checkout.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );
