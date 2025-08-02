@@ -84,10 +84,10 @@ const EditableFAQ: React.FC<EditableFAQProps> = ({ className }) => {
     <section className={`py-16 md:py-24 bg-background ${className}`}>
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-          <div className="inline-block bg-primary-light/20 text-primary font-semibold py-1 px-3 rounded-full text-sm mb-4">
+          <div className="inline-block bg-primary/10 text-primary font-semibold py-2 px-4 rounded-full text-sm mb-4">
             FAQs
           </div>
-          <h2 className="font-clash text-4xl md:text-5xl font-bold text-primary mb-4">
+          <h2 className="font-clash text-4xl md:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-muted-foreground">
@@ -95,15 +95,17 @@ const EditableFAQ: React.FC<EditableFAQProps> = ({ className }) => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {faqs.map((faq, index) => (
-            <div key={index} className="flex items-start space-x-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-primary-light/20 rounded-full flex items-center justify-center">
-                {getIconForCategory(faq.category)}
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-foreground mb-2">{faq.question}</h3>
-                <p className="text-muted-foreground">{faq.answer}</p>
+            <div key={index} className="glass rounded-2xl p-6 border border-border/30 hover:border-primary/30 transition-all duration-300">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  {getIconForCategory(faq.category)}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-clash font-semibold text-lg text-primary mb-3">{faq.question}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
+                </div>
               </div>
             </div>
           ))}

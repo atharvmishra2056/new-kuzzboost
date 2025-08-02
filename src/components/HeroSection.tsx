@@ -180,14 +180,61 @@ const HeroSection = () => {
             <span className="text-primary font-medium"> Professional, secure, and instant delivery.</span>
           </motion.p>
 
+          {/* Hero Video */}
+          <motion.div 
+            variants={itemVariants} 
+            className="mb-8 relative"
+          >
+            <div className="relative w-full max-w-2xl mx-auto aspect-video rounded-3xl overflow-hidden glass border border-border/30">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent-peach/10 to-accent-lavender/20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.div
+                  className="text-center"
+                  animate={{
+                    scale: [1, 1.05, 1],
+                    rotate: [0, 2, -2, 0],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <div className="text-6xl mb-4">🚀</div>
+                  <div className="text-lg font-medium text-primary">
+                    Your Growth Journey Starts Here
+                  </div>
+                </motion.div>
+              </div>
+              
+              {/* Animated particles */}
+              {[...Array(8)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 bg-accent-peach/60 rounded-full"
+                  animate={{
+                    x: [0, Math.random() * 400, 0],
+                    y: [0, Math.random() * 200, 0],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 3 + i * 0.5,
+                    repeat: Infinity,
+                    delay: i * 0.2,
+                  }}
+                />
+              ))}
+            </div>
+          </motion.div>
+
           {/* CTA Buttons */}
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Link
                 to="/services"
-                className="glass-button group flex items-center gap-3 text-lg"
+                className="glass-button group flex items-center gap-3 text-lg animate-breathing-glow"
             >
               <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-              Explore Services
+              Get Started Now
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
 

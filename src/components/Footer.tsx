@@ -68,8 +68,9 @@ const Footer = () => {
   const footerSections = isDashboard ? dashboardFooterSections : publicFooterSections;
 
   return (
-      <footer className="bg-gradient-to-t from-black/20 via-transparent to-transparent text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <footer className="relative bg-gradient-to-t from-primary/10 via-background to-background">
+        <div className="absolute inset-0 glass" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className={`grid gap-8 ${isDashboard ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-5'}`}>
             {/* KuzzBoost Info Section */}
             <div className={isDashboard ? "col-span-1" : "col-span-2 md:col-span-1"}>

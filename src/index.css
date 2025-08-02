@@ -173,6 +173,7 @@ body {
     backdrop-filter: var(--glass-backdrop);
     box-shadow: var(--glass-shadow), var(--glass-inner-shadow);
     position: relative;
+    overflow: hidden;
   }
 
   .glass::before {
@@ -184,10 +185,17 @@ body {
     bottom: 0;
     border-radius: inherit;
     background: linear-gradient(135deg,
-    hsla(0, 0%, 100%, 0.1),
-    hsla(0, 0%, 100%, 0.05)
+      hsla(0, 0%, 100%, 0.15),
+      hsla(0, 0%, 100%, 0.05),
+      hsla(0, 0%, 100%, 0.1)
     );
     pointer-events: none;
+    z-index: 1;
+  }
+
+  .glass > * {
+    position: relative;
+    z-index: 2;
   }
 
   /* Enhanced interactive glassmorphic button */
@@ -286,6 +294,17 @@ body {
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Hide default scrollbar on body to prevent dual scrollbars */
+  body::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+
+  /* For Firefox */
+  html {
+    scrollbar-width: none;
   }
 
   /* Mobile-first responsive improvements */
