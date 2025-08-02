@@ -13,7 +13,7 @@ const ParticleField = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: 0, y: 0 });
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -76,7 +76,7 @@ const ParticleField = () => {
         
         if (size > 0.1) {
           ctx.beginPath();
-          ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+          ctx.arc(particle.x, particle.y, Math.max(0.1, size), 0, Math.PI * 2);
           
           // Create gradient for particle
           const gradient = ctx.createRadialGradient(

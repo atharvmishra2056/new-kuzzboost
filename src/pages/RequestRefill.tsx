@@ -13,11 +13,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Database } from '@/types/supabase';
 
-type OrderItem = Database['public']['Tables']['order_items']['Row'] & {
+interface OrderItem {
+  id: number;
   title: string;
   platform: string;
+  quantity: number;
+  service_quantity: number;
+  price: number;
+  userInput: string;
   refill_eligible?: boolean;
-};
+}
 
 type Order = Database['public']['Tables']['orders']['Row'] & {
   items: OrderItem[];
