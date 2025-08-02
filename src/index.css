@@ -156,7 +156,11 @@
     @apply border-border;
   }
 
-  body {
+  html {
+  scroll-behavior: smooth;
+}
+
+body {
     @apply bg-background text-foreground font-sans;
   }
 }
@@ -345,6 +349,14 @@
   .platform-logo:hover {
     transform: scale(1.1) rotate(5deg);
     filter: grayscale(0%) drop-shadow(0 8px 20px hsla(25, 30%, 20%, 0.3));
+  }
+
+  /* Timeline SVG Gradient Colors */
+  .timeline-gradient-start {
+    stop-color: hsl(var(--primary-light));
+  }
+  .timeline-gradient-end {
+    stop-color: hsl(var(--primary));
   }
 
   /* Enhanced morphing blob animation with particles */

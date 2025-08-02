@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Service } from '@/types/service';
 
 const MAX_RECENT_ITEMS = 8;
@@ -23,7 +23,7 @@ export const useRecentlyViewed = () => {
     localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
   }, [recentlyViewed]);
 
-  const addToRecentlyViewed = (service: Service) => {
+  const addToRecentlyViewed = useCallback((service: Service) => {
     setRecentlyViewed(prev => {
       // Remove if already exists
       const filtered = prev.filter(item => item.id !== service.id);
@@ -32,7 +32,7 @@ export const useRecentlyViewed = () => {
       // Limit to MAX_RECENT_ITEMS
       return updated.slice(0, MAX_RECENT_ITEMS);
     });
-  };
+  }, []);
 
   const clearRecentlyViewed = () => {
     setRecentlyViewed([]);

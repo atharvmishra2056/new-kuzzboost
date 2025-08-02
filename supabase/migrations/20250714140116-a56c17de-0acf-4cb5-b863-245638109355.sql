@@ -4,7 +4,7 @@
 -- Create profiles table for user data
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   full_name TEXT,
   email TEXT NOT NULL,
   phone TEXT,

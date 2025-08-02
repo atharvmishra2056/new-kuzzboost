@@ -91,8 +91,15 @@ export default {
 				'gradient-glass': 'var(--gradient-glass)',
 				'gradient-accent': 'var(--gradient-accent)',
 				'gradient-hero': 'var(--gradient-hero)',
-				'gradient-vibrant': 'var(--gradient-vibrant)'
+				'gradient-vibrant': 'var(--gradient-vibrant)',
+        'grid-pattern': `
+          linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+          linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)
+        `
 			},
+			backgroundSize: {
+        'grid-size': '40px 40px',
+      },
 			backdropBlur: {
 				'glass': '20px'
 			},

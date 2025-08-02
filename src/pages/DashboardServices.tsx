@@ -135,7 +135,7 @@ const DashboardServices = () => {
 
   return (
     <div>
-      <section className="pb-12 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="font-clash text-5xl md:text-7xl font-bold text-primary mb-6">Our Services</h1>
@@ -259,8 +259,6 @@ const DashboardServices = () => {
                             <span className="text-sm">Contact for pricing</span>
                           </div>
                       )}
-
-=======
                     </div>
                   </div>
                 </motion.div>

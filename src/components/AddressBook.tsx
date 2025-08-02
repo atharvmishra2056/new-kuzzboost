@@ -61,7 +61,19 @@ const AddressBook = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAddresses(data || []);
+      const mapped = (data || []).map((row: any) => ({
+        id: row.id,
+        full_name: `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim() || row.label || 'Name',
+        street: row.address_line_1,
+        city: row.city,
+        state: row.state,
+        zip_code: row.postal_code,
+        country: row.country,
+        phone: row.phone,
+        is_default: row.is_default,
+        created_at: row.created_at,
+      }));
+      setAddresses(mapped);
     } catch (error) {
       console.error('Error fetching addresses:', error);
       toast({
@@ -89,9 +101,21 @@ const AddressBook = () => {
     try {
       if (editingAddress) {
         // Update existing address
+        const nameParts = formData.full_name.split(' ');
+        const payload = {
+          first_name: nameParts.shift() ?? '',
+          last_name: nameParts.join(' '),
+          address_line_1: formData.street,
+          city: formData.city,
+          state: formData.state,
+          postal_code: formData.zip_code,
+          country: formData.country,
+          phone: formData.phone,
+          label: 'Primary',
+        };
         const { error } = await supabase
           .from('addresses')
-          .update(formData)
+          .update(payload)
           .eq('id', editingAddress.id);
 
         if (error) throw error;
@@ -102,13 +126,23 @@ const AddressBook = () => {
         });
       } else {
         // Create new address
+        const namePartsNew = formData.full_name.split(' ');
+        const payloadNew = {
+          user_id: currentUser?.id,
+          is_default: addresses.length === 0,
+          first_name: namePartsNew.shift() ?? '',
+          last_name: namePartsNew.join(' '),
+          address_line_1: formData.street,
+          city: formData.city,
+          state: formData.state,
+          postal_code: formData.zip_code,
+          country: formData.country,
+          phone: formData.phone,
+          label: 'Primary',
+        };
         const { error } = await supabase
           .from('addresses')
-          .insert({
-            ...formData,
-            user_id: currentUser?.id,
-            is_default: addresses.length === 0 // First address is default
-          });
+          .insert(payloadNew);
 
         if (error) throw error;
         
@@ -242,7 +276,7 @@ const AddressBook = () => {
         </div>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openAddModal} className="glass-button">
+            <Button onClick={openAddModal} className="glass-button w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Add Address
             </Button>
@@ -347,7 +381,7 @@ const AddressBook = () => {
             <MapPin className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold text-primary mb-2">No addresses yet</h3>
             <p className="text-muted-foreground mb-6">Add your first shipping address to get started</p>
-            <Button onClick={openAddModal} className="glass-button">
+            <Button onClick={openAddModal} className="glass-button w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Add Your First Address
             </Button>

@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { SiInstagram, SiYoutube, SiDiscord, SiTwitch, SiSpotify, SiWhatsapp, SiSnapchat, SiX } from 'react-icons/si';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 
 // --- Interfaces and Data ---
 interface ServiceTier {
@@ -28,6 +30,7 @@ interface Service {
     features: string[];
     description: string;
     badge: string;
+    refill_eligible: boolean;
 }
 
 const iconMap: { [key: string]: ReactElement } = {
@@ -41,7 +44,7 @@ const iconMap: { [key: string]: ReactElement } = {
     SiSnapchat: <SiSnapchat className="w-6 h-6 text-[#FFFC00]" />,
 };
 
-// --- Zod Schema for Validation (Corrected) ---
+// --- Zod Schema for Validation ---
 const serviceSchema = z.object({
     title: z.string().min(3, "Title must be at least 3 characters long."),
     platform: z.string().min(1, "Platform is required."),
@@ -79,21 +82,35 @@ const ManageServices = () => {
     const fetchServices = async () => {
         setLoading(true);
         try {
-            const { data: servicesData, error } = await supabase
+            const { data: servicesData, error: servicesError } = await supabase
                 .from('services')
                 .select('*')
                 .order('id');
-                
-            if (error) throw error;
-            
-            const services = servicesData?.map(data => ({
-                ...data,
-                icon: iconMap[data.icon_name],
-                iconName: data.icon_name,
-                tiers: [], // Will need to fetch separately if needed
-            })) || [];
-            
-            setServices(services);
+            if (servicesError) {
+                toast.error('Failed to fetch services.');
+                throw servicesError;
+            }
+
+            const { data: tiersData, error: tiersError } = await supabase
+                .from('service_tiers')
+                .select('*');
+            if (tiersError) {
+                toast.error('Failed to fetch service tiers.');
+                throw tiersError;
+            }
+
+            const servicesWithTiers = servicesData.map(service => {
+                const serviceTiers = tiersData.filter(tier => tier.service_id === service.id);
+                return {
+                    ...service,
+                    icon: iconMap[service.icon_name],
+                    iconName: service.icon_name,
+                    tiers: serviceTiers.map(({ quantity, price }) => ({ quantity, price })),
+                    refill_eligible: service.refill_eligible ?? false,
+                };
+            });
+
+            setServices(servicesWithTiers);
         } catch (error) {
             console.error("Error fetching services:", error);
         } finally {
@@ -108,10 +125,10 @@ const ManageServices = () => {
     const handleOpenDialog = (service: Service | null = null) => {
         setEditingService(service);
         if (service) {
-            // Map the features array of strings to an array of objects for the form
             reset({
                 ...service,
-                features: service.features.map(f => ({ value: f }))
+                features: service.features.map(f => ({ value: f })),
+                tiers: service.tiers.length > 0 ? service.tiers : [{ quantity: 1000, price: 100 }]
             });
         } else {
             reset({
@@ -122,18 +139,39 @@ const ManageServices = () => {
         setIsDialogOpen(true);
     };
 
+    const handleRefillToggle = async (service: Service) => {
+        const newStatus = !service.refill_eligible;
+
+        setServices(currentServices =>
+            currentServices.map(s =>
+                s.id === service.id ? { ...s, refill_eligible: newStatus } : s
+            )
+        );
+
+        try {
+            const { error } = await supabase
+                .from('services')
+                .update({ refill_eligible: newStatus })
+                .eq('id', service.id);
+
+            if (error) throw error;
+
+            toast.success(`'${service.title}' refill status updated.`);
+        } catch (error) {
+            console.error("Error updating refill status: ", error);
+            toast.error("Failed to update refill status.");
+            setServices(currentServices =>
+                currentServices.map(s =>
+                    s.id === service.id ? { ...s, refill_eligible: !newStatus } : s
+                )
+            );
+        }
+    };
+
     const onSubmit = async (data: ServiceFormData) => {
         try {
-            let serviceId;
-            if (editingService) {
-                serviceId = editingService.id;
-            } else {
-                const latestService = services.reduce((max, s) => s.id > max.id ? s : max, { id: 0 });
-                serviceId = latestService.id + 1;
-            }
-
-            const dataToSave = {
-                id: serviceId,
+            const serviceData = {
+                ...(editingService ? { id: editingService.id } : {}),
                 title: data.title,
                 platform: data.platform,
                 icon_name: data.iconName,
@@ -142,33 +180,50 @@ const ManageServices = () => {
                 rating: data.rating,
                 reviews: data.reviews,
                 features: data.features.map(f => f.value),
+                refill_eligible: editingService ? editingService.refill_eligible : false,
             };
 
-            const { error } = await supabase
+            const { data: savedService, error: serviceError } = await supabase
                 .from('services')
-                .upsert(dataToSave);
-                
-            if (error) throw error;
+                .upsert(serviceData)
+                .select()
+                .single();
 
+            if (serviceError) throw serviceError;
+
+            const serviceId = savedService.id;
+
+            await supabase.from('service_tiers').delete().eq('service_id', serviceId);
+
+            const tiersToInsert = data.tiers.map(tier => ({
+                service_id: serviceId,
+                quantity: tier.quantity,
+                price: tier.price,
+            }));
+
+            const { error: tiersError } = await supabase.from('service_tiers').insert(tiersToInsert);
+
+            if (tiersError) throw tiersError;
+
+            toast.success(`Service '${savedService.title}' has been ${editingService ? 'updated' : 'created'} successfully.`);
             setIsDialogOpen(false);
             await fetchServices();
         } catch (error) {
             console.error("Error saving service: ", error);
+            toast.error('Failed to save service.');
         }
     };
 
-    const handleDelete = async (serviceId: number) => {
-        if (window.confirm("Are you sure you want to delete this service?")) {
+    const handleDelete = async (serviceId: number, serviceTitle: string) => {
+        if (window.confirm(`Are you sure you want to delete the service: "${serviceTitle}"?`)) {
             try {
-                const { error } = await supabase
-                    .from('services')
-                    .delete()
-                    .eq('id', serviceId);
-                    
+                const { error } = await supabase.from('services').delete().eq('id', serviceId);
                 if (error) throw error;
+                toast.success(`Service '${serviceTitle}' deleted successfully.`);
                 await fetchServices();
             } catch (error) {
                 console.error("Error deleting service: ", error);
+                toast.error('Failed to delete service.');
             }
         }
     };
@@ -272,6 +327,7 @@ const ManageServices = () => {
                             <TableHead>Icon</TableHead>
                             <TableHead>Title</TableHead>
                             <TableHead>Platform</TableHead>
+                            <TableHead className="text-center">Refill Eligible</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -282,9 +338,16 @@ const ManageServices = () => {
                                 <TableCell>{service.icon}</TableCell>
                                 <TableCell className="font-medium">{service.title}</TableCell>
                                 <TableCell>{service.platform}</TableCell>
+                                <TableCell className="text-center">
+                                    <Switch
+                                        checked={service.refill_eligible}
+                                        onCheckedChange={() => handleRefillToggle(service)}
+                                        aria-label="Toggle refill eligibility"
+                                    />
+                                </TableCell>
                                 <TableCell className="flex gap-2">
                                     <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(service)}><Edit className="h-4 w-4"/></Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(service.id)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(service.id, service.title)}><Trash2 className="h-4 w-4 text-destructive"/></Button>
                                 </TableCell>
                             </TableRow>
                         ))}

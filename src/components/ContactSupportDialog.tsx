@@ -1,16 +1,20 @@
 import { useState } from "react";
+import TawkChatModal from "./TawkChatModal";
 import { Mail, MessageCircle, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+
 
 interface ContactSupportDialogProps {
   children: React.ReactNode;
 }
 
 const ContactSupportDialog = ({ children }: ContactSupportDialogProps) => {
+  
   const [isOpen, setIsOpen] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
+  const [isChatModalOpen, setChatModalOpen] = useState(false);
   const { toast } = useToast();
 
   const supportEmail = "support@kuzzboost.com";
@@ -39,7 +43,8 @@ const ContactSupportDialog = ({ children }: ContactSupportDialogProps) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -84,18 +89,14 @@ const ContactSupportDialog = ({ children }: ContactSupportDialogProps) => {
             </Button>
           </div>
 
-          {/* Chat Support - Coming Soon */}
+          {/* Chat Support */}
           <div className="space-y-3">
             <Button
-              disabled
-              className="w-full flex items-center justify-center gap-3 h-12 opacity-50 cursor-not-allowed"
-              variant="outline"
+              onClick={() => setChatModalOpen(true)}
+              className="w-full flex items-center justify-center gap-3 h-12 glass-button"
             >
               <MessageCircle className="w-5 h-5" />
-              <div className="flex flex-col items-start">
-                <span className="font-medium">Chat With Us</span>
-                <span className="text-xs">Coming Soon</span>
-              </div>
+              <span className="font-medium">Chat With Us</span>
             </Button>
           </div>
 
@@ -105,6 +106,8 @@ const ContactSupportDialog = ({ children }: ContactSupportDialogProps) => {
         </div>
       </DialogContent>
     </Dialog>
+      <TawkChatModal isOpen={isChatModalOpen} onClose={() => setChatModalOpen(false)} />
+    </>
   );
 };
 

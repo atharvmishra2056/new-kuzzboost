@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -14,15 +15,33 @@ import { motion } from "framer-motion";
 import { useToast } from '@/hooks/use-toast';
 import { useAnnouncements, Announcement } from '@/hooks/useAnnouncements';
 
+const sitePages = [
+  { label: 'Home', value: '/' },
+  { label: 'Services', value: '/services' },
+  { label: 'About Us', value: '/about' },
+  { label: 'Contact Us', value: '/contact' },
+  { label: 'Dashboard', value: '/dashboard' },
+  { label: 'Dashboard - Services', value: '/dashboard/services' },
+  { label: 'Dashboard - Orders', value: '/dashboard/orders' },
+  { label: 'Dashboard - Wishlist', value: '/dashboard/wishlist' },
+  { label: 'Dashboard - Cart', value: '/dashboard/cart' },
+  { label: 'Dashboard - Account Settings', value: '/dashboard/account-settings' },
+  { label: 'Terms of Service', value: '/terms' },
+  { label: 'Privacy Policy', value: '/privacy' },
+  { label: 'Refund Policy', value: '/refund-policy' },
+];
+
 const Announcements = () => {
-  const { announcements, loading, createAnnouncement, updateAnnouncement, deleteAnnouncement } = useAnnouncements();
+  const { announcements, loading, createAnnouncement, updateAnnouncement, deleteAnnouncement, toggleAnnouncementActive } = useAnnouncements();
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    is_active: true
+    is_active: true,
+    button_text: '',
+    button_link: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,17 +57,33 @@ const Announcements = () => {
     }
 
     try {
+      // Prepare the data to be saved
+      const announcementData = {
+        ...formData,
+        // Ensure we're not sending empty strings for optional fields
+        button_text: formData.button_text || null,
+        button_link: formData.button_link || null
+      };
+
       if (editingAnnouncement) {
-        const { error } = await updateAnnouncement(editingAnnouncement.id, formData);
-        if (error) throw error;
+        console.log('Updating announcement:', editingAnnouncement.id, announcementData);
+        const { error } = await updateAnnouncement(editingAnnouncement.id, announcementData);
+        if (error) {
+          console.error('Update error details:', error);
+          throw error;
+        }
         
         toast({
           title: "Success",
           description: "Announcement updated successfully",
         });
       } else {
-        const { error } = await createAnnouncement(formData);
-        if (error) throw error;
+        console.log('Creating new announcement:', announcementData);
+        const { error } = await createAnnouncement(announcementData);
+        if (error) {
+          console.error('Create error details:', error);
+          throw error;
+        }
         
         toast({
           title: "Success",
@@ -61,13 +96,19 @@ const Announcements = () => {
       setFormData({
         title: '',
         description: '',
-        is_active: true
+        is_active: true,
+        button_text: '',
+        button_link: ''
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving announcement:', error);
+      
+      // More detailed error message
+      const errorMessage = error?.message || 'An unknown error occurred';
+      
       toast({
         title: "Error",
-        description: "Failed to save announcement",
+        description: `Failed to save announcement: ${errorMessage}`,
         variant: "destructive",
       });
     }
@@ -78,7 +119,9 @@ const Announcements = () => {
     setFormData({
       title: announcement.title,
       description: announcement.description,
-      is_active: announcement.is_active
+      is_active: announcement.is_active,
+      button_text: announcement.button_text || '',
+      button_link: announcement.button_link || ''
     });
     setIsModalOpen(true);
   };
@@ -106,9 +149,7 @@ const Announcements = () => {
 
   const handleToggleActive = async (announcement: Announcement) => {
     try {
-      const { error } = await updateAnnouncement(announcement.id, {
-        is_active: !announcement.is_active
-      });
+      const { error } = await toggleAnnouncementActive(announcement.id);
       if (error) throw error;
       
       toast({
@@ -130,9 +171,19 @@ const Announcements = () => {
     setFormData({
       title: '',
       description: '',
-      is_active: true
+      is_active: true,
+      button_text: '',
+      button_link: ''
     });
     setIsModalOpen(true);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData({ ...formData, [name]: value });
   };
 
   if (loading) {
@@ -170,8 +221,9 @@ const Announcements = () => {
                 <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
+                  name="title"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={handleChange}
                   placeholder="e.g., Summer Sale - Up to 50% Off!"
                   required
                 />
@@ -180,12 +232,41 @@ const Announcements = () => {
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
+                  name="description"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={handleChange}
                   placeholder="Describe the announcement or promotion..."
                   rows={3}
                   required
                 />
+              </div>
+              <div>
+                <Label htmlFor="button_text">Button Text</Label>
+                <Input
+                  id="button_text"
+                  name="button_text"
+                  value={formData.button_text}
+                  onChange={handleChange}
+                  placeholder="e.g., Shop Now, Learn More"
+                />
+              </div>
+              <div>
+                <Label htmlFor="button_link">Button Link</Label>
+                <Select
+                  value={formData.button_link || ''}
+                  onValueChange={(value) => handleSelectChange('button_link', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a page to link to" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sitePages.map((page) => (
+                      <SelectItem key={page.value} value={page.value}>
+                        {page.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch

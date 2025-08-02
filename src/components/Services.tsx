@@ -62,8 +62,21 @@ export const useServices = () => {
     }
   };
 
-  useEffect(() => {
+    useEffect(() => {
     fetchServices();
+
+    const channel = supabase.channel('services-realtime-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, async (payload) => {
+        await fetchServices(); // Refetch all services if a service is added/deleted/updated
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_tiers' }, async (payload) => {
+        await fetchServices(); // Refetch all services if a tier is added/deleted/updated
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return { services, loading, refetch: fetchServices };

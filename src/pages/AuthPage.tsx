@@ -11,7 +11,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useToast } from "@/hooks/use-toast";
 import { MailCheck } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/hooks/useWishlist';
+import { Service } from '@/types/service';
+
+interface LocationState {
+  returnTo?: string;
+  action?: 'addToCart' | 'saveForLater';
+  service?: Service;
+  quantity?: number;
+  price?: number;
+  userInput?: string;
+}
 
 const AuthPage = () => {
     const [email, setEmail] = useState('');
@@ -23,18 +35,54 @@ const AuthPage = () => {
     const { toast } = useToast();
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentUser } = useAuth(); // Get currentUser from context
+    const { currentUser } = useAuth();
+    const { addToCart } = useCart();
+    const { addToWishlist } = useWishlist();
 
     const searchParams = new URLSearchParams(location.search);
     const defaultTab = searchParams.get('tab') || 'signin';
 
-    // This useEffect will redirect the user if they are already logged in
-    // or after they successfully log in.
+    // Persist location state to handle post-auth actions
+    useEffect(() => {
+        const state = location.state as LocationState;
+        if (state?.action && state.service) {
+            sessionStorage.setItem('postAuthAction', JSON.stringify(state));
+        }
+    }, [location.state]);
+
     useEffect(() => {
         if (currentUser) {
-            navigate('/dashboard');
+            const postAuthActionString = sessionStorage.getItem('postAuthAction');
+            let state: LocationState | null = null;
+
+            if (postAuthActionString) {
+                state = JSON.parse(postAuthActionString);
+                sessionStorage.removeItem('postAuthAction');
+            } else {
+                state = location.state as LocationState;
+            }
+
+            if (state?.action && state.service) {
+                if (state.action === 'addToCart' && state.quantity && state.price) {
+                    addToCart(state.service, state.quantity, state.price, state.userInput || '');
+                    toast({ title: 'Item added to cart!' });
+                } else if (state.action === 'saveForLater') {
+                    addToWishlist(state.service);
+                    toast({ title: 'Item saved for later!' });
+                }
+
+                if (state.returnTo) {
+                    navigate(state.returnTo, { replace: true });
+                } else {
+                    navigate('/dashboard', { replace: true });
+                }
+            } else if (state?.returnTo) {
+                navigate(state.returnTo, { replace: true });
+            } else {
+                navigate('/dashboard', { replace: true });
+            }
         }
-    }, [currentUser, navigate]);
+    }, [currentUser, navigate, location.state, addToCart, addToWishlist, toast]);
 
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();

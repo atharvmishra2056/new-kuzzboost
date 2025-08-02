@@ -40,7 +40,7 @@ const ViewCart = () => {
               <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate('/services')}
+                  onClick={() => navigate('/dashboard/services')}
                   className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -168,9 +168,9 @@ const ViewCart = () => {
                     </Button>
 
                     <Button
-                        variant="outline"
-                        onClick={() => navigate('/services')}
-                        className="w-full"
+                        variant="secondary"
+                        onClick={() => navigate('/dashboard/services')}
+                        className="w-full text-lg py-6"
                     >
                       Continue Shopping
                     </Button>

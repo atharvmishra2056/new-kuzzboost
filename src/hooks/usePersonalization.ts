@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Service } from '@/types/service';
 
 interface UserPreferences {
@@ -31,7 +31,7 @@ export const usePersonalization = () => {
     localStorage.setItem('userPreferences', JSON.stringify(preferences));
   }, [preferences]);
 
-  const trackServiceView = (service: Service) => {
+  const trackServiceView = useCallback((service: Service) => {
     setPreferences(prev => ({
       ...prev,
       viewHistory: [
@@ -39,7 +39,7 @@ export const usePersonalization = () => {
         ...prev.viewHistory.slice(0, 49) // Keep last 50 views
       ]
     }));
-  };
+  }, []);
 
   const updateFavoriteCategories = (category: string) => {
     setPreferences(prev => {

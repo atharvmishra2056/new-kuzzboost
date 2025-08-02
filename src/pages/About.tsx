@@ -3,16 +3,17 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import ParticleField from "../components/ParticleField";
 import { Code, Lightbulb, Users, Target, Star, Award } from "lucide-react";
+import { useHref } from "react-router-dom";
 
 const About = () => {
   const [hoveredFounder, setHoveredFounder] = useState<string | null>(null);
 
-  const founders = [
+  const teamMembers = [
     {
       name: "Daksh",
       role: "Founder & CEO",
       bio: "Visionary entrepreneur with 5+ years in social media marketing. Daksh founded KuzzBoost with the mission to democratize social media growth for creators and businesses worldwide.",
-      avatar: "👨‍💼",
+      avatar: "daksh.png",
       specialties: ["Strategy", "Leadership", "Innovation"],
       achievements: ["10K+ Clients Served", "99% Success Rate", "Industry Pioneer"]
     },
@@ -20,9 +21,49 @@ const About = () => {
       name: "Atharv",
       role: "Co-Founder & Lead Developer",
       bio: "Full-stack developer and tech enthusiast who brings cutting-edge technology to social media growth. Atharv ensures our platform delivers the most advanced and secure growth solutions.",
-      avatar: "👨‍💻",
+      avatar: "atharv.webp",
       specialties: ["Development", "Security", "Automation"],
       achievements: ["Platform Architecture", "Security Systems", "AI Integration"]
+    },
+    {
+      name: "Asad Saifi",
+      role: "Head Manager - Marketing",
+      bio: "A strategic marketing leader with a passion for building brands and driving growth. Asad leads our marketing efforts with creativity and data-driven insights.",
+      avatar: "Saifi.webp",
+      specialties: ["Brand Strategy", "Digital Marketing", "Team Leadership"],
+      achievements: ["Led 5+ Major Campaigns", "200% ROI Increase", "Built High-Performing Team"]
+    },
+    {
+      name: "Kavy Chauhan",
+      role: "Marketing",
+      bio: "A creative marketeer who excels at crafting compelling campaigns that resonate with audiences and drive engagement.",
+      avatar: "kavy.webp",
+      specialties: ["Content Creation", "Social Media", "Campaign Management"],
+      achievements: ["Viral Campaign Creator", "Grew Socials by 50K", "Top Ad Converter"]
+    },
+    {
+      name: "Ranbir Khurana",
+      role: "Marketing",
+      bio: "Analytical and results-oriented marketer specializing in performance marketing and customer acquisition.",
+      avatar: "ranbir.webp",
+      specialties: ["PPC Advertising", "SEO", "Data Analysis"],
+      achievements: ["Managed $1M+ Ad Spend", "Top 1% SEO Ranker", "Data-Driven Strategist"]
+    },
+    {
+      name: "Krish Kumar",
+      role: "Investor",
+      bio: "An experienced investor with a keen eye for disruptive technologies. Krish provides strategic guidance and support to fuel our growth.",
+      avatar: "krish.webp",
+      specialties: ["Venture Capital", "Financial Strategy", "Market Analysis"],
+      achievements: ["Seed Round Leader", "Strategic Advisor", "Fintech Expert"]
+    },
+    {
+      name: "Atharv Upadhyay",
+      role: "Marketing",
+      bio: "A dynamic marketer with expertise in community building and influencer partnerships. Atharv connects KuzzBoost with key voices in the industry.",
+      avatar: "https://placehold.co/128x128/E9D5FF/4C1D95?text=🤝&font=sans",
+      specialties: ["Community Management", "Influencer Outreach", "Partnerships"],
+      achievements: ["Built 100K+ Community", "Secured 50+ Partnerships", "Brand Ambassador Program Lead"]
     }
   ];
 
@@ -57,7 +98,7 @@ const About = () => {
       <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-clash text-5xl md:text-7xl font-bold text-primary mb-6">
-            The Visionaries Behind KuzzBoost
+            Meet the KuzzBoost Team
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Meet the innovative minds who are revolutionizing social media growth 
@@ -69,18 +110,18 @@ const About = () => {
       {/* Founders Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {founders.map((founder, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {teamMembers.map((member, index) => (
               <div
-                key={founder.name}
+                key={member.name}
                 className="stagger-item relative group"
-                style={{ animationDelay: `${index * 0.3}s` }}
-                onMouseEnter={() => setHoveredFounder(founder.name)}
+                style={{ animationDelay: `${index * 0.2}s` }}
+                onMouseEnter={() => setHoveredFounder(member.name)}
                 onMouseLeave={() => setHoveredFounder(null)}
               >
                 <div className="glass rounded-3xl p-8 md:p-12 h-full relative overflow-hidden">
                   {/* Background particles effect */}
-                  {hoveredFounder === founder.name && (
+                  {hoveredFounder === member.name && (
                     <div className="absolute inset-0 pointer-events-none">
                       {[...Array(12)].map((_, i) => (
                         <div
@@ -99,31 +140,31 @@ const About = () => {
 
                   <div className="relative z-10">
                     {/* Avatar */}
-                    <div className="text-8xl mb-6 transform group-hover:scale-110 transition-transform duration-500">
-                      {founder.avatar}
+                    <div className="w-32 h-32 mb-6 mx-auto transform group-hover:scale-110 transition-transform duration-500 rounded-full overflow-hidden border-4 border-primary/20 bg-primary/5">
+                      <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
                     </div>
 
                     {/* Name & Role */}
-                    <h3 className="font-clash text-3xl font-bold text-primary mb-2">
-                      {founder.name}
+                    <h3 className="font-clash text-2xl font-bold text-primary mb-1">
+                      {member.name}
                     </h3>
-                    <div className="text-accent-peach font-semibold mb-6">
-                      {founder.role}
+                    <div className="text-accent-peach font-semibold mb-4">
+                      {member.role}
                     </div>
 
                     {/* Bio */}
-                    <p className="text-muted-foreground mb-8 leading-relaxed">
-                      {founder.bio}
+                    <p className="text-muted-foreground mb-6 leading-relaxed text-sm">
+                      {member.bio}
                     </p>
 
                     {/* Specialties */}
-                    <div className="mb-8">
-                      <h4 className="font-semibold text-primary mb-4 flex items-center gap-2">
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-primary mb-3 flex items-center gap-2">
                         <Star className="w-4 h-4" />
                         Specialties
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {founder.specialties.map((specialty) => (
+                        {member.specialties.map((specialty) => (
                           <span
                             key={specialty}
                             className="glass rounded-full px-3 py-1 text-sm font-medium text-primary border border-primary/20"
@@ -136,12 +177,12 @@ const About = () => {
 
                     {/* Achievements */}
                     <div>
-                      <h4 className="font-semibold text-primary mb-4 flex items-center gap-2">
+                      <h4 className="font-semibold text-primary mb-3 flex items-center gap-2">
                         <Award className="w-4 h-4" />
                         Key Achievements
                       </h4>
                       <div className="space-y-2">
-                        {founder.achievements.map((achievement) => (
+                        {member.achievements.map((achievement) => (
                           <div key={achievement} className="flex items-center gap-2 text-sm text-muted-foreground">
                             <div className="w-1.5 h-1.5 rounded-full bg-accent-lavender" />
                             {achievement}
@@ -160,7 +201,7 @@ const About = () => {
       {/* Our Values */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="font-clash text-4xl md:text-5xl font-bold text-primary mb-6">
               Our Core Values
             </h2>
@@ -177,10 +218,10 @@ const About = () => {
                 className="stagger-item service-card text-center"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="text-accent-peach mb-4 mx-auto w-fit">
+                <div className="text-accent-peach mb-3 mx-auto w-fit">
                   {value.icon}
                 </div>
-                <h3 className="font-clash text-xl font-semibold text-primary mb-4">
+                <h3 className="font-clash text-xl font-semibold text-primary mb-2">
                   {value.title}
                 </h3>
                 <p className="text-muted-foreground">

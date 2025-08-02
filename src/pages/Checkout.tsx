@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from "@/integrations/supabase/types";
 import { useToast } from "@/components/ui/use-toast";
+import { useCart } from "../context/CartContext";
 
 // --- Interfaces ---
 interface CheckoutItem {
@@ -45,6 +46,7 @@ const Checkout = () => {
   const { getSymbol, convert } = useCurrency();
   const { currentUser } = useAuth();
   const { toast } = useToast();
+  const { clearCart } = useCart();
 
   const [orderReview, setOrderReview] = useState<OrderReviewData | null>(null);
   const [currentStep, setCurrentStep] = useState<'payment' | 'verify'>('payment');
@@ -107,13 +109,16 @@ const Checkout = () => {
         customer_info: orderReview.customerInfo as unknown as Json,
         items: orderReview.items as unknown as Json,
         total_amount: orderReview.totalAmount,
-        status: 'processing',
-        transaction_id: transactionId
+        transaction_id: transactionId.trim(),
+        status: 'pending'
       });
 
       if (error) throw error;
 
-      localStorage.removeItem('cartItems');
+      // Clear the cart after successful order placement
+      await clearCart();
+
+      // Clear stored data
       localStorage.removeItem('orderReviewData');
 
       navigate('/dashboard/checkout/success', {

@@ -11,6 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingCart, Settings, LifeBuoy, User as UserIcon, MapPin, CreditCard } from "lucide-react";
 import { motion } from "framer-motion";
+import ContactSupportDialog from '@/components/ContactSupportDialog';
+import useTawk from "@/hooks/useTawk";
 import { useToast } from '@/hooks/use-toast';
 import AddressBook from '@/components/AddressBook';
 
@@ -39,6 +41,7 @@ const ActionButton = ({ icon, title, onClick }: { icon: React.ReactNode, title: 
 );
 
 const Account = () => {
+    const { openChat } = useTawk();
     const { currentUser } = useAuth();
     const { wishlistCount } = useWishlist();
     const navigate = useNavigate();
@@ -118,10 +121,10 @@ const Account = () => {
 
                 {/* Tabs for different sections */}
                 <Tabs defaultValue="overview" className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="addresses">Address Book</TabsTrigger>
-                        <TabsTrigger value="payment">Payment Methods</TabsTrigger>
+                    <TabsList className="flex flex-col sm:grid sm:grid-cols-3 gap-2 w-full mt-4 h-auto p-0 bg-muted/60">
+                        <TabsTrigger value="overview" className="w-full sm:w-auto">Overview</TabsTrigger>
+                        <TabsTrigger value="addresses" className="w-full sm:w-auto">Address Book</TabsTrigger>
+                        <TabsTrigger value="payment" className="w-full sm:w-auto">Payment Methods</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview" className="space-y-6">
@@ -132,7 +135,9 @@ const Account = () => {
                                 <ActionButton icon={<ShoppingCart className="mr-2"/>} title="View Order History" onClick={() => navigate('/dashboard/orders')} />
                                 <ActionButton icon={<Settings className="mr-2"/>} title="Account Settings" onClick={() => navigate('/dashboard/account-settings')} />
                                 <ActionButton icon={<MapPin className="mr-2"/>} title="Manage Addresses" onClick={() => {}} />
-                                <ActionButton icon={<LifeBuoy className="mr-2"/>} title="Contact Support" onClick={() => window.location.href='mailto:support@kuzzboost.com'} />
+                                <ContactSupportDialog>
+                                    <ActionButton icon={<LifeBuoy className="mr-2"/>} title="Contact Support" onClick={() => {}} />
+                                </ContactSupportDialog>
                             </CardContent>
                         </Card>
                     </TabsContent>

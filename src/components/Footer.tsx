@@ -73,7 +73,10 @@ const Footer = () => {
           <div className={`grid gap-8 ${isDashboard ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-5'}`}>
             {/* KuzzBoost Info Section */}
             <div className={isDashboard ? "col-span-1" : "col-span-2 md:col-span-1"}>
-              <h2 className="text-2xl font-clash font-bold text-primary">KuzzBoost</h2>
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/site_logo.png" alt="KuzzBoost Logo" className="w-8 h-8 object-contain" />
+                <h2 className="text-2xl font-clash font-bold text-primary">KuzzBoost</h2>
+              </div>
               <p className="mt-4 text-sm text-muted-foreground">
                 {isDashboard 
                   ? "Your trusted partner for social media growth."

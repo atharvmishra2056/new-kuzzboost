@@ -12,6 +12,19 @@ export const useWishlist = () => {
   useEffect(() => {
     if (currentUser) {
       loadWishlist();
+
+      const channel = supabase.channel(`wishlists:user_id=eq.${currentUser.id}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlists', filter: `user_id=eq.${currentUser.id}` },
+          (payload) => {
+            console.log('Wishlist change received!', payload);
+            loadWishlist(); // Refetch wishlist on any change
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     } else {
       setWishlistItems([]);
     }
@@ -46,23 +59,25 @@ export const useWishlist = () => {
       if (error) throw error;
 
       const formattedItems: Service[] = data?.map(item => {
-        const service = item.services as any;
+        const serviceData = item.services as any;
+        if (!serviceData) return null;
+
         return {
-          id: service.id,
-          title: service.title,
-          platform: service.platform,
-          iconName: service.icon_name,
-          description: service.description,
-          rating: service.rating,
-          reviews: service.reviews,
-          badge: service.badge,
-          features: service.features || [],
-          tiers: service.service_tiers?.map((tier: any) => ({
+          id: serviceData.id,
+          title: serviceData.title,
+          platform: serviceData.platform,
+          iconName: serviceData.icon_name,
+          description: serviceData.description,
+          rating: serviceData.rating,
+          reviews: serviceData.reviews,
+          badge: serviceData.badge,
+          features: serviceData.features || [],
+          tiers: serviceData.service_tiers?.map((tier: any) => ({
             quantity: tier.quantity,
             price: Number(tier.price)
           })) || []
-        };
-      }) || [];
+        } as Service;
+      })?.filter((item): item is Service => item !== null) || [];
 
       setWishlistItems(formattedItems);
     } catch (error) {
@@ -88,7 +103,7 @@ export const useWishlist = () => {
 
       if (error) throw error;
 
-      await loadWishlist(); // Reload to get updated data
+      setWishlistItems(prev => [...prev, service]); // Optimistic update
       return true;
     } catch (error) {
       console.error('Error adding to wishlist:', error);

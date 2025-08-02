@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import { LogOut, ShoppingCart, Heart, Package, Settings, Home, User, Menu, X } from "lucide-react";
+import { LogOut, ShoppingCart, Heart, Package, Settings, Home, User, Menu, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +56,11 @@ const DashboardLayout = () => {
       icon: <Package className="w-5 h-5" />,
       label: "My Orders",
       path: "/dashboard/orders"
+    },
+    {
+      icon: <RefreshCw className="w-5 h-5" />,
+      label: "Refill Requests",
+      path: "/dashboard/refill-requests"
     }
   ];
 
@@ -70,7 +75,10 @@ const DashboardLayout = () => {
     <>
       {/* Logo */}
       <div className="p-6 border-b border-border/20">
-        <h1 className="text-2xl font-clash font-bold text-primary">KuzzBoost</h1>
+        <Link to="/" className="flex items-center gap-3 text-2xl font-clash font-bold text-primary">
+            <img src="/site_logo.png" alt="KuzzBoost Logo" className="w-8 h-8 object-contain" />
+            <span>KuzzBoost</span>
+        </Link>
         <p className="text-sm text-muted-foreground mt-1">Dashboard</p>
       </div>
 
@@ -171,13 +179,13 @@ const DashboardLayout = () => {
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          className="md:hidden fixed inset-0 bg-black/80 z-40"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar */}
-      <aside className={`md:hidden fixed top-0 left-0 h-full w-64 glass border-r border-border/20 flex flex-col z-50 transform transition-transform duration-300 ${
+      <aside className={`md:hidden fixed top-0 left-0 h-full w-64 glass sidebar-glass border-r border-border/20 flex flex-col z-50 transform transition-transform duration-300 ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <SidebarContent />
@@ -190,7 +198,7 @@ const DashboardLayout = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pt-16 md:pt-0">
           <Outlet />
         </main>
       </div>

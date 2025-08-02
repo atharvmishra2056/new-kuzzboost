@@ -9,10 +9,11 @@ import { useCart } from "@/context/CartContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Heart, Package, Settings, Store, LifeBuoy, MessageSquare, ChevronRight, Star } from "lucide-react";
+import { ShoppingCart, Heart, Package, Settings, Store, LifeBuoy, MessageSquare, ChevronRight, Star, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from '@/hooks/use-toast';
 import { useServices } from "@/components/Services";
+import { useAnnouncements } from '@/hooks/useAnnouncements';
 import { useCurrency } from "@/context/CurrencyContext";
 import ContactSupportDialog from "@/components/ContactSupportDialog";
 import FeedbackDialog from "@/components/FeedbackDialog";
@@ -92,15 +93,17 @@ const RecommendationCard = ({ service, onClick }: { service: any, onClick: () =>
   );
 };
 
-const AnnouncementBanner = ({ announcement }: { announcement: any }) => (
+const AnnouncementBanner = ({ announcement, onButtonClick }: { announcement: any, onButtonClick: (link: string) => void }) => (
   <Card className="glass border-accent-peach/30 bg-gradient-to-r from-accent-peach/10 to-accent-coral/10">
     <CardContent className="p-6 flex items-center justify-between">
       <div className="flex-1">
         <h3 className="font-bold text-primary mb-2">{announcement.title}</h3>
         <p className="text-muted-foreground">{announcement.description}</p>
       </div>
-      <Button className="glass-button ml-4">
-        Shop Now
+      <Button className="glass-button w-full md:w-auto ml-4"
+        onClick={() => onButtonClick(announcement.button_link || '/services')}
+      >
+        {announcement.button_text || 'Shop Now'}
       </Button>
     </CardContent>
   </Card>
@@ -111,11 +114,11 @@ const DashboardHome = () => {
   const { wishlistCount } = useWishlist();
   const { cartCount } = useCart();
   const { services } = useServices();
+  const { announcements, loading: announcementsLoading } = useAnnouncements();
   const navigate = useNavigate();
   const [orderCount, setOrderCount] = useState(0);
   const [pendingOrderCount, setPendingOrderCount] = useState(0);
   const [lastLogin, setLastLogin] = useState<string>('');
-  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -140,22 +143,11 @@ const DashboardHome = () => {
           .eq('user_id', currentUser.id)
           .in('status', ['pending', 'processing']);
 
-        // Fetch announcements
-        const { data: announcementsData, error: announcementsError } = await supabase
-          .from('announcements')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(3);
-
         if (orderError) console.error("Error fetching orders:", orderError);
         else setOrderCount(totalOrders || 0);
 
         if (pendingError) console.error("Error fetching pending orders:", pendingError);
         else setPendingOrderCount(pendingOrders || 0);
-
-        if (announcementsError) console.error("Error fetching announcements:", announcementsError);
-        else setAnnouncements(announcementsData || []);
 
         // Set last login (mock for now)
         setLastLogin(new Date().toLocaleDateString());
@@ -209,7 +201,7 @@ const DashboardHome = () => {
     }
   ];
 
-  if (loading) {
+  if (loading || announcementsLoading) {
     return (
       <div className="p-8">
         <div className="max-w-6xl mx-auto space-y-8">
@@ -272,12 +264,12 @@ const DashboardHome = () => {
         </div>
 
         {/* Announcements */}
-        {announcements.length > 0 && (
+        {!announcementsLoading && announcements.filter(a => a.is_active).length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <h2 className="text-xl font-semibold text-primary mb-4">Latest Announcements</h2>
             <div className="space-y-4">
-              {announcements.map((announcement, index) => (
-                <AnnouncementBanner key={index} announcement={announcement} />
+              {announcements.filter(a => a.is_active).slice(0, 3).map((announcement) => (
+                <AnnouncementBanner key={announcement.id} announcement={announcement} onButtonClick={(link) => navigate(link)} />
               ))}
             </div>
           </motion.div>
@@ -287,7 +279,7 @@ const DashboardHome = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-primary">Recommended for You</h2>
-            <Button variant="ghost" onClick={() => navigate('/dashboard/services')}>
+            <Button  variant="ghost" onClick={() => navigate('/dashboard/services')}>
               View All <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -325,15 +317,22 @@ const DashboardHome = () => {
                   <p className="text-sm text-muted-foreground">Our support team is here to assist you</p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col w-full md:flex-row gap-3">
+                <Button  
+                  variant="outline" 
+                  onClick={() => navigate('/about')}
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  See Our Team
+                </Button>
                 <ContactSupportDialog>
-                  <Button variant="outline">
+                  <Button  variant="outline">
                     <LifeBuoy className="w-4 h-4 mr-2" />
                     Contact Support
                   </Button>
                 </ContactSupportDialog>
                 <FeedbackDialog>
-                  <Button variant="outline">
+                  <Button  variant="outline">
                     <MessageSquare className="w-4 h-4 mr-2" />
                     Give Feedback
                   </Button>
@@ -346,23 +345,23 @@ const DashboardHome = () => {
         {/* Legal Links */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
           <div className="flex flex-wrap justify-center gap-6 py-6 border-t border-border/20">
-            <Button 
+            <Button  
               variant="link" 
-              className="text-muted-foreground hover:text-primary text-sm"
+              className="text-muted-foreground hover:text-primary text-sm w-full md:w-auto"
               onClick={() => navigate('/dashboard/terms')}
             >
               Terms of Service
             </Button>
-            <Button 
+            <Button  
               variant="link" 
-              className="text-muted-foreground hover:text-primary text-sm"
+              className="text-muted-foreground hover:text-primary text-sm w-full md:w-auto"
               onClick={() => navigate('/dashboard/privacy')}
             >
               Privacy Policy
             </Button>
-            <Button 
+            <Button  
               variant="link" 
-              className="text-muted-foreground hover:text-primary text-sm"
+              className="text-muted-foreground hover:text-primary text-sm w-full md:w-auto"
               onClick={() => navigate('/dashboard/refund-policy')}
             >
               Refund Policy

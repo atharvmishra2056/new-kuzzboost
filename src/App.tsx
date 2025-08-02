@@ -10,7 +10,9 @@ import About from './pages/About';
 import AuthPage from './pages/AuthPage';
 import Account from './pages/Account';
 import AccountSettings from './pages/AccountSettings';
-import OrderHistory from './pages/OrderHistory';
+import OrderHistory from "./pages/OrderHistory";
+import RequestRefillPage from "./pages/RequestRefill";
+import RefillRequestsPage from "./pages/RefillRequestsPage";
 import OrderDetails from './pages/OrderDetails';
 import ViewCart from './pages/ViewCart';
 import Checkout from './pages/Checkout';
@@ -20,31 +22,30 @@ import Wishlist from './pages/Wishlist';
 import NotFound from './pages/NotFound';
 import AdminLayout from './pages/admin/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-import CursorFollower from './components/CursorFollower';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ContactUs from './pages/ContactUs';
-import Analytics from "@/pages/admin/Analytics.tsx";
-import AdminOrders from "@/pages/admin/Orders.tsx";
-import ManageServices from "@/pages/admin/ManageServices.tsx";
-import UserManagement from "@/pages/admin/UserManagement.tsx";
-import Announcements from "@/pages/admin/Announcements.tsx";
-import MainLayout from './layouts/MainLayout';
-import DashboardLayout from './layouts/DashboardLayout';
-
+import Analytics from "@/pages/admin/Analytics";
+import AdminOrders from "@/pages/admin/Orders";
+import ManageServices from "@/pages/admin/ManageServices";
+import UserManagement from "@/pages/admin/UserManagement";
+import Announcements from "@/pages/admin/Announcements";
+import RefillRequests from "@/pages/admin/RefillRequests";
 import RefundPolicy from './pages/RefundPolicy';
-import ScrollToTop from './components/ScrollToTop';
-import DashboardServices from "./pages/DashboardServices.tsx";
-import DashboardHome from "./pages/DashboardHome.tsx";
+import DashboardLayout from './layouts/DashboardLayout';
+import MainLayout from './layouts/MainLayout';
+import useSmoothScroll from './hooks/useSmoothScroll';
+import DashboardServices from "./pages/DashboardServices";
+import DashboardHome from "./pages/DashboardHome";
 
 function App() {
+  useSmoothScroll();
+
   return (
-      <Router>
-        <ScrollToTop />
-        <AuthProvider>
-          <CurrencyProvider>
-            <CartProvider>
-              <CursorFollower />
+    <Router>
+      <AuthProvider>
+        <CurrencyProvider>
+          <CartProvider>
               <Routes>
                 {/* Public Routes */}
                 <Route element={<MainLayout />}>
@@ -67,6 +68,9 @@ function App() {
                   <Route path="/dashboard/account-settings" element={<AccountSettings />} />
                   <Route path="/dashboard/orders" element={<OrderHistory />} />
                   <Route path="/dashboard/order-details/:orderId" element={<OrderDetails />} />
+                  <Route path="/dashboard/refill-requests" element={<RefillRequestsPage />} />
+                  <Route path="/dashboard/request-refill/:orderId" element={<RequestRefillPage />} />
+                  <Route path="/dashboard/request-refill" element={<RequestRefillPage />} />
                   <Route path="/dashboard/cart" element={<ViewCart />} />
                   <Route path="/dashboard/checkout" element={<Checkout />} />
                   <Route path="/dashboard/checkout/review" element={<OrderReview />} />
@@ -88,10 +92,12 @@ function App() {
                     <Route path="services" element={<ManageServices />} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="announcements" element={<Announcements />} />
+                    <Route path="refill-requests" element={<RefillRequests />} />
                   </Route>
                 </Route>
               </Routes>
               <Toaster />
+              
             </CartProvider>
           </CurrencyProvider>
         </AuthProvider>

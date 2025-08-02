@@ -10,6 +10,8 @@ export interface Announcement {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  button_text?: string;
+  button_link?: string;
 }
 
 export const useAnnouncements = () => {
@@ -34,15 +36,17 @@ export const useAnnouncements = () => {
   };
 
   const createAnnouncement = async (announcement: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
+    const newAnnouncement = {
+      ...announcement,
+      updated_at: new Date().toISOString(),
+    };
     try {
       const { data, error } = await supabase
         .from('announcements')
-        .insert(announcement)
-        .select()
-        .single();
+        .insert([newAnnouncement])
+        .select();
 
       if (error) throw error;
-      await fetchAnnouncements();
       return { data, error: null };
     } catch (error) {
       return { data: null, error };
@@ -50,18 +54,23 @@ export const useAnnouncements = () => {
   };
 
   const updateAnnouncement = async (id: string, updates: Partial<Announcement>) => {
+    const updatesWithTimestamp = {
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
     try {
-      const { data, error } = await supabase
+      // First, update the record
+      const { data, error: updateError } = await supabase
         .from('announcements')
-        .update(updates)
+        .update(updatesWithTimestamp)
         .eq('id', id)
-        .select()
-        .single();
+        .select();
 
-      if (error) throw error;
-      await fetchAnnouncements();
-      return { data, error: null };
+      if (updateError) throw updateError;
+
+      return { data: data ? data[0] : null, error: null };
     } catch (error) {
+      console.error('Error in updateAnnouncement:', error);
       return { data: null, error };
     }
   };
@@ -71,18 +80,50 @@ export const useAnnouncements = () => {
       const { error } = await supabase
         .from('announcements')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) throw error;
-      await fetchAnnouncements();
-      return { error: null };
+      return { data: null, error: null };
     } catch (error) {
-      return { error };
+      return { data: null, error };
+    }
+  };
+
+  const toggleAnnouncementActive = async (id: string) => {
+    const announcement = announcements.find(a => a.id === id);
+    if (!announcement) return { data: null, error: new Error('Announcement not found') };
+    const newActiveState = !announcement.is_active;
+    // Optimistically update local state for instant UI feedback
+    setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, is_active: newActiveState } : a));
+    try {
+      const result = await updateAnnouncement(id, { is_active: newActiveState });
+      if (result.error) {
+        // Revert on error
+        setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, is_active: !newActiveState } : a));
+      }
+      return result;
+    } catch (error) {
+      setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, is_active: !newActiveState } : a));
+      return { data: null, error };
     }
   };
 
   useEffect(() => {
     fetchAnnouncements();
+
+    const channel = supabase.channel('realtime-announcements')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'announcements' },
+        (payload) => {
+          fetchAnnouncements();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {
@@ -91,6 +132,7 @@ export const useAnnouncements = () => {
     fetchAnnouncements,
     createAnnouncement,
     updateAnnouncement,
-    deleteAnnouncement
+    deleteAnnouncement,
+    toggleAnnouncementActive
   };
 };

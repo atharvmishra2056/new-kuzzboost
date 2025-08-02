@@ -1,5 +1,33 @@
 import { ReactElement } from "react";
 
+export interface Review {
+  id: string;
+  created_at: string;
+  service_id: number;
+  user_id: string;
+  rating: number;
+  title?: string | null;
+  comment?: string | null;
+  is_verified_purchase?: boolean;
+  user?: {
+    full_name?: string | null;
+    avatar_url?: string | null;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
+export interface QnA {
+  id: string;
+  created_at: string;
+  question: string;
+  answer: string | null;
+  user: {
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
 export interface ServiceTier {
   id?: string;
   quantity: number;
@@ -19,6 +47,7 @@ export interface Service {
   description: string;
   badge: string;
   isActive?: boolean;
+  refill_eligible?: boolean; // Whether the service is eligible for refills
   // --- FIX: ADDED THE MISSING OPTIONAL PROPERTIES ---
   rules?: string[];
   estimatedDelivery?: string;
@@ -49,6 +78,17 @@ export interface Address {
   updated_at: string;
 }
 
+export interface RefillRequest {
+  id: string;
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  requested_at: string;
+  current_count?: number;
+  screenshot_url?: string;
+  admin_notes?: string | null;
+  processed_by?: string | null;
+  processed_at?: string | null;
+}
+
 export interface Order {
   id: string;
   order_id: string;
@@ -73,12 +113,14 @@ export interface Order {
     service_quantity: number;
     price: number;
     userInput: string;
+    refill_eligible?: boolean;
   }>;
   total_amount: number;
   status: 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';
   transaction_id?: string;
   payment_verified: boolean;
   tracking_info: TrackingInfo[];
+  refill_requests?: RefillRequest[];
   created_at: string;
   updated_at: string;
 }

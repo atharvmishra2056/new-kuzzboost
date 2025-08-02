@@ -1,138 +1,118 @@
-import React, { useState } from 'react';
-import { supabase } from '../integrations/supabase/client';
-
-// We will still define the shapes of our data for clarity and for use elsewhere.
-interface SubmitReviewResponse {
-    success: boolean;
-    message: string;
-    review_id: string;
-    is_verified: boolean;
-}
-
-interface SubmitReviewArgs {
-    p_service_id: number;
-    p_rating: number;
-    p_title: string;
-    p_comment: string;
-    p_media_urls: null;
-}
-
-interface NewReviewPayload {
-    id: string;
-    service_id: number;
-    rating: number;
-    title: string;
-    comment: string;
-    media_urls: null;
-    is_verified_purchase: boolean;
-    created_at: string;
-    user: {
-        full_name: string;
-    };
-}
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Review } from '@/types/service';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReviewModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    serviceId: number;
-    onReviewSubmitted: (review: NewReviewPayload) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  serviceId: number;
+  onReviewSubmitted: () => Promise<void>;
+  reviewToEdit?: Review | null;
 }
 
+const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, serviceId, onReviewSubmitted, reviewToEdit }) => {
+  const [rating, setRating] = useState(5);
+  const [title, setTitle] = useState('');
+  const [comment, setComment] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
 
-const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, serviceId, onReviewSubmitted }) => {
-    const [rating, setRating] = useState(5);
-    const [title, setTitle] = useState('');
-    const [comment, setComment] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+  useEffect(() => {
+    if (reviewToEdit) {
+      setRating(reviewToEdit.rating);
+      setTitle(reviewToEdit.title);
+      setComment(reviewToEdit.comment);
+    } else {
+      setRating(5);
+      setTitle('');
+      setComment('');
+    }
+  }, [reviewToEdit, isOpen]);
 
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) {
+      setError('You must be logged in to leave a review.');
+      return;
+    }
+    setIsLoading(true);
+    setError('');
 
-        const reviewArgs: SubmitReviewArgs = {
-            p_service_id: serviceId,
-            p_rating: rating,
-            p_title: title,
-            p_comment: comment,
-            p_media_urls: null,
-        };
+    try {
+      if (reviewToEdit) {
+        // Update existing review
+        const { error: rpcError } = await (supabase.rpc as any)('update_review', {
+          p_review_id: reviewToEdit.id,
+          p_rating: rating,
+          p_title: title,
+          p_comment: comment,
+        });
 
-        // --- FINAL, STABLE FIX ---
-        // We are disabling the 'no-explicit-any' lint rule for this single line.
-        // This is the standard way to bypass a stubborn type error while acknowledging
-        // that we are making a deliberate choice. It keeps the rest of the file type-safe.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: rpcError } = await (supabase.rpc as any)('submit_review', reviewArgs);
+        if (rpcError) throw rpcError;
+        toast({ title: 'Success', description: 'Your review has been updated.' });
+      } else {
+        // Submit new review
+        const { error: rpcError } = await supabase.rpc('submit_review', {
+          p_service_id: serviceId,
+          p_rating: rating,
+          p_title: title,
+          p_comment: comment,
+          p_media_urls: null,
+        });
 
-        if (rpcError) {
-            setError(rpcError.message);
-            setIsLoading(false);
-            return;
-        }
+        if (rpcError) throw rpcError;
+        toast({ title: 'Success', description: 'Thank you for your review!' });
+      }
+      await onReviewSubmitted();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred.');
+      toast({ variant: 'destructive', title: 'Error', description: err.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // We still perform a safe assertion on the response for maximum type safety.
-        const responseData = data as SubmitReviewResponse;
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
+      <div className="glass p-8 rounded-2xl shadow-xl w-full max-w-md border border-white/10">
+        <h2 className="font-clash text-3xl font-bold text-primary mb-6">
+          {reviewToEdit ? 'Edit Your Review' : 'Write a Review'}
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Rating (1-5)</label>
+            <input type="number" min="1" max="5" value={rating} onChange={(e) => setRating(Number(e.target.value))} required className="w-full p-3 bg-transparent border border-white/20 rounded-lg text-primary focus:ring-2 focus:ring-accent-peach focus:border-accent-peach transition"/>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Review Title</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-3 bg-transparent border border-white/20 rounded-lg text-primary focus:ring-2 focus:ring-accent-peach focus:border-accent-peach transition"/>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Comment</label>
+            <textarea value={comment} onChange={(e) => setComment(e.target.value)} required className="w-full p-3 bg-transparent border border-white/20 rounded-lg text-primary focus:ring-2 focus:ring-accent-peach focus:border-accent-peach transition" rows={4}></textarea>
+          </div>
 
-        if (!responseData || !responseData.success) {
-            setError(responseData?.message || 'Failed to submit review. Have you purchased this service?');
-            setIsLoading(false);
-            return;
-        }
+          {error && <p className="text-red-400 text-sm">{error}</p>}
 
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const newReview: NewReviewPayload = {
-            id: responseData.review_id,
-            service_id: serviceId,
-            rating,
-            title,
-            comment,
-            media_urls: null,
-            is_verified_purchase: responseData.is_verified,
-            created_at: new Date().toISOString(),
-            user: { full_name: user?.user_metadata?.full_name || 'You' }
-        };
-
-        onReviewSubmitted(newReview);
-
-        setIsLoading(false);
-        onClose();
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-4">Write a Review</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Rating (1-5)</label>
-                        <input type="number" min="1" max="5" value={rating} onChange={(e) => setRating(Number(e.target.value))} required className="w-full p-2 border rounded"/>
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Review Title</label>
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-2 border rounded"/>
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Comment</label>
-                        <textarea value={comment} onChange={(e) => setComment(e.target.value)} required className="w-full p-2 border rounded" rows={4}></textarea>
-                    </div>
-
-                    {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-                    <div className="flex justify-end gap-4">
-                        <button type="button" onClick={onClose} disabled={isLoading} className="text-gray-600">Cancel</button>
-                        <button type="submit" disabled={isLoading} className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 disabled:bg-blue-300">
-                            {isLoading ? 'Submitting...' : 'Submit Review'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+          <div className="flex justify-end gap-4 pt-4">
+            <button type="button" onClick={onClose} disabled={isLoading} className="text-muted-foreground hover:text-primary transition">
+              Cancel
+            </button>
+            <button type="submit" disabled={isLoading} className="glass-button px-6 py-2 rounded-lg font-semibold text-primary hover:bg-primary/20 transition disabled:opacity-50">
+              {isLoading ? 'Submitting...' : (reviewToEdit ? 'Update Review' : 'Submit Review')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default ReviewModal;

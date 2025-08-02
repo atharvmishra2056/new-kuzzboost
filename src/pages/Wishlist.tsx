@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,14 +23,23 @@ const iconMap: { [key: string]: React.ReactElement } = {
 
 const Wishlist = () => {
   const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
+  const { addToCart: addServiceToCart } = useCart();
   const { getSymbol, convert } = useCurrency();
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<any[]>([]);
 
-  const addToCart = (item: any) => {
-    // For wishlist items, we need to calculate price based on a default quantity
-    const basePrice = 100; // Default price fallback
-    setCartItems(prev => [...prev, { ...item, quantity: 1, price: basePrice }]);
+  const handleAddToCart = (item: any) => {
+    // Find the lowest priced tier to add to cart by default from wishlist
+    if (!item.tiers || item.tiers.length === 0) {
+      console.error("Service has no pricing tiers.");
+      // Optionally, show a toast notification to the user
+      return;
+    }
+
+    const lowestPriceTier = item.tiers.reduce((lowest: any, current: any) => {
+      return current.price < lowest.price ? current : lowest;
+    }, item.tiers[0]);
+
+    addServiceToCart(item, lowestPriceTier.quantity, lowestPriceTier.price, '');
     removeFromWishlist(item.id);
   };
 
@@ -47,7 +57,7 @@ const Wishlist = () => {
                 Start browsing our services and save your favorites for later!
               </p>
               <Button 
-                onClick={() => navigate('/services')}
+                onClick={() => navigate('/dashboard/services')}
                 className="glass-button"
               >
                 Browse Services
@@ -76,6 +86,12 @@ const Wishlist = () => {
             </div>
             
             <div className="flex gap-3">
+              <Button 
+                onClick={() => navigate('/dashboard/services')}
+                className="glass-button"
+              >
+                Continue Shopping
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={clearWishlist}
@@ -139,7 +155,7 @@ const Wishlist = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/service/${item.id}`)}
+                    onClick={() => navigate(`/dashboard/service/${item.id}`)}
                     className="flex items-center gap-1"
                   >
                     <ArrowRight className="w-3 h-3" />
@@ -147,7 +163,7 @@ const Wishlist = () => {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => addToCart(item)}
+                    onClick={() => handleAddToCart(item)}
                     className="glass-button flex items-center gap-1"
                   >
                     <ShoppingCart className="w-3 h-3" />
