@@ -80,10 +80,30 @@ export const ServiceCalculatorModal = ({ service, onAddToCart }: { service: Serv
             <span className="text-3xl">{service.icon}</span>{service.title}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-6 pt-4">
+        <div className="space-y-5 pt-4">
           <div>
-            <label className="block text-sm font-medium text-primary mb-3">Quantity: {quantity.toLocaleString()}</label>
-            <input type="range" min={minTier.quantity} max={maxTier.quantity} step={minTier.quantity > 10 ? minTier.quantity / 10 : 1} value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value))} className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer slider" />
+            <label htmlFor="quantity" className="block text-sm font-medium mb-2">Quantity</label>
+            <input 
+              id="quantity"
+              type="range" 
+              min={minTier.quantity} 
+              max={maxTier.quantity} 
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{minTier.quantity.toLocaleString()}</span>
+              <span>{maxTier.quantity.toLocaleString()}</span>
+            </div>
+            <input
+              type="number"
+              min={minTier.quantity}
+              max={maxTier.quantity}
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              className="w-full mt-2 glass-input py-2 text-sm"
+            />
           </div>
           <div className="text-center">
             <p className="text-muted-foreground">Total Price</p>

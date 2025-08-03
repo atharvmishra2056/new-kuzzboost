@@ -224,22 +224,22 @@ const DashboardHome = () => {
   const firstName = currentUser?.user_metadata?.full_name?.split(' ')[0] || currentUser?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="px-4 py-6 sm:p-8">
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         {/* Welcome Section */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-primary font-clash">
+              <h1 className="text-2xl sm:text-3xl font-bold text-primary font-clash">
                 Welcome back, {firstName}! 👋
               </h1>
-              <p className="text-muted-foreground mt-1">Last login: {lastLogin}</p>
+              <p className="text-muted-foreground mt-1 text-sm">Last login: {lastLogin}</p>
             </div>
           </div>
         </motion.div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <StatCard 
             icon={<ShoppingCart />} 
             title="Cart Items" 
@@ -278,12 +278,12 @@ const DashboardHome = () => {
         {/* Personalized Recommendations */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-primary">Recommended for You</h2>
-            <Button  variant="ghost" onClick={() => navigate('/dashboard/services')}>
+            <h2 className="text-lg sm:text-xl font-semibold text-primary">Recommended for You</h2>
+            <Button  variant="ghost" className="text-sm" onClick={() => navigate('/dashboard/services')}>
               View All <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-hide">
             {getRecommendations().map((service) => (
               <RecommendationCard 
                 key={service.id} 
@@ -296,7 +296,7 @@ const DashboardHome = () => {
 
         {/* Quick Actions */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <h2 className="text-xl font-semibold text-primary mb-4">Quick Actions</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-primary mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {quickActions.map((action, index) => (
               <QuickActionCard key={index} {...action} />
@@ -307,33 +307,34 @@ const DashboardHome = () => {
         {/* Support & Feedback */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Card className="glass">
-            <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-accent-peach/20 flex items-center justify-center">
-                  <LifeBuoy className="w-6 h-6 text-accent-peach" />
+            <CardContent className="p-4 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-accent-peach/20 flex items-center justify-center">
+                  <LifeBuoy className="w-5 h-5 sm:w-6 sm:h-6 text-accent-peach" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-primary">Need Help?</h3>
-                  <p className="text-sm text-muted-foreground">Our support team is here to assist you</p>
+                  <h3 className="font-semibold text-primary text-base sm:text-lg">Need Help?</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Our support team is here to assist you</p>
                 </div>
               </div>
-              <div className="flex flex-col w-full md:flex-row gap-3">
+              <div className="flex flex-col w-full md:flex-row gap-2 sm:gap-3">
                 <Button  
                   variant="outline" 
+                  className="text-xs sm:text-sm h-8 sm:h-10"
                   onClick={() => navigate('/about')}
                 >
-                  <User className="w-4 h-4 mr-2" />
+                  <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   See Our Team
                 </Button>
                 <ContactSupportDialog>
-                  <Button  variant="outline">
-                    <LifeBuoy className="w-4 h-4 mr-2" />
+                  <Button  variant="outline" className="text-xs sm:text-sm h-8 sm:h-10">
+                    <LifeBuoy className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Contact Support
                   </Button>
                 </ContactSupportDialog>
                 <FeedbackDialog>
-                  <Button  variant="outline">
-                    <MessageSquare className="w-4 h-4 mr-2" />
+                  <Button  variant="outline" className="text-xs sm:text-sm h-8 sm:h-10">
+                    <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Give Feedback
                   </Button>
                 </FeedbackDialog>
@@ -344,24 +345,24 @@ const DashboardHome = () => {
 
         {/* Legal Links */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <div className="flex flex-wrap justify-center gap-6 py-6 border-t border-border/20">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 py-4 sm:py-6 border-t border-border/20">
             <Button  
               variant="link" 
-              className="text-muted-foreground hover:text-primary text-sm w-full md:w-auto"
+              className="text-muted-foreground hover:text-primary text-xs sm:text-sm w-full md:w-auto h-8 sm:h-10"
               onClick={() => navigate('/dashboard/terms')}
             >
               Terms of Service
             </Button>
             <Button  
               variant="link" 
-              className="text-muted-foreground hover:text-primary text-sm w-full md:w-auto"
+              className="text-muted-foreground hover:text-primary text-xs sm:text-sm w-full md:w-auto h-8 sm:h-10"
               onClick={() => navigate('/dashboard/privacy')}
             >
               Privacy Policy
             </Button>
             <Button  
               variant="link" 
-              className="text-muted-foreground hover:text-primary text-sm w-full md:w-auto"
+              className="text-muted-foreground hover:text-primary text-xs sm:text-sm w-full md:w-auto h-8 sm:h-10"
               onClick={() => navigate('/dashboard/refund-policy')}
             >
               Refund Policy

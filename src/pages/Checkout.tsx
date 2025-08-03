@@ -156,17 +156,17 @@ const Checkout = () => {
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
               <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/dashboard/checkout/review')}
-                  className="flex items-center gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Review
-              </Button>
-              <h1 className="font-clash text-3xl md:text-4xl font-bold text-primary">
-                Payment
-              </h1>
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/services')}
+                className="flex items-center gap-2 py-2 px-3 text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Continue Shopping
+            </Button>
+            <h1 className="font-clash text-2xl md:text-4xl font-bold text-primary">
+              Checkout
+            </h1>
             </div>
 
             <AnimatePresence mode="wait">
@@ -179,44 +179,45 @@ const Checkout = () => {
                       exit={{ opacity: 0, x: -20 }}
                   >
                     <div className="glass rounded-2xl p-8 text-center">
-                      <div className="flex items-center justify-center gap-3 mb-6">
-                        <Smartphone className="w-8 h-8 text-primary" />
-                        <h2 className="font-clash text-2xl font-semibold text-primary">
-                          UPI Payment
-                        </h2>
-                      </div>
-
-                      <div className="mb-8">
-                        {/* --- UPDATED QR CODE IMAGE --- */}
-                        <div className="w-64 h-64 mx-auto bg-white rounded-2xl p-2 flex items-center justify-center mb-4 border-4 border-primary/20 shadow-lg">
-                          <img
-                              src="/upi-qr.png" // Path to the image in the 'public' folder
-                              alt="UPI QR Code for KuzzBoost"
-                              className="rounded-lg w-full h-full object-contain"
-                          />
+                      <div className="space-y-5">
+                        <div className="text-center">
+                          <Smartphone className="w-10 h-10 text-accent-peach mx-auto mb-3" />
+                          <h3 className="font-clash text-lg font-semibold text-primary mb-2">Pay with UPI</h3>
+                          <p className="text-muted-foreground mb-5 text-sm">
+                            Send exactly {getSymbol()}{convert(totalAmount)} to our UPI ID
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">Scan QR code with any UPI app</p>
-                        <div className="glass rounded-xl p-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <p className="font-medium text-primary font-mono">UPI ID: {upiId}</p>
-                            <Button variant="ghost" size="icon" onClick={handleCopyUpiId}>
-                              {isCopied ? <CheckCircle className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5 text-muted-foreground" />}
-                            </Button>
+                        <div className="grid grid-cols-1 gap-5">
+                          <div className="glass rounded-xl p-3 flex items-center justify-center">
+                            <img
+                                src="/upi-qr.png" // Path to the image in the 'public' folder
+                                alt="UPI QR Code for KuzzBoost"
+                                className="rounded-lg w-full h-full object-contain"
+                            />
                           </div>
-                          <p className="text-sm text-muted-foreground">Amount: {getSymbol()}{convert(totalAmount)}</p>
+                          <p className="text-xs text-muted-foreground mb-2">Scan QR code with any UPI app</p>
+                          <div className="glass rounded-xl p-3">
+                            <div className="flex items-center justify-center gap-2">
+                              <p className="font-medium text-primary font-mono text-sm">UPI ID: {upiId}</p>
+                              <Button variant="ghost" size="icon" onClick={handleCopyUpiId} className="h-8 w-8">
+                                {isCopied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Amount: {getSymbol()}{convert(totalAmount)}</p>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                          After making the payment, click the button below to verify your transaction.
-                        </p>
-                        <Button
-                            onClick={() => setCurrentStep('verify')}
-                            className="w-full glass-button"
-                        >
-                          I have paid - Verify Now
-                        </Button>
+                        <div className="space-y-4">
+                          <p className="text-sm text-muted-foreground">
+                            After making the payment, click the button below to verify your transaction.
+                          </p>
+                          <Button
+                              onClick={() => setCurrentStep('verify')}
+                              className="w-full glass-button py-2 text-base"
+                          >
+                            I have paid - Verify Now
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -231,18 +232,18 @@ const Checkout = () => {
                       exit={{ opacity: 0, x: -20 }}
                   >
                     <div className="glass rounded-2xl p-8">
-                      <h2 className="font-clash text-2xl font-semibold text-primary text-center mb-6">
+                      <h2 className="font-clash text-xl font-semibold text-primary text-center mb-5">
                         Verify Payment
                       </h2>
 
-                      <div className="space-y-6">
+                      <div className="space-y-5">
                         <div>
-                          <Label htmlFor="transactionId">Transaction ID / UTR Number *</Label>
+                          <Label htmlFor="transactionId" className="text-sm">Transaction ID / UTR Number *</Label>
                           <Input
                               id="transactionId"
                               value={transactionId}
                               onChange={(e) => setTransactionId(e.target.value)}
-                              className="mt-1"
+                              className="mt-1 py-2 text-sm"
                               placeholder="Enter your transaction ID"
                               required
                           />
@@ -254,7 +255,7 @@ const Checkout = () => {
                         <Button
                             onClick={handleVerifyPayment}
                             disabled={loading || !transactionId.trim()}
-                            className="w-full glass-button"
+                            className="w-full glass-button py-2 text-base"
                         >
                           {loading ? (
                               <div className="flex items-center justify-center gap-2">

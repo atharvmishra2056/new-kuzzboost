@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const HeroSection = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const isMobile = useIsMobile();
 
   useEffect(() => {
+    // Skip mouse tracking on mobile devices
+    if (isMobile) return;
+    
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
         x: (e.clientX / window.innerWidth) * 20,
@@ -16,7 +21,7 @@ const HeroSection = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  }, [isMobile]);
 
   const texts = [
     "Elevate Your Social Presence",
@@ -141,15 +146,15 @@ const HeroSection = () => {
             animate="visible"
         >
           {/* Main Headline */}
-          <div className="mb-8">
-            <motion.h1 variants={itemVariants} className="hero-title mb-4">
+          <div className="mb-6 md:mb-8">
+            <motion.h1 variants={itemVariants} className="hero-title mb-3 md:mb-4">
               KuzzBoost
             </motion.h1>
-            <div className="h-20 flex items-center justify-center">
+            <div className="h-16 md:h-20 flex items-center justify-center">
               <AnimatePresence mode="wait">
                 <motion.h2
                     key={currentTextIndex}
-                    className="text-3xl md:text-5xl font-semibold text-primary-glow"
+                    className="text-2xl md:text-5xl font-semibold text-primary-glow"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
@@ -174,44 +179,44 @@ const HeroSection = () => {
           {/* Subtitle */}
           <motion.p
               variants={itemVariants}
-              className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg md:text-2xl text-muted-foreground mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed"
           >
             The ultimate marketplace for authentic social media growth.
             <span className="text-primary font-medium"> Professional, secure, and instant delivery.</span>
           </motion.p>
 
           {/* CTA Buttons */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
             <Link
                 to="/services"
-                className="glass-button group flex items-center gap-3 text-lg"
+                className="glass-button group flex items-center gap-2 md:gap-3 text-base md:text-lg py-3 px-6"
             >
-              <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+              <Sparkles className="w-4 h-4 md:w-5 md:h-5 group-hover:rotate-12 transition-transform duration-300" />
               Explore Services
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
 
             <Link
                 to="/about"
-                className="glass rounded-2xl px-8 py-4 text-lg font-medium border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-105"
+                className="glass rounded-2xl px-6 py-3 md:px-8 md:py-4 text-base md:text-lg font-medium border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-105"
             >
               Meet the Team
             </Link>
           </motion.div>
 
           {/* Trust Indicators */}
-          <motion.div variants={itemVariants} className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+          <motion.div variants={itemVariants} className="mt-12 md:mt-16 grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary font-clash">24/7</div>
-              <div className="text-muted-foreground">Support</div>
+              <div className="text-2xl md:text-3xl font-bold text-primary font-clash">24/7</div>
+              <div className="text-sm md:text-base text-muted-foreground">Support</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary font-clash">10K+</div>
-              <div className="text-muted-foreground">Happy Clients</div>
+              <div className="text-2xl md:text-3xl font-bold text-primary font-clash">10K+</div>
+              <div className="text-sm md:text-base text-muted-foreground">Happy Clients</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary font-clash">99%</div>
-              <div className="text-muted-foreground">Success Rate</div>
+              <div className="text-2xl md:text-3xl font-bold text-primary font-clash">99%</div>
+              <div className="text-sm md:text-base text-muted-foreground">Success Rate</div>
             </div>
           </motion.div>
         </motion.div>

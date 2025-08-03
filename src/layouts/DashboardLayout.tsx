@@ -114,7 +114,7 @@ const DashboardLayout = () => {
               key={item.path}
               to={item.path}
               onClick={() => setIsSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                 isActive(item.path, item.exact)
                   ? 'bg-accent-peach/20 text-accent-peach border border-accent-peach/30'
                   : 'text-muted-foreground hover:text-primary hover:bg-accent/50'
@@ -123,7 +123,7 @@ const DashboardLayout = () => {
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.badge && (
-                <Badge className="bg-accent-peach text-white text-xs">
+                <Badge className="bg-accent-peach text-white text-sm">
                   {item.badge}
                 </Badge>
               )}
@@ -137,9 +137,9 @@ const DashboardLayout = () => {
         <Button
           onClick={handleSignOut}
           variant="ghost"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 py-3 text-base"
         >
-          <LogOut className="w-4 h-4 mr-2" />
+          <LogOut className="w-5 h-5 mr-3" />
           Sign Out
         </Button>
       </div>
@@ -158,7 +158,7 @@ const DashboardLayout = () => {
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-2"
             >
-              {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>
             <h1 className="text-xl font-clash font-bold text-primary">KuzzBoost</h1>
           </div>
@@ -167,8 +167,8 @@ const DashboardLayout = () => {
             className="flex items-center gap-2"
             title="View Profile"
           >
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-xs font-semibold text-primary">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-sm font-semibold text-primary">
                 {currentUser?.email?.[0].toUpperCase()}
               </span>
             </div>

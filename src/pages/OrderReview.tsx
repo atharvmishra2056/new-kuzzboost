@@ -84,10 +84,10 @@ const OrderReview = () => {
     return (
         <div className="flex items-center justify-center min-h-[70vh]">
           <div className="text-center">
-            <ShoppingCart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="font-clash text-2xl font-bold text-primary mb-2">Your cart is empty</h2>
-            <p className="text-muted-foreground mb-6">Add some services to continue</p>
-            <Button onClick={() => navigate('/dashboard/services')} className="glass-button">
+            <ShoppingCart className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <h2 className="font-clash text-xl font-bold text-primary mb-2">Your cart is empty</h2>
+            <p className="text-muted-foreground mb-5">Add some services to continue</p>
+            <Button onClick={() => navigate('/dashboard/services')} className="glass-button py-2 px-4 text-base">
               Browse Services
             </Button>
           </div>
@@ -99,17 +99,17 @@ const OrderReview = () => {
       <div className="px-4 sm:px-6 lg:px-8 py-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-3 mb-6">
               <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/services')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 py-2 px-3 text-sm"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Continue Shopping
               </Button>
-              <h1 className="font-clash text-3xl md:text-4xl font-bold text-primary">
+              <h1 className="font-clash text-2xl md:text-4xl font-bold text-primary">
                 Review Your Order
               </h1>
             </div>
@@ -133,16 +133,20 @@ const OrderReview = () => {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="flex items-center gap-4 p-4 glass rounded-xl"
+                            className="flex items-start gap-3 p-3 glass rounded-xl"
                         >
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-primary">{item.title}</h4>
-                            <p className="text-sm text-muted-foreground">{item.platform}</p>
+                            <h4 className="font-medium text-primary text-base">{item.title}</h4>
+                            <p className="text-xs text-muted-foreground">{item.platform}</p>
                             {item.service_quantity && (
-                                <p className="text-sm text-accent-peach">
+                                <p className="text-xs text-accent-peach">
                                   {item.service_quantity.toLocaleString()} units
                                 </p>
                             )}
+                            <div className="flex items-center gap-2 mt-2 text-xs text-primary/80">
+                              <ArrowLeft className="w-3 h-3 flex-shrink-0 rotate-90" />
+                              <p className="truncate font-mono text-xs font-semibold">{item.userInput}</p>
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -180,7 +184,7 @@ const OrderReview = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => removeFromCart(item.id)}
-                              className="text-red-500 hover:text-red-700"
+                              className="text-red-500 hover:text-red-700 flex-shrink-0 p-1"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -225,9 +229,9 @@ const OrderReview = () => {
                     Contact Information
                   </h2>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <Label htmlFor="email">Email Address *</Label>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <Label htmlFor="email" className="text-sm">Email Address *</Label>
                       <Input
                           id="email"
                           name="email"
@@ -235,7 +239,7 @@ const OrderReview = () => {
                           required
                           value={formData.email}
                           onChange={handleInputChange}
-                          className="mt-1"
+                          className="mt-1 text-sm py-2"
                           placeholder="your@email.com"
                       />
                     </div>
@@ -269,7 +273,7 @@ const OrderReview = () => {
 
                   <Button
                       onClick={handleProceedToPayment}
-                      className="w-full glass-button text-lg py-6"
+                      className="w-full glass-button text-base py-4"
                       disabled={!formData.email || !selectedAddress}
                   >
                     Proceed to Payment
