@@ -10,14 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface ReviewItemProps {
+interface EnhancedReviewItemProps {
   review: Review;
   onEdit: (review: Review) => void;
   onDelete: (reviewId: string) => Promise<void>;
   currentUserProfileId?: string;
 }
 
-const ReviewItem: React.FC<ReviewItemProps> = ({ 
+const EnhancedReviewItem: React.FC<EnhancedReviewItemProps> = ({ 
   review, 
   onEdit, 
   onDelete, 
@@ -210,4 +210,4 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   );
 };
 
-export default ReviewItem;
+export default EnhancedReviewItem;

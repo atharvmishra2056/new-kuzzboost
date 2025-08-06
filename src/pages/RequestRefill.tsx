@@ -207,7 +207,7 @@ const RequestRefillPage = () => {
       
       // Navigate to orders or show success page
       setTimeout(() => {
-        navigate('/dashboard/account/orders');
+        navigate('/dashboard/orders');
       }, 1500);
       
     } catch (error) {

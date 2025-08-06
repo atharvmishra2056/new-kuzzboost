@@ -6,9 +6,10 @@ interface ReviewListProps {
   reviews: Review[];
   onEdit: (review: Review) => void;
   onDelete: (reviewId: string) => Promise<void>;
+  currentUserProfileId?: string;
 }
 
-const ReviewList: React.FC<ReviewListProps> = ({ reviews, onEdit, onDelete }) => {
+const ReviewList: React.FC<ReviewListProps> = ({ reviews, onEdit, onDelete, currentUserProfileId }) => {
   if (!reviews || reviews.length === 0) {
     return (
       <div className="text-center py-8">
@@ -20,7 +21,13 @@ const ReviewList: React.FC<ReviewListProps> = ({ reviews, onEdit, onDelete }) =>
   return (
     <div className="space-y-6">
       {reviews.map((review) => (
-        <ReviewItem key={review.id} review={review} onEdit={onEdit} onDelete={onDelete} />
+        <ReviewItem 
+          key={review.id} 
+          review={review} 
+          onEdit={onEdit} 
+          onDelete={onDelete} 
+          currentUserProfileId={currentUserProfileId}
+        />
       ))}
     </div>
   );

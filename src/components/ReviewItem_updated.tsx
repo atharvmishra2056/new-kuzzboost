@@ -28,7 +28,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   const [showAllImages, setShowAllImages] = useState(false);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   
-  const isOwner = currentUserProfileId === review.user_id;
+  const isOwner = currentUser?.id === review.user_id || currentUserProfileId === review.user_id;
   
   // Extract name from email or use full_name
   const getUserDisplayName = () => {
@@ -71,7 +71,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
   const displayImages = showAllImages ? images : images.slice(0, 3);
 
   return (
-    <div className="bg-background/80 backdrop-blur-sm rounded-xl p-6 border border-white/10 shadow-lg">
+    <div className="bg-background/90 backdrop-blur-sm rounded-xl p-6 border border-white/10 shadow-lg">
       <div className="flex gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary/20 to-accent-peach/20 rounded-full flex items-center justify-center font-bold text-primary text-lg border border-white/10">

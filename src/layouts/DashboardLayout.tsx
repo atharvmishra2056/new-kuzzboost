@@ -178,16 +178,16 @@ const DashboardLayout = () => {
 
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-black/80 z-40"
-          onClick={() => setIsSidebarOpen(false)}
-        />
+      <div
+      className="md:hidden fixed inset-0 bg-black/80 z-40"
+      onClick={() => setIsSidebarOpen(false)}
+      />
       )}
-
+      
       {/* Mobile Sidebar */}
-      <aside className={`md:hidden fixed top-0 left-0 h-full w-64 glass sidebar-glass border-r border-border/20 flex flex-col z-50 transform transition-transform duration-300 ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <aside className={`md:hidden fixed top-0 left-0 h-full w-64 border-r border-border/20 flex flex-col z-50 transform transition-transform duration-300 ${
+      isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(20px)' }}>
         <SidebarContent />
       </aside>
 

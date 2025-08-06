@@ -1,6 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Filter, Star, ShoppingCart, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +11,8 @@ import SaveForLater from "@/components/SaveForLater";
 import { useServices } from "@/components/Services";
 import { Button } from "@/components/ui/button";
 import { Service } from "@/types/service";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const platforms = [
   { name: "All", icon: <Star className="w-5 h-5" />, filter: "all" },
@@ -128,59 +128,63 @@ const DashboardServices = () => {
   const [selectedPlatform, setSelectedPlatform] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("popular");
-    const [selectedServiceForCalc, setSelectedServiceForCalc] = useState<Service | null>(null);
+  const [selectedServiceForCalc, setSelectedServiceForCalc] = useState<Service | null>(null);
 
-  const { data: reviews, isLoading: reviewsLoading } = useQuery({
-    queryKey: ['allReviews'],
+  // Fetch review statistics for all services
+  const { data: reviewStats } = useQuery({
+    queryKey: ['allServicesReviewStats'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('reviews').select('id, service_id, rating');
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('service_id, rating');
+        
       if (error) {
-        console.error('Error fetching reviews:', error);
-        return [];
+        console.error('Error fetching review stats:', error);
+        return {};
       }
-      return data || [];
-    },
-  });
-
-  const reviewStats = useMemo(() => {
-    if (!reviews) return new Map();
-    
-    const statsByService = new Map<number, { totalRating: number; reviewCount: number }>();
-    
-    reviews.forEach(review => {
-      const { service_id, rating } = review;
-      if (!statsByService.has(service_id)) {
-        statsByService.set(service_id, { totalRating: 0, reviewCount: 0 });
+      
+      if (!data || data.length === 0) {
+        return {};
       }
-      const currentStats = statsByService.get(service_id)!;
-      currentStats.totalRating += rating;
-      currentStats.reviewCount += 1;
-    });
-
-    const finalStats = new Map<number, { averageRating: number; reviewCount: number }>();
-    statsByService.forEach((value, key) => {
-      finalStats.set(key, {
-        averageRating: value.totalRating / value.reviewCount,
-        reviewCount: value.reviewCount,
+      
+      const serviceStats: { [serviceId: number]: { averageRating: number; totalReviews: number } } = {};
+      
+      // Group reviews by service_id
+      const reviewsByService = data.reduce((acc, review) => {
+        if (!acc[review.service_id]) {
+          acc[review.service_id] = [];
+        }
+        acc[review.service_id].push(review);
+        return acc;
+      }, {} as { [serviceId: number]: any[] });
+      
+      // Calculate stats for each service
+      Object.entries(reviewsByService).forEach(([serviceId, reviews]) => {
+        const totalReviews = reviews.length;
+        const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / totalReviews;
+        
+        serviceStats[parseInt(serviceId)] = {
+          averageRating: Number(averageRating.toFixed(1)),
+          totalReviews
+        };
       });
-    });
-    
-    return finalStats;
-  }, [reviews]);
+      
+      return serviceStats;
+    },
+    refetchOnWindowFocus: false,
+  });
 
   const handleAddToCart = async (service: Service, quantity: number, price: number) => {
     await addToCart(service, quantity, price, '');
     setSelectedServiceForCalc(null);
   };
 
-  const enhancedServices = services.map(service => {
-    const stats = reviewStats.get(service.id);
-    return {
-      ...service,
-      rating: stats ? parseFloat(stats.averageRating.toFixed(1)) : service.rating,
-      reviews: stats ? stats.reviewCount : service.reviews,
-    };
-  });
+  // Enhance services with real review data
+  const enhancedServices = services.map(service => ({
+    ...service,
+    rating: reviewStats?.[service.id]?.averageRating || service.rating || 0,
+    reviews: reviewStats?.[service.id]?.totalReviews || service.reviews || 0
+  }));
 
   const filteredServices = enhancedServices
       .filter(s => (selectedPlatform === "all" || s.platform === selectedPlatform) && s.title.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -198,7 +202,7 @@ const DashboardServices = () => {
   const listVariants: Variants = { visible: { transition: { staggerChildren: 0.1 } } };
   const itemVariants: Variants = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } };
 
-  if (loading || reviewsLoading) {
+  if (loading) {
     return <div className="text-center py-20 text-lg font-semibold">Loading Services...</div>;
   }
 
@@ -299,7 +303,7 @@ const DashboardServices = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-accent-peach text-accent-peach"/>
-                        <span className="text-sm font-medium">{service.rating}</span>
+                        <span className="text-sm font-medium">{service.rating.toFixed(1)}</span>
                         <span className="text-xs text-muted-foreground">({service.reviews})</span>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">

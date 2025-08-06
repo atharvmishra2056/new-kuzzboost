@@ -18,6 +18,10 @@ BEFORE UPDATE ON public.reviews
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_review_update();
 
+-- Add unique constraint to prevent multiple reviews per user per service
+ALTER TABLE public.reviews 
+ADD CONSTRAINT unique_user_service_review UNIQUE (user_id, service_id);
+
 -- Create RPC function to delete a review
 CREATE OR REPLACE FUNCTION public.delete_review(review_id_to_delete uuid)
 RETURNS json
@@ -56,7 +60,8 @@ CREATE OR REPLACE FUNCTION public.update_review(
   p_review_id uuid,
   p_rating int,
   p_title text,
-  p_comment text
+  p_comment text,
+  p_media_urls jsonb DEFAULT NULL
 )
 RETURNS json
 LANGUAGE plpgsql
@@ -87,7 +92,8 @@ BEGIN
   SET
     rating = p_rating,
     title = p_title,
-    comment = p_comment
+    comment = p_comment,
+    media_urls = COALESCE(p_media_urls, media_urls)
   WHERE id = p_review_id;
 
   RETURN json_build_object('success', true, 'message', 'Review updated successfully');

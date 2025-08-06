@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const timelineData = [
   { 
@@ -33,10 +34,11 @@ const ProcessTimeline = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const isInView = useInView(containerRef, { margin: "-30%" });
+  const isMobile = useIsMobile();
 
-  // Simple scroll-based navigation
+  // Desktop scroll-based navigation
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView || isMobile) return;
 
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -58,8 +60,201 @@ const ProcessTimeline = () => {
     handleScroll(); // Initial call
     
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isInView]);
+  }, [isInView, isMobile]);
 
+  // Mobile auto-progression
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev + 1) % timelineData.length);
+    }, 3000); // Change step every 3 seconds on mobile
+
+    return () => clearInterval(interval);
+  }, [isMobile]);
+
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <section className="relative bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 py-16 px-4">
+        {/* Background Effects - Smaller for mobile */}
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div
+            className="absolute w-48 h-48 rounded-full opacity-15 blur-2xl"
+            style={{ background: timelineData[currentStep].color }}
+            animate={{
+              x: ['-10%', '10%', '-10%'],
+              y: ['-5%', '5%', '-5%'],
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute w-32 h-32 rounded-full opacity-10 blur-xl right-0 bottom-0"
+            style={{ background: timelineData[currentStep].color }}
+            animate={{
+              x: ['10%', '-10%', '10%'],
+              y: ['5%', '-5%', '5%'],
+            }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </div>
+
+        {/* Header */}
+        <div className="text-center mb-12 relative z-10">
+          <motion.h1 
+            className="text-3xl sm:text-4xl font-bold mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+              How It Works
+            </span>
+          </motion.h1>
+          <motion.p 
+            className="text-base text-gray-600 max-w-sm mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            Your journey to social media success in four simple steps
+          </motion.p>
+        </div>
+
+        {/* Mobile Timeline - Vertical Stack */}
+        <div className="relative z-10 max-w-sm mx-auto">
+          {/* Progress Indicators */}
+          <div className="flex justify-center gap-2 mb-8">
+            {timelineData.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  index === currentStep 
+                    ? 'scale-125 shadow-md' 
+                    : 'bg-gray-300'
+                }`}
+                style={{
+                  backgroundColor: index === currentStep ? timelineData[currentStep].color : undefined
+                }}
+                onClick={() => setCurrentStep(index)}
+              />
+            ))}
+          </div>
+
+          {/* Current Step Content */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className="text-center"
+            >
+              {/* Step Visual */}
+              <div className="flex justify-center mb-6">
+                <motion.div
+                  className="relative w-32 h-32"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, type: "spring" }}
+                >
+                  <div 
+                    className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${timelineData[currentStep].color}20, ${timelineData[currentStep].color}10)`,
+                      border: `2px solid ${timelineData[currentStep].color}40`
+                    }}
+                  >
+                    {/* Step Number */}
+                    <div 
+                      className="text-4xl font-bold opacity-40"
+                      style={{ color: timelineData[currentStep].color }}
+                    >
+                      {timelineData[currentStep].icon}
+                    </div>
+
+                    {/* Floating Elements - Smaller for mobile */}
+                    <motion.div
+                      className="absolute w-6 h-6 rounded-full opacity-60"
+                      style={{ backgroundColor: timelineData[currentStep].color }}
+                      animate={{
+                        x: [0, 15, 0],
+                        y: [0, -10, 0],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                    <motion.div
+                      className="absolute w-4 h-4 rounded-full opacity-40"
+                      style={{ backgroundColor: timelineData[currentStep].color }}
+                      animate={{
+                        x: [0, -12, 0],
+                        y: [0, 8, 0],
+                        scale: [1.1, 1, 1.1],
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 0.5
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Step Number Badge */}
+              <div 
+                className="inline-block px-3 py-1.5 rounded-xl text-white font-bold text-sm mb-4"
+                style={{ backgroundColor: timelineData[currentStep].color }}
+              >
+                Step {timelineData[currentStep].icon}
+              </div>
+
+              {/* Title */}
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">
+                {timelineData[currentStep].title}
+              </h2>
+
+              {/* Description */}
+              <p className="text-sm text-gray-600 leading-relaxed px-4">
+                {timelineData[currentStep].description}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Bottom CTA */}
+          <div className="text-center mt-12">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              <h3 className="text-lg font-bold text-gray-800 mb-4">
+                Ready to boost your social presence?
+              </h3>
+              <Link to="/services">
+                <motion.button
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white font-semibold rounded-full text-sm shadow-lg hover:shadow-xl transition-all duration-300"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Get Started Now
+                </motion.button>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop Layout (Original)
   return (
     <section 
       ref={containerRef} 

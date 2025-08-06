@@ -173,8 +173,8 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
     const averageRating = reviewCount > 0 ? 
       reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewCount : 0;
     
-    // Check if user has reviewed by comparing with profile data
-    const userHasReviewed = currentUser ? reviews.some(r => r.user_id === currentUser.id) : false;
+    // Allow users to write multiple reviews for now
+    const userHasReviewed = false;
     
     return { 
       averageRating: Number(averageRating.toFixed(1)),
@@ -479,7 +479,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
                 </div>
               </div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-gray-800/20 backdrop-blur-lg border border-white/10 rounded-2xl p-6">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass rounded-2xl p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold text-primary">Reviews ({reviewCount})</h3>
                   {!userHasReviewed && currentUser && (
@@ -497,20 +497,11 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
                     <p>Could not load reviews. Please try again later.</p>
                   </div>
                 ) : reviews && reviews.length > 0 ? (
-                  <>
-                    <ReviewList 
-                      reviews={reviews.slice(0, 3)} 
-                      onEdit={handleEditReview} 
-                      onDelete={handleDeleteReview} 
-                    />
-                    {reviews.length > 3 && (
-                      <div className="text-center mt-6">
-                        <Button variant="outline" onClick={() => navigate(`/dashboard/service/${serviceId}/reviews`)}>
-                          View All {reviewCount} Reviews
-                        </Button>
-                      </div>
-                    )}
-                  </>
+                  <ReviewList 
+                    reviews={reviews} 
+                    onEdit={handleEditReview} 
+                    onDelete={handleDeleteReview} 
+                  />
                 ) : (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">No reviews yet. Be the first to leave one!</p>

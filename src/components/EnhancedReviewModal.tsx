@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Review } from '@/types/service';
 import { useAuth } from '@/context/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Star, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
-interface ReviewModalProps {
+interface EnhancedReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   serviceId: number;
@@ -18,7 +17,7 @@ interface ReviewModalProps {
   reviewToEdit?: Review | null;
 }
 
-const ReviewModal: React.FC<ReviewModalProps> = ({ 
+const EnhancedReviewModal: React.FC<EnhancedReviewModalProps> = ({ 
   isOpen, 
   onClose, 
   serviceId, 
@@ -32,10 +31,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   const [error, setError] = useState('');
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-
   const { currentUser } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (reviewToEdit) {
@@ -102,77 +99,45 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!serviceId) {
-      toast({
-        title: "Error",
-        description: "Service ID is missing",
-        variant: "destructive",
-      });
+    if (!currentUser) {
+      setError('You must be logged in to leave a review.');
       return;
     }
-
     setIsLoading(true);
+    setError('');
 
     try {
       const mediaUrls = uploadedImages.length > 0 ? uploadedImages : null;
 
       if (reviewToEdit) {
-        const { data, error: rpcError } = await (supabase.rpc as any)('update_review', {
+        // Update existing review
+        const { error: rpcError } = await (supabase.rpc as any)('update_review', {
           p_review_id: reviewToEdit.id,
           p_rating: rating,
           p_title: title,
           p_comment: comment,
-          p_media_urls: mediaUrls ? JSON.stringify(mediaUrls) : null,
         });
 
         if (rpcError) throw rpcError;
-        
-        if (data && !data.success) {
-          throw new Error(data.message || 'Failed to update review');
-        }
-
-        toast({
-          title: "Success",
-          description: data?.message || "Review updated successfully!",
-        });
+        toast({ title: 'Success', description: 'Your review has been updated.' });
       } else {
-        const { data, error: rpcError } = await supabase.rpc('submit_review', {
+        // Submit new review
+        const { error: rpcError } = await supabase.rpc('submit_review', {
           p_service_id: serviceId,
           p_rating: rating,
           p_title: title,
           p_comment: comment,
-          p_media_urls: mediaUrls ? JSON.stringify(mediaUrls) : null,
+          p_media_urls: mediaUrls,
         });
 
         if (rpcError) throw rpcError;
-        
-        if (data && !data.success) {
-          throw new Error(data.message || 'Failed to submit review');
-        }
-
-        toast({
-          title: "Success",
-          description: data?.message || "Review submitted successfully!",
-        });
+        toast({ title: 'Success', description: 'Thank you for your review!' });
       }
-
-      setRating(5);
-      setTitle('');
-      setComment('');
-      setUploadedImages([]);
+      await onReviewSubmitted();
       onClose();
-      
-      queryClient.invalidateQueries({ queryKey: ['reviews', serviceId] });
-      queryClient.invalidateQueries({ queryKey: ['service', serviceId] });
-
-    } catch (error: any) {
-      console.error('Error submitting review:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to submit review. Please try again.",
-        variant: "destructive",
-      });
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred.');
+      toast({ variant: 'destructive', title: 'Error', description: err.message });
     } finally {
       setIsLoading(false);
     }
@@ -198,6 +163,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Rating */}
           <div>
             <Label className="text-base font-medium text-muted-foreground mb-3 block">
               Rating
@@ -207,6 +173,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             </div>
           </div>
 
+          {/* Title */}
           <div>
             <Label htmlFor="title" className="text-base font-medium text-muted-foreground mb-2 block">
               Review Title
@@ -221,6 +188,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             />
           </div>
 
+          {/* Comment */}
           <div>
             <Label htmlFor="comment" className="text-base font-medium text-muted-foreground mb-2 block">
               Your Review
@@ -236,11 +204,13 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             />
           </div>
 
+          {/* Image Upload */}
           <div>
             <Label className="text-base font-medium text-muted-foreground mb-2 block">
               Add Photos (Optional)
             </Label>
             <div className="space-y-4">
+              {/* Upload Button */}
               <div className="flex items-center gap-4">
                 <label className="cursor-pointer">
                   <input
@@ -267,6 +237,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 </span>
               </div>
 
+              {/* Image Preview */}
               {uploadedImages.length > 0 && (
                 <div className="grid grid-cols-3 gap-3">
                   {uploadedImages.map((url, index) => (
@@ -296,6 +267,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             </div>
           )}
 
+          {/* Action Buttons */}
           <div className="flex justify-end gap-4 pt-4">
             <Button
               type="button"
@@ -320,4 +292,4 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   );
 };
 
-export default ReviewModal;
+export default EnhancedReviewModal;

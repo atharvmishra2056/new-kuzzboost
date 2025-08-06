@@ -206,9 +206,7 @@ const OrderReview = () => {
                     onAddressChange={(addressData) => {
                       setFormData(prev => ({
                         ...prev,
-                        firstName: addressData.firstName || prev.firstName,
-                        lastName: addressData.lastName || prev.lastName,
-                        phone: addressData.phone || prev.phone,
+                        // First name, last name, and phone are now handled in the Contact Info section
                         address: addressData.address || prev.address,
                         city: addressData.city || prev.city,
                         postalCode: addressData.postalCode || prev.postalCode,
@@ -229,8 +227,34 @@ const OrderReview = () => {
                     Contact Information
                   </h2>
 
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                      <Label htmlFor="firstName" className="text-sm">First Name *</Label>
+                      <Input
+                          id="firstName"
+                          name="firstName"
+                          type="text"
+                          required
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                          className="mt-1 text-sm py-2"
+                          placeholder="Enter your first name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName" className="text-sm">Last Name *</Label>
+                      <Input
+                          id="lastName"
+                          name="lastName"
+                          type="text"
+                          required
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                          className="mt-1 text-sm py-2"
+                          placeholder="Enter your last name"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
                       <Label htmlFor="email" className="text-sm">Email Address *</Label>
                       <Input
                           id="email"
@@ -241,6 +265,19 @@ const OrderReview = () => {
                           onChange={handleInputChange}
                           className="mt-1 text-sm py-2"
                           placeholder="your@email.com"
+                      />
+                    </div>
+                     <div>
+                      <Label htmlFor="phone" className="text-sm">Phone Number *</Label>
+                      <Input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          required
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="mt-1 text-sm py-2"
+                          placeholder="Enter your phone number"
                       />
                     </div>
                   </div>
@@ -274,7 +311,7 @@ const OrderReview = () => {
                   <Button
                       onClick={handleProceedToPayment}
                       className="w-full glass-button text-base py-4"
-                      disabled={!formData.email || !selectedAddress}
+                      disabled={!formData.email || !formData.firstName || !formData.lastName || !formData.phone || !selectedAddress}
                   >
                     Proceed to Payment
                   </Button>

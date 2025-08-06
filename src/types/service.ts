@@ -2,13 +2,14 @@ import { ReactElement } from "react";
 
 export interface Review {
   id: string;
-  created_at: string;
+  created_at: string | null;
   service_id: number;
   user_id: string;
   rating: number;
   title?: string | null;
   comment?: string | null;
   is_verified_purchase?: boolean;
+  media_urls?: string[] | null;
   user?: {
     full_name?: string | null;
     avatar_url?: string | null;
@@ -36,21 +37,22 @@ export interface ServiceTier {
 
 export interface Service {
   id: number;
+  created_at: string;
+  updated_at: string;
   title: string;
   platform: string;
-  icon?: ReactElement;
-  iconName: string; // This was a duplicate, but keeping it to match your existing code
-  tiers?: ServiceTier[];
-  rating: number;
-  reviews: number;
-  features: string[];
   description: string;
-  badge: string;
-  isActive?: boolean;
-  refill_eligible?: boolean; // Whether the service is eligible for refills
-  // --- FIX: ADDED THE MISSING OPTIONAL PROPERTIES ---
-  rules?: string[];
-  estimatedDelivery?: string;
+  features: string[] | null;
+  icon?: ReactElement;
+  iconName: string;
+  rating: number | null;
+  reviews: number | null;
+  badge: string | null;
+  refill_eligible: boolean | null;
+  isActive?: boolean | null;
+  rules?: string[] | null;
+  estimatedDelivery?: string | null;
+  tiers?: ServiceTier[];
   packageTypes?: { name: string; description: string; multiplier: number }[];
 }
 

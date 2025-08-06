@@ -22,7 +22,7 @@ const Index = () => {
     <div className="relative">
       <Robot3D />
       <ParticleField />
-      <div className="pt-20">
+      <div className="pt-24 md:pt-20">
         <HeroSection />
         <ProcessTimeline />
         <EditableFAQ className="py-20" />

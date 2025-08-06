@@ -14,7 +14,7 @@ interface NavigationProps {
   onCartClick?: () => void;
 }
 
-const Navigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
+const EnhancedNavigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -386,4 +386,4 @@ const Navigation = ({ cartItemCount, onCartClick }: NavigationProps) => {
   );
 };
 
-export default Navigation;
+export default EnhancedNavigation;
