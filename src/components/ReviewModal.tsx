@@ -69,10 +69,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `review-images/${fileName}`;
+        const filePath = `review-photos/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('review-images')
+          .from('review-photos')
           .upload(filePath, file);
 
         if (uploadError) {
@@ -81,7 +81,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         }
 
         const { data: { publicUrl } } = supabase.storage
-          .from('review-images')
+          .from('review-photos')
           .getPublicUrl(filePath);
 
         newImageUrls.push(publicUrl);
@@ -123,18 +123,19 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
           p_rating: rating,
           p_title: title,
           p_comment: comment,
-          p_media_urls: mediaUrls ? JSON.stringify(mediaUrls) : null,
+          p_media_urls: mediaUrls,
         });
 
         if (rpcError) throw rpcError;
         
-        if (data && !data.success) {
-          throw new Error(data.message || 'Failed to update review');
+        const result = data as any;
+        if (result && !result.success) {
+          throw new Error(result.message || 'Failed to update review');
         }
 
         toast({
           title: "Success",
-          description: data?.message || "Review updated successfully!",
+          description: result?.message || "Review updated successfully!",
         });
       } else {
         const { data, error: rpcError } = await supabase.rpc('submit_review', {
@@ -142,18 +143,19 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
           p_rating: rating,
           p_title: title,
           p_comment: comment,
-          p_media_urls: mediaUrls ? JSON.stringify(mediaUrls) : null,
+          p_media_urls: mediaUrls,
         });
 
         if (rpcError) throw rpcError;
         
-        if (data && !data.success) {
-          throw new Error(data.message || 'Failed to submit review');
+        const result = data as any;
+        if (result && !result.success) {
+          throw new Error(result.message || 'Failed to submit review');
         }
 
         toast({
           title: "Success",
-          description: data?.message || "Review submitted successfully!",
+          description: result?.message || "Review submitted successfully!",
         });
       }
 

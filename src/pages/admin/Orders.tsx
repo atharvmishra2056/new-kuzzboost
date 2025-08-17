@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Order, RefillRequest } from "@/types/service";
 import { Separator } from "@/components/ui/separator";
 import { Link as LinkIcon, Search, ArrowDown, ArrowUp, MoreVertical, RefreshCw } from "lucide-react";
@@ -103,7 +103,7 @@ const AdminOrders = () => {
         setIsModalOpen(true);
     };
 
-    const updateOrderInDatabase = async (orderId: string, status: Order['status'], paymentVerified: boolean) => {
+    const updateOrderInDatabase = async (orderId: string, status: Order['status'], paymentVerified: boolean, oldStatus: Order['status']) => {
         setIsSubmitting(true);
         try {
             const { error } = await supabase
@@ -120,6 +120,66 @@ const AdminOrders = () => {
             toast({ title: "Success", description: "Order updated successfully." });
             await fetchOrders();
             setIsModalOpen(false);
+
+            // Award referral credits when order is completed
+            if (status === 'completed' && oldStatus !== 'completed') {
+                try {
+                    console.log(`Order ${orderId} marked as completed, checking for referral credits...`);
+                    
+                    // Get order details
+                    const { data: order, error: orderError } = await supabase
+                        .from('orders')
+                        .select('user_id, total_amount')
+                        .eq('id', orderId)
+                        .single();
+
+                    if (orderError || !order) {
+                        console.error('Failed to fetch order for referral processing:', orderError);
+                        return;
+                    }
+
+                    // Get referrer using database function
+                    const { data: referrerId, error: referralError } = await supabase
+                        .rpc('get_referrer' as any, { referred_user_id: order.user_id });
+
+                    if (referralError) {
+                        console.error('Error checking referral:', referralError);
+                        return;
+                    }
+
+                    if (referrerId) {
+                        const creditAmount = Number(order.total_amount) * 0.02;
+                        
+                        console.log(`Awarding ${creditAmount} credits to referrer ${referrerId}`);
+                        
+                        // Call the increment_credits function
+                        const { error: creditError } = await supabase
+                            .rpc('increment_credits' as any, { 
+                                p_user_id: referrerId, 
+                                p_amount: creditAmount 
+                            });
+
+                        if (creditError) {
+                            console.error('Failed to add referral credits:', creditError);
+                            toast({ 
+                                title: "Warning", 
+                                description: `Order completed, but failed to award referral credits.`, 
+                                variant: "destructive" 
+                            });
+                        } else {
+                            console.log(`Successfully added ${creditAmount} credits to referrer`);
+                            toast({ 
+                                title: "Success", 
+                                description: `Order completed! Awarded ₹${creditAmount.toFixed(2)} referral credits.`,
+                                duration: 5000
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error processing referral credits:', error);
+                    // Don't show error toast for referral issues, just log them
+                }
+            }
         } catch (error) {
             const err = error as Error;
             toast({ title: "Error", description: `Failed to update order: ${err.message}`, variant: "destructive" });
@@ -131,13 +191,13 @@ const AdminOrders = () => {
 
     const handleVerifyPayment = () => {
         if (selectedOrder) {
-            updateOrderInDatabase(selectedOrder.id, 'processing', true);
+            updateOrderInDatabase(selectedOrder.id, 'processing', true, selectedOrder.status);
         }
     };
 
     const handleSaveChanges = () => {
         if (selectedOrder && newStatus && newStatus !== selectedOrder.status) {
-            updateOrderInDatabase(selectedOrder.id, newStatus, selectedOrder.payment_verified);
+            updateOrderInDatabase(selectedOrder.id, newStatus, selectedOrder.payment_verified, selectedOrder.status);
         }
     };
 
@@ -274,7 +334,7 @@ const AdminOrders = () => {
         if (newStatus !== order.status) {
             setSelectedOrder(order);
             setNewStatus(newStatus);
-            await updateOrderInDatabase(order.id, newStatus, order.payment_verified);
+            await updateOrderInDatabase(order.id, newStatus, order.payment_verified, order.status);
         }
     };
 

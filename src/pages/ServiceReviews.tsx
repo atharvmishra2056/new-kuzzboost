@@ -59,7 +59,7 @@ const ServiceReviews = () => {
       if (!serviceId) return [];
       const { data, error } = await supabase
         .from('reviews')
-        .select('*, user:profiles(full_name, avatar_url)')
+        .select('*, user:profiles!reviews_user_id_fkey(full_name, avatar_url, email)')
         .eq('service_id', serviceId)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -75,7 +75,9 @@ const ServiceReviews = () => {
           comment: r.comment,
           media_urls: Array.isArray(r.media_urls) ? r.media_urls.filter((url): url is string => typeof url === 'string') : [],
           is_verified_purchase: r.is_verified_purchase || false,
-          user: r.user ? { full_name: r.user.full_name, avatar_url: r.user.avatar_url } : { full_name: 'Anonymous' },
+          user: r.user
+            ? { full_name: r.user.full_name || r.user.email || 'Anonymous', avatar_url: r.user.avatar_url }
+            : { full_name: 'Anonymous' },
         };
         return reviewData;
       });
@@ -232,11 +234,11 @@ const ServiceReviews = () => {
         ) : areReviewsError ? (
           <div className="text-center py-10 text-red-500">Could not load reviews.</div>
         ) : sortedReviews.length > 0 ? (
-          <ReviewList 
+         <ReviewList 
             reviews={sortedReviews} 
             onEdit={handleEditReview}
             onDelete={handleDeleteReview}
-            currentUserProfileId={currentUser?.id}
+           currentUserProfileId={(currentUser?.user_metadata as any)?.profile_id}
           />
         ) : (
           <div className="text-center py-10 glass rounded-2xl">

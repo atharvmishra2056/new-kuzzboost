@@ -1,12 +1,13 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import { LogOut, ShoppingCart, Heart, Package, Settings, Home, User, Menu, X, RefreshCw } from "lucide-react";
+import { LogOut, ShoppingCart, Heart, Package, Settings, Home, User, Menu, X, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "../components/Footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from '@/integrations/supabase/client';
 
 const DashboardLayout = () => {
   const { currentUser, signOut } = useAuth();
@@ -15,6 +16,51 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [referralEnabled, setReferralEnabled] = useState(false);
+
+  useEffect(() => {
+    const fetchReferralEnabled = async () => {
+      if (currentUser) {
+        // Force fresh data by clearing cache and adding timestamp
+        const { data } = await (supabase as any)
+          .from('profiles')
+          .select('referral_enabled')
+          .eq('user_id', currentUser.id)
+          .single();
+        setReferralEnabled(data?.referral_enabled || false);
+      }
+    };
+    
+    // Initial fetch
+    fetchReferralEnabled();
+    
+    // Also fetch after a short delay to handle race conditions
+    const timeoutId = setTimeout(fetchReferralEnabled, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [currentUser, location.pathname]); // Also trigger on route changes
+
+  // Additional effect to refresh on window focus (new tab scenario)
+  useEffect(() => {
+    const handleFocus = async () => {
+      if (currentUser && document.visibilityState === 'visible') {
+        const { data } = await (supabase as any)
+          .from('profiles')
+          .select('referral_enabled')
+          .eq('user_id', currentUser.id)
+          .single();
+        setReferralEnabled(data?.referral_enabled || false);
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleFocus);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('visibilitychange', handleFocus);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [currentUser]);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -61,7 +107,12 @@ const DashboardLayout = () => {
       icon: <RefreshCw className="w-5 h-5" />,
       label: "Refill Requests",
       path: "/dashboard/refill-requests"
-    }
+    },
+    ...(referralEnabled ? [{
+      icon: <Users className="w-5 h-5" />,
+      label: "Referrals",
+      path: "/dashboard/referrals"
+    }] : []),
   ];
 
   const isActive = (path: string, exact = false) => {

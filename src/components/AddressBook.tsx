@@ -35,7 +35,6 @@ const AddressBook = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [formData, setFormData] = useState({
-    full_name: '',
     street: '',
     city: '',
     state: '',
@@ -89,7 +88,7 @@ const AddressBook = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.full_name || !formData.street || !formData.city || !formData.zip_code || !formData.country) {
+    if (!formData.street || !formData.city || !formData.zip_code || !formData.country) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -99,12 +98,17 @@ const AddressBook = () => {
     }
 
     try {
+      // Derive first/last name from account name (not editable in address modal)
+      const accountName = (currentUser?.user_metadata as any)?.full_name as string | undefined;
+      const nameParts = (accountName || '').trim().split(/\s+/);
+      const firstName = nameParts.shift() || '';
+      const lastName = nameParts.join(' ');
+
       if (editingAddress) {
         // Update existing address
-        const nameParts = formData.full_name.split(' ');
         const payload = {
-          first_name: nameParts.shift() ?? '',
-          last_name: nameParts.join(' '),
+          first_name: firstName,
+          last_name: lastName,
           address_line_1: formData.street,
           city: formData.city,
           state: formData.state,
@@ -126,12 +130,11 @@ const AddressBook = () => {
         });
       } else {
         // Create new address
-        const namePartsNew = formData.full_name.split(' ');
         const payloadNew = {
           user_id: currentUser?.id,
           is_default: addresses.length === 0,
-          first_name: namePartsNew.shift() ?? '',
-          last_name: namePartsNew.join(' '),
+          first_name: firstName,
+          last_name: lastName,
           address_line_1: formData.street,
           city: formData.city,
           state: formData.state,
@@ -155,7 +158,6 @@ const AddressBook = () => {
       setIsModalOpen(false);
       setEditingAddress(null);
       setFormData({
-        full_name: '',
         street: '',
         city: '',
         state: '',
@@ -177,7 +179,6 @@ const AddressBook = () => {
   const handleEdit = (address: Address) => {
     setEditingAddress(address);
     setFormData({
-      full_name: address.full_name,
       street: address.street,
       city: address.city,
       state: address.state,
@@ -246,7 +247,6 @@ const AddressBook = () => {
   const openAddModal = () => {
     setEditingAddress(null);
     setFormData({
-      full_name: '',
       street: '',
       city: '',
       state: '',
@@ -288,15 +288,7 @@ const AddressBook = () => {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="full_name">Full Name *</Label>
-                <Input
-                  id="full_name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  required
-                />
-              </div>
+              {/* Removed name inputs. Name is derived from your account in Account Settings. */}
               <div>
                 <Label htmlFor="street">Street Address *</Label>
                 <Input

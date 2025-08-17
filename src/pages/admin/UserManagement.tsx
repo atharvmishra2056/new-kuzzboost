@@ -11,6 +11,8 @@ import {
   TrendingUp, DollarSign, ShoppingCart, Star, User as UserIcon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/components/ui/use-toast";
 
 interface User {
   id: string;
@@ -23,6 +25,8 @@ interface User {
   lastOrder?: string;
   status: 'active' | 'inactive';
   user_id: string;
+  referral_enabled?: boolean;
+  referral_code?: string;
 }
 
 const UserManagement = () => {
@@ -30,6 +34,7 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -81,6 +86,24 @@ const UserManagement = () => {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleReferral = async (userId: string, enabled: boolean) => {
+    let referralCode = null;
+    if (enabled) {
+      referralCode = crypto.randomUUID().slice(0,8).toUpperCase();
+    }
+    const { error } = await supabase
+      .from('profiles')
+      .update({ referral_enabled: enabled, referral_code: referralCode })
+      .eq('user_id', userId);
+    
+    if (error) {
+      toast({ title: "Error", description: "Failed to update referral status", variant: "destructive" });
+    } else {
+      fetchUsers();
+      toast({ title: "Success", description: `Referral ${enabled ? 'enabled' : 'disabled'} successfully` });
     }
   };
 
@@ -192,6 +215,7 @@ const UserManagement = () => {
                   <TableHead>Total Spent</TableHead>
                   <TableHead>Last Order</TableHead>
                   <TableHead>Joined</TableHead>
+                  <TableHead>Referral Enabled</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -243,6 +267,12 @@ const UserManagement = () => {
                           <Calendar className="w-3 h-3 text-muted-foreground" />
                           {new Date(user.created_at).toLocaleDateString()}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Switch 
+                          checked={user.referral_enabled || false}
+                          onCheckedChange={(checked) => handleToggleReferral(user.user_id, checked)}
+                        />
                       </TableCell>
                       <TableCell>
                         <Button

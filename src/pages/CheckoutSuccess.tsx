@@ -39,10 +39,12 @@ const CheckoutSuccess = () => {
               <CheckCircle className="w-12 h-12 text-success" />
             </div>
             <h1 className="font-clash text-4xl md:text-5xl font-bold text-primary mb-4">
-              Payment Successful!
+              {orderDetails.totalAmount === 0 ? 'Order Completed!' : 'Payment Successful!'}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Thank you for your order. Your social media growth services are being processed.
+              {orderDetails.totalAmount === 0 
+                ? 'Thank you for your order. It has been completed using your credits. Your social media growth services are being processed.' 
+                : 'Thank you for your order. Your social media growth services are being processed.'}
             </p>
           </motion.div>
 
@@ -71,10 +73,36 @@ const CheckoutSuccess = () => {
               <div className="text-right mt-4 md:mt-0">
                 <p className="text-sm text-muted-foreground">Total Paid</p>
                 <p className="font-clash text-3xl font-bold text-primary">
-                  {getSymbol()}{convert(orderDetails.total)}
+                  {getSymbol()}{convert(orderDetails.totalAmount || 0)}
                 </p>
+                {orderDetails.creditsUsed > 0 && (
+                  <div className="mt-2 text-sm">
+                    <p className="text-muted-foreground">Credits Applied: -₹{orderDetails.creditsUsed.toFixed(2)}</p>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Payment Summary */}
+            {orderDetails.creditsUsed > 0 && (
+              <div className="bg-accent/10 p-4 rounded-lg mb-6">
+                <h3 className="font-semibold text-primary mb-2">Payment Breakdown:</h3>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Original Total:</span>
+                    <span>₹{((orderDetails.totalAmount || 0) + (orderDetails.creditsUsed || 0)).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-accent-peach">
+                    <span>Credits Applied:</span>
+                    <span>-₹{(orderDetails.creditsUsed || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold pt-1 border-t">
+                    <span>Final Amount:</span>
+                    <span>₹{(orderDetails.totalAmount || 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Order Items */}
             <div className="space-y-4">
@@ -158,11 +186,9 @@ const CheckoutSuccess = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-semibold text-primary mb-2">Contact Details</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {customerInfo.firstName} {customerInfo.lastName}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{customerInfo.fullName}</p>
                   <p className="text-sm text-muted-foreground">{customerInfo.email}</p>
-                  <p className="text-sm text-muted-foreground">{customerInfo.phone}</p>
+                  {customerInfo.phone && <p className="text-sm text-muted-foreground">{customerInfo.phone}</p>}
                 </div>
                 <div>
                   <h4 className="font-semibold text-primary mb-2">Billing Address</h4>

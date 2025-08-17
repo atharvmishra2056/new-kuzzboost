@@ -25,6 +25,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
 import ReviewList from "../components/ReviewList";
 import ReviewModal from "../components/ReviewModal";
+import ReviewSummary from "../components/ReviewSummary";
 import SaveForLater from "../components/SaveForLater";
 import Cart from "../components/Cart";
 
@@ -41,7 +42,7 @@ const iconMap: { [key: string]: React.ReactElement } = {
   SiSnapchat: <SiSnapchat className="w-12 h-12 text-[#FFFC00]" />,
 };
 
-interface ServiceDetailProps {}
+type ServiceDetailProps = Record<string, never>;
 
 const ServiceDetail: React.FC<ServiceDetailProps> = () => {
   const { id } = useParams<{ id: string }>();
@@ -115,6 +116,14 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
   };
 
   const handleOpenReviewModal = () => {
+    if (currentUser && reviews && Array.isArray(reviews)) {
+      const existing = reviews.find(r => r.user_id === currentUser.id);
+      if (existing) {
+        setReviewToEdit(existing);
+        setReviewModalOpen(true);
+        return;
+      }
+    }
     setReviewToEdit(null);
     setReviewModalOpen(true);
   };
@@ -132,7 +141,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
         .from('reviews')
         .select(`
           *,
-          profiles ( id, full_name, avatar_url )
+          profiles!reviews_user_id_fkey ( id, full_name, avatar_url, email )
         `)
         .eq('service_id', serviceId)
         .order('created_at', { ascending: false });
@@ -145,7 +154,20 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
       if (!data) return [];
       
       // Transform the data to match the Review type from service.ts
-      return data.map((review: any) => ({
+      type SupabaseReviewRow = {
+        id: string;
+        created_at: string;
+        service_id: number;
+        user_id: string;
+        rating: number;
+        title: string | null;
+        comment: string | null;
+        media_urls: unknown;
+        is_verified_purchase: boolean | null;
+        profiles?: { full_name?: string | null; avatar_url?: string | null; email?: string | null } | null;
+      };
+
+      return data.map((review: SupabaseReviewRow) => ({
         id: review.id,
         created_at: review.created_at,
         service_id: review.service_id,
@@ -153,10 +175,14 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
         rating: review.rating,
         title: review.title || null,
         comment: review.comment || null,
+        media_urls: Array.isArray(review.media_urls)
+          ? review.media_urls.filter((url: unknown): url is string => typeof url === 'string')
+          : [],
         is_verified_purchase: review.is_verified_purchase || false,
         user: {
-          full_name: review.profiles?.full_name || 'Anonymous',
-          avatar_url: review.profiles?.avatar_url || null
+          full_name: review.profiles?.full_name ?? review.profiles?.email ?? 'Anonymous',
+          avatar_url: review.profiles?.avatar_url ?? null,
+          email: review.profiles?.email ?? null
         }
       }));
     },
@@ -173,8 +199,9 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
     const averageRating = reviewCount > 0 ? 
       reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewCount : 0;
     
-    // Check if user has reviewed by comparing with profile data
-    const userHasReviewed = currentUser ? reviews.some(r => r.user_id === currentUser.id) : false;
+    // Check if user has reviewed: compare profile id to review.user_id
+    const profileId: string | undefined = (currentUser?.user_metadata as any)?.profile_id;
+    const userHasReviewed = profileId ? reviews.some(r => r.user_id === profileId) : false;
     
     return { 
       averageRating: Number(averageRating.toFixed(1)),
@@ -327,6 +354,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
   const finalPrice = calculatePrice(quantity);
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-hero">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -454,75 +482,73 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
 
           <div className="mt-16 space-y-8">
             <hr className="border-white/10" />
-            <div>
-              <div className="space-y-6 mt-12">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold font-clash text-white">Customer Reviews</h3>
-                  {reviewCount > 0 && (
-                    <div className="flex items-center mt-2">
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`h-5 w-5 ${
-                              star <= Math.round(averageRating) ? 'text-yellow-400 fill-current' : 'text-gray-500'
-                            }`}
-                          />
-                        ))}
-                        <span className="ml-2 text-gray-300">
-                          {averageRating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
-                        </span>
-                      </div>
+            
+            {/* Review Summary Section */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.3 }}
+            >
+              <ReviewSummary serviceId={serviceId} />
+            </motion.div>
+
+            {/* Individual Reviews Section */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 0.4 }} 
+              className="glass rounded-2xl p-6"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-primary">
+                  Top reviews from India
+                </h3>
+                {currentUser && (
+                  <Button variant="outline" size="sm" onClick={handleOpenReviewModal}>
+                    {userHasReviewed ? 'Edit Your Review' : 'Write a Review'}
+                  </Button>
+                )}
+              </div>
+              
+              {reviewsQuery.isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin" />
+                </div>
+              ) : reviewsQuery.isError ? (
+                <div className="text-center py-8 text-red-500">
+                  <p>Could not load reviews. Please try again later.</p>
+                </div>
+              ) : reviews && reviews.length > 0 ? (
+                <div className="space-y-0">
+                  <ReviewList 
+                    reviews={reviews.slice(0, 3)} 
+                    onEdit={handleEditReview} 
+                    onDelete={handleDeleteReview} 
+                    currentUserProfileId={(currentUser?.user_metadata as any)?.profile_id}
+                  />
+                  {reviews.length > 3 && (
+                    <div className="text-center mt-6 pt-6 border-t border-gray-200">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => navigate(currentUser ? `/dashboard/service/${serviceId}/reviews` : `/service/${serviceId}/reviews`)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        See all {reviewCount} reviews
+                      </Button>
                     </div>
                   )}
                 </div>
-              </div>
-
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-gray-800/20 backdrop-blur-lg border border-white/10 rounded-2xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-primary">Reviews ({reviewCount})</h3>
-                  {!userHasReviewed && currentUser && (
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground mb-4">No reviews yet. Be the first to leave one!</p>
+                  {currentUser && (
                     <Button variant="outline" size="sm" onClick={handleOpenReviewModal}>
-                      Write a Review
+                      Write the first review
                     </Button>
                   )}
                 </div>
-                {reviewsQuery.isLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                  </div>
-                ) : reviewsQuery.isError ? (
-                  <div className="text-center py-8 text-red-500">
-                    <p>Could not load reviews. Please try again later.</p>
-                  </div>
-                ) : reviews && reviews.length > 0 ? (
-                  <>
-                    <ReviewList 
-                      reviews={reviews.slice(0, 3)} 
-                      onEdit={handleEditReview} 
-                      onDelete={handleDeleteReview} 
-                    />
-                    {reviews.length > 3 && (
-                      <div className="text-center mt-6">
-                        <Button variant="outline" onClick={() => navigate(`/dashboard/service/${serviceId}/reviews`)}>
-                          View All {reviewCount} Reviews
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No reviews yet. Be the first to leave one!</p>
-                    {currentUser && (
-                      <Button variant="outline" size="sm" onClick={handleOpenReviewModal} className="mt-4">
-                        Write a Review
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            </div>
+              )}
+            </motion.div>
           </div>
         </div>
       </div>
@@ -571,7 +597,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = () => {
         onRemoveItem={() => {}}
         onClearCart={() => {}}
       />
-    </div>
+    </>
   );
 };
 

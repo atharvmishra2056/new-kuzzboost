@@ -11,7 +11,7 @@ interface AuthContextType {
   currentUser: UserWithRole | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName?: string, referralCode?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any | null }>;
 }
@@ -36,13 +36,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data, error } = await supabase
             .from('profiles')
-            .select('role')
+            .select('id, role, full_name, user_id, email')
             .eq('user_id', user.id)
             .single();
 
         if (error) throw error;
-
-        setCurrentUser({ ...user, role: data?.role || 'user' });
+        const fullName = (data as any)?.full_name || (user.user_metadata as any)?.full_name || user.email;
+        const profileId = (data as any)?.id;
+        // Ensure auth user metadata has full_name/profile_id for UI
+        const mergedUser: UserWithRole = {
+          ...(user as any),
+          user_metadata: { ...(user.user_metadata as any), full_name: fullName, profile_id: profileId },
+          role: (data as any)?.role || 'user',
+        } as any;
+        setCurrentUser(mergedUser);
       } catch (error) {
         console.error("Error fetching user role:", error);
         setCurrentUser(user);
@@ -79,18 +86,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string, referralCode?: string) => {
     const redirectUrl = `${window.location.origin}/`;
+
+    const signupData: any = {
+      full_name: fullName || email,
+      role: 'user'
+    };
+
+    // Add referral code to metadata if provided
+    if (referralCode) {
+      signupData.referral_code = referralCode;
+    }
 
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName || email,
-          role: 'user'
-        }
+        data: signupData
       }
     });
     return { error };

@@ -39,6 +39,7 @@ import useSmoothScroll from './hooks/useSmoothScroll';
 import ScrollToTop from './components/ScrollToTop';
 import DashboardServices from "./pages/DashboardServices";
 import DashboardHome from "./pages/DashboardHome";
+import Referrals from "./pages/Referrals";
 
 function App() {
   useSmoothScroll();
@@ -87,6 +88,7 @@ function App() {
                   <Route path="/dashboard/privacy" element={<PrivacyPolicy />} />
                   <Route path="/dashboard/refund-policy" element={<RefundPolicy />} />
                   <Route path="/dashboard/contact" element={<ContactUs />} />
+                  <Route path="/dashboard/referrals" element={<Referrals />} />
                 </Route>
 
                 {/* Admin Routes - Protected for admin users only */}

@@ -11,17 +11,16 @@ import { Loader2, Upload, X } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
-import { Database } from '@/types/supabase';
 
-type OrderItem = Database['public']['Tables']['order_items']['Row'] & {
+interface OrderItem {
+  id: number;
   title: string;
   platform: string;
+  quantity: number;
+  service_quantity: number;
+  price: number;
   refill_eligible?: boolean;
-};
-
-type Order = Database['public']['Tables']['orders']['Row'] & {
-  items: OrderItem[];
-};
+}
 
 interface EligibleOrder {
   orderId: string;
@@ -60,10 +59,22 @@ const RequestRefillPage = () => {
         if (servicesError) throw servicesError;
         const refillableServiceMap = new Map(refillableServicesData.map(s => [s.id, s]));
 
-        // 2. Fetch user's orders
+        // 2. Fetch user's orders with order_items
         const { data: ordersData, error: ordersError } = await supabase
           .from('orders')
-          .select('id, order_id, status, created_at, items')
+          .select(`
+            id, 
+            order_id, 
+            status, 
+            created_at,
+            order_items (
+              id,
+              service_id,
+              quantity,
+              service_quantity,
+              price
+            )
+          `)
           .eq('user_id', currentUser.id)
           .in('status', ['completed', 'processing'])
           .order('created_at', { ascending: false });
@@ -74,11 +85,11 @@ const RequestRefillPage = () => {
         // 3. Combine data on the client-side
         const formattedOrders = [];
         for (const order of ordersData) {
-          const items = order.items as any[]; // The 'items' column is JSON
-          if (!Array.isArray(items) || items.length === 0) continue;
+          const orderItems = (order as any).order_items || [];
+          if (!Array.isArray(orderItems) || orderItems.length === 0) continue;
 
           const refillableItems = [];
-          for (const item of items) {
+          for (const item of orderItems) {
             const service = refillableServiceMap.get(item.service_id);
             if (service) {
               refillableItems.push({
@@ -87,8 +98,7 @@ const RequestRefillPage = () => {
                 platform: service.platform || 'Unknown',
                 quantity: item.quantity,
                 service_quantity: item.service_quantity,
-                price: 0, // Not needed for this view
-                userInput: '', // Not needed for this view
+                price: item.price || 0,
                 refill_eligible: true
               });
             }

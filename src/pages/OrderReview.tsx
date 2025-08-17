@@ -21,8 +21,7 @@ const OrderReview = () => {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [formData, setFormData] = useState({
     email: currentUser?.email || "",
-    firstName: "",
-    lastName: "",
+    fullName: (currentUser?.user_metadata?.full_name as string) || "",
     phone: "",
     country: "India",
     address: "",
@@ -223,62 +222,20 @@ const OrderReview = () => {
                     transition={{ delay: 0.3 }}
                     className="glass rounded-2xl p-6"
                 >
-                  <h2 className="font-clash text-xl font-semibold text-primary mb-6">
-                    Contact Information
-                  </h2>
+                  <h2 className="font-clash text-xl font-semibold text-primary mb-6">Contact Information</h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName" className="text-sm">First Name *</Label>
-                      <Input
-                          id="firstName"
-                          name="firstName"
-                          type="text"
-                          required
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          className="mt-1 text-sm py-2"
-                          placeholder="Enter your first name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName" className="text-sm">Last Name *</Label>
-                      <Input
-                          id="lastName"
-                          name="lastName"
-                          type="text"
-                          required
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          className="mt-1 text-sm py-2"
-                          placeholder="Enter your last name"
-                      />
+                    <div className="md:col-span-2">
+                      <Label htmlFor="fullName" className="text-sm">Name</Label>
+                      <Input id="fullName" name="fullName" type="text" value={formData.fullName} disabled className="mt-1 text-sm py-2" />
                     </div>
                     <div className="md:col-span-2">
-                      <Label htmlFor="email" className="text-sm">Email Address *</Label>
-                      <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="mt-1 text-sm py-2"
-                          placeholder="your@email.com"
-                      />
+                      <Label htmlFor="email" className="text-sm">Email Address</Label>
+                      <Input id="email" name="email" type="email" value={formData.email} disabled className="mt-1 text-sm py-2" />
                     </div>
-                     <div>
-                      <Label htmlFor="phone" className="text-sm">Phone Number *</Label>
-                      <Input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          required
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="mt-1 text-sm py-2"
-                          placeholder="Enter your phone number"
-                      />
+                    <div>
+                      <Label htmlFor="phone" className="text-sm">Phone Number (Optional)</Label>
+                      <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} className="mt-1 text-sm py-2" placeholder="Enter your phone number" />
                     </div>
                   </div>
                 </motion.div>
@@ -311,7 +268,7 @@ const OrderReview = () => {
                   <Button
                       onClick={handleProceedToPayment}
                       className="w-full glass-button text-base py-4"
-                      disabled={!formData.email || !formData.firstName || !formData.lastName || !formData.phone || !selectedAddress}
+                      disabled={!formData.email || !selectedAddress}
                   >
                     Proceed to Payment
                   </Button>

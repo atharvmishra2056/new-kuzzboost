@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, MoreVertical, Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Star, MoreVertical, Edit, Trash2, ChevronDown, ChevronUp, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Review } from '@/types/service';
 import { Button } from './ui/button';
@@ -58,127 +58,154 @@ const ReviewItem: React.FC<ReviewItemProps> = ({
     }
   };
 
-  const renderStars = () => {
+  const renderStars = (size: 'sm' | 'md' = 'sm') => {
+    const starSize = size === 'md' ? 'w-5 h-5' : 'w-4 h-4';
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${i < review.rating ? 'text-accent-peach fill-accent-peach' : 'text-gray-400'}`}
+        className={`${starSize} ${i < review.rating ? 'text-orange-400 fill-orange-400' : 'text-gray-300'}`}
       />
     ));
   };
 
   const images = review.media_urls ? (Array.isArray(review.media_urls) ? review.media_urls : []) : [];
-  const displayImages = showAllImages ? images : images.slice(0, 3);
+  const displayImages = showAllImages ? images : images.slice(0, 5);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   return (
-    <div className="bg-background/80 backdrop-blur-sm rounded-xl p-6 border border-white/10 shadow-lg">
+    <div className="border-b border-gray-200 py-6 last:border-b-0">
       <div className="flex gap-4">
         {/* Avatar */}
-        <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary/20 to-accent-peach/20 rounded-full flex items-center justify-center font-bold text-primary text-lg border border-white/10">
-          {getUserDisplayName().charAt(0).toUpperCase()}
+        <div className="flex-shrink-0">
+          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+            <User className="w-6 h-6 text-gray-500" />
+          </div>
         </div>
         
-        <div className="flex-grow">
+        <div className="flex-grow min-w-0">
           {/* Header */}
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h4 className="font-semibold text-primary text-lg">{getUserDisplayName()}</h4>
-              <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex-grow">
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="font-medium text-gray-900 text-sm">{getUserDisplayName()}</h4>
+                {isOwner && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
+                        <MoreVertical className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-32">
+                      <DropdownMenuItem onSelect={() => onEdit(review)} className="text-sm">
+                        <Edit className="mr-2 h-3 w-3" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onSelect={handleDelete} 
+                        disabled={isDeleting} 
+                        className="text-sm text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-3 w-3" />
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+              
+              {/* Rating and Date */}
+              <div className="flex items-center gap-3 mb-2">
                 <div className="flex items-center gap-1">
                   {renderStars()}
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(review.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </span>
                 {review.is_verified_purchase && (
-                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">
-                    Verified Purchase
-                  </span>
+                  <span className="text-xs text-orange-600 font-medium">Verified Purchase</span>
                 )}
               </div>
+              
+              <div className="text-xs text-gray-500 mb-3">
+                Reviewed in India on {formatDate(review.created_at)}
+              </div>
             </div>
-            
-            {/* Actions Menu */}
-            {isOwner && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="glass border-white/10">
-                  <DropdownMenuItem onSelect={() => onEdit(review)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    <span>Edit</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onSelect={handleDelete} 
-                    disabled={isDeleting} 
-                    className="text-red-400 focus:text-red-400 focus:bg-red-500/10"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
           </div>
 
           {/* Review Content */}
           <div className="space-y-3">
+            {/* Title */}
             {review.title && (
-              <h5 className="font-semibold text-lg text-primary">{review.title}</h5>
+              <h5 className="font-semibold text-gray-900 text-base leading-tight">
+                {review.title}
+              </h5>
             )}
             
-            <p className="text-muted-foreground leading-relaxed">{review.comment}</p>
+            {/* Comment */}
+            <div className="text-gray-700 text-sm leading-relaxed">
+              {review.comment}
+            </div>
             
             {/* Images */}
-            {images.length > 0 && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-3 gap-2">
-                  {displayImages.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={url}
-                        alt={`Review image ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg border border-white/20 cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => setExpandedImage(url)}
-                      />
-                      {index === 2 && images.length > 3 && !showAllImages && (
-                        <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
-                          <span className="text-white font-semibold">+{images.length - 3}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+            <div className="space-y-3 mt-4">
+              {images.length === 0 ? (
+                <div className="w-full border border-dashed border-gray-300 rounded-md p-4 text-center text-xs text-gray-500">
+                  No images yet
                 </div>
-                
-                {images.length > 3 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAllImages(!showAllImages)}
-                    className="text-primary hover:text-primary/80"
-                  >
-                    {showAllImages ? (
-                      <>
-                        <ChevronUp className="w-4 h-4 mr-1" />
-                        Show Less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="w-4 h-4 mr-1" />
-                        View All {images.length} Photos
-                      </>
-                    )}
-                  </Button>
-                )}
+              ) : (
+                <>
+                  <div className="flex gap-2 flex-wrap">
+                    {displayImages.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={url}
+                          alt={`Customer image ${index + 1}`}
+                          className="w-20 h-20 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => setExpandedImage(url)}
+                        />
+                        {index === 4 && images.length > 5 && !showAllImages && (
+                          <div className="absolute inset-0 bg-black/60 rounded flex items-center justify-center">
+                            <span className="text-white text-xs font-medium">+{images.length - 5}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {images.length > 5 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAllImages(!showAllImages)}
+                      className="text-blue-600 hover:text-blue-700 text-sm p-0 h-auto font-normal"
+                    >
+                      {showAllImages ? (
+                        <>Show fewer images</>
+                      ) : (
+                        <>See all {images.length} images</>
+                      )}
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Helpful section */}
+            <div className="flex items-center gap-4 mt-4 pt-3 border-t border-gray-100">
+              <span className="text-xs text-gray-500">Was this review helpful to you?</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="text-xs px-3 py-1 h-7">
+                  Helpful
+                </Button>
+                <Button variant="outline" size="sm" className="text-xs px-3 py-1 h-7">
+                  Report
+                </Button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

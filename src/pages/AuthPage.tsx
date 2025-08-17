@@ -29,6 +29,8 @@ const AuthPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [resetEmail, setResetEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showVerificationMessage, setShowVerificationMessage] = useState(false);
@@ -41,6 +43,7 @@ const AuthPage = () => {
 
     const searchParams = new URLSearchParams(location.search);
     const defaultTab = searchParams.get('tab') || 'signin';
+    const refCode = searchParams.get('ref');
 
     // Persist location state to handle post-auth actions
     useEffect(() => {
@@ -88,11 +91,18 @@ const AuthPage = () => {
         e.preventDefault();
         setError('');
         setLoading(true);
+        const fullName = `${firstName} ${lastName}`.trim();
         const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                emailRedirectTo: `${window.location.origin}/`
+                emailRedirectTo: `${window.location.origin}/`,
+                data: {
+                    full_name: fullName || email,
+                    first_name: firstName || undefined,
+                    last_name: lastName || undefined,
+                    referral_code: refCode || undefined
+                }
             }
         });
         if (error) {
@@ -205,8 +215,13 @@ const AuthPage = () => {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSignUp} className="space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <Input type="text" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                                  <Input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                                </div>
                                 <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                                 <Input type="password" placeholder="Password (min. 6 characters)" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                {refCode && <p className="text-sm text-muted-foreground mt-2">Referred by: {refCode}</p>}
                                 <Button type="submit" className="w-full glass-button" disabled={loading}>
                                     {loading ? 'Creating Account...' : 'Create Account'}
                                 </Button>
